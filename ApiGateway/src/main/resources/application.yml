@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: ApiGateway
+  cloud:
+    gateway:
+      mvc:
+        http-client:
+          type: autodetect
+        routes:
+          - id: service1
+            uri: http://localhost:8081
+            predicates:
+              - Path=/service1
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: ui
+            uri: http://localhost:5173
+            predicates:
+              - Path=/ui/**
+            filters:
+              - StripPrefix=1
+          - id: home
+            uri: http://localhost:8080
+            predicates:
+              - Path=/
+            filters:
+              - RedirectTo=301,http://localhost:8080/ui
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:9090/realms/CRMRealm
+        registration:
+          kc1client:
+            provider: keycloak
+            client-id: crmclient
+            client-secret: UAGMutFg200hRp3pfFomluDh7GAQ8epl
+            scope:
+              - openid
+              - offline_access
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/crmclient

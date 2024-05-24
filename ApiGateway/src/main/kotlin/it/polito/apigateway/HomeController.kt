@@ -1,6 +1,9 @@
 package it.polito.apigateway
 
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
@@ -36,6 +39,23 @@ class HomeController {
             "name" to "anon",
             "date" to LocalDateTime.now(),
             "principal" to principal
+        )
+    }
+
+    @GetMapping("/me")
+    fun me(
+        @CookieValue(name="XSRF-TOKEN", required = false)
+        xsrf: String?,
+        authentication: Authentication?
+    ): Map<String, Any?> {
+        val principal: OidcUser? = authentication?.principal as? OidcUser
+        val name = principal?.preferredUsername ?: ""
+        return mapOf(
+            "name" to name,
+            "loginUrl" to "/oauth2/authorization/crmclient",
+            "logoutUrl" to "/logout",
+            "principal" to principal,
+            "xsrfToken" to xsrf
         )
     }
 }

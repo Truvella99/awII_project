@@ -22,7 +22,8 @@ class SecurityConfig(val crr: ClientRegistrationRepository) {
                 it.requestMatchers("/", "/login","/logout").permitAll() // permit all requests to /
                 it.requestMatchers("/secure").authenticated()
                 it.requestMatchers("/anon").anonymous()
-                it.anyRequest().denyAll()
+                it.requestMatchers("/ui/**").permitAll()
+                it.anyRequest().permitAll()
             }
             .oauth2Login {  }
             .logout { it.logoutSuccessHandler(oidcLogoutSuccessHandler()) }
