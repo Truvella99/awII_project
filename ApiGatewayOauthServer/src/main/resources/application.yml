@@ -7,4 +7,4 @@ spring:
         jwt:
           issuer-uri: http://localhost:9090/realms/CRMRealm
 server:
-  port: 8081
+  port: 8084

@@ -7,10 +7,31 @@ spring:
         http-client:
           type: autodetect
         routes:
-          - id: service1
+          - id: crm
             uri: http://localhost:8081
             predicates:
-              - Path=/service1
+              - Path=/crm
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: communicationManager
+            uri: http://localhost:8082
+            predicates:
+              - Path=/communicationManager
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: docStore
+            uri: http://localhost:8083
+            predicates:
+              - Path=/docStore
+            filters:
+              - StripPrefix=1
+              - TokenRelay
+          - id: oAuthServer
+            uri: http://localhost:8084
+            predicates:
+              - Path=/oAuthServer/**
             filters:
               - StripPrefix=1
               - TokenRelay
@@ -42,3 +63,5 @@ spring:
               - offline_access
             authorization-grant-type: authorization_code
             redirect-uri: http://localhost:8080/login/oauth2/code/crmclient
+server:
+  port: 8080
