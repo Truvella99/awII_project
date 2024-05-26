@@ -1,0 +1,13 @@
+# Send am Email API
+
+POST http://localhost:8081/API/emails/
+Content-Type: application/json
+
+{
+  "from": "aw2g52024@gmail.com",
+  "to": "gagliardo9974@gmail.com",
+  "subject": "new email",
+  "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+}
+
+###

@@ -1,0 +1,74 @@
+# client requests all the documents
+GET http://localhost:8080/API/documents/?pageNumber=0&limit=10
+
+###
+
+# client uploads a new document
+POST http://localhost:8080/API/documents/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="newDocument.txt"
+
+< ./newDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+newDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-03-19T08:32:00.000
+--boundary
+
+###
+
+# client checks if the document is now present with a new request
+GET http://localhost:8080/API/documents/1/
+
+###
+
+# client downloads the document
+GET http://localhost:8080/API/documents/1/data/
+
+###
+
+# client updates the document
+PUT http://localhost:8080/API/documents/1/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="updatedDocument.txt"
+
+< ./updatedDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+updatedDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-04-09T08:32:00.000
+--boundary
+
+###
+
+# client checks if the document is now updated with a new request
+GET http://localhost:8080/API/documents/1/
+
+###
+
+# client deletes the document
+DELETE http://localhost:8080/API/documents/1/
+
+###

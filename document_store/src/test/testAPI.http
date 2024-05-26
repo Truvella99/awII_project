@@ -1,0 +1,429 @@
+#
+#
+#
+# GET /API/documents/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/documents/?pageNumber=0&limit=10
+
+> {%
+    client.log("GET /API/documents/ correct request");
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber
+GET http://localhost:8080/API/documents/?pageNumber=-1&limit=10
+
+> {%
+    client.log("GET /API/documents/ wrong pageNumber");
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid pageNumber Parameter.", `Expected response detail "Invalid pageNumber Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong limit
+GET http://localhost:8080/API/documents/?pageNumber=0&limit=0
+
+> {%
+    client.log("GET /API/documents/ wrong limit");
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid limit Parameter.", `Expected response detail "Invalid limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber and limit
+GET http://localhost:8080/API/documents/?pageNumber=-1&limit=0
+
+> {%
+    client.log("GET /API/documents/ wrong limit");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Invalid pageNumber and limit Parameter.", `Expected response detail "Invalid pageNumber and limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber (string)
+GET http://localhost:8080/API/documents/?pageNumber=gre&limit=10
+
+> {%
+    client.log("GET /API/documents/ correct request");
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Failed to convert 'pageNumber' with value: 'gre'", `Expected response name "Failed to convert 'pageNumber' with value: 'gre'" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# POST /API/documents/ TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/documents/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="newDocument.txt"
+
+< ./newDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+newDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-03-19T08:32:00.000
+--boundary
+
+> {%
+    client.log("POST /API/documents/ correct request");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function () {
+        client.assert(response.body["name"] === "newDocument.txt", `Expected response name "newDocument.txt" but is ${response.body["name"]}`);
+        client.assert(response.body["size"] === 1539, `Expected response size 1539 but is ${response.body["size"]}`);
+        client.assert(response.body["content_type"] === "TXT", `Expected response content_type "TXT" but is ${response.body["content_type"]}`);
+        client.assert(response.body["creation_timestamp"] === "2024-03-19T08:32:00", `Expected response creation_timestamp "2024-03-19T08:32:00" but is ${response.body["creation_timestamp"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# file with that name already exists
+POST http://localhost:8080/API/documents/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="newDocument.txt"
+
+< ./newDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+newDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-03-19T08:32:00.000
+--boundary
+
+> {%
+    client.log("POST /API/documents/ file with that name already exists");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 302, `Expected response status 302 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Document Named newDocument.txt Already Exists.", `Expected response name "Document Named newDocument.txt Already Exists." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/documents/{metadataId} TESTS
+#
+#
+#
+
+# correct request
+PUT http://localhost:8080/API/documents/1/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="updatedDocument.txt"
+
+< ./updatedDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+updatedDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-04-09T08:32:00.000
+--boundary
+
+> {%
+    client.log("PUT /API/documents/{metadataId} correct request");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function () {
+        client.assert(response.body["name"] === "updatedDocument.txt", `Expected response name "updatedDocument.txt" but is ${response.body["name"]}`);
+        client.assert(response.body["size"] === 1549, `Expected response size 1549 but is ${response.body["size"]}`);
+        client.assert(response.body["content_type"] === "TXT", `Expected response content_type "TXT" but is ${response.body["content_type"]}`);
+        client.assert(response.body["creation_timestamp"] === "2024-04-09T08:32:00", `Expected response creation_timestamp "2024-04-09T08:32:00" but is ${response.body["creation_timestamp"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# negative metadataId
+PUT http://localhost:8080/API/documents/-1/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="updatedDocument.txt"
+
+< ./updatedDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+updatedDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-04-09T08:32:00.000
+--boundary
+
+> {%
+    client.log("PUT /API/documents/{metadataId} negative metadataId");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Invalid metadataId Parameter.", `Expected response detail "Invalid metadataId Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# file does not exist
+PUT http://localhost:8080/API/documents/71/
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="updatedDocument.txt"
+
+< ./updatedDocument.txt
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+updatedDocument.txt
+--boundary
+Content-Disposition: form-data; name="contentType"
+
+TXT
+--boundary
+Content-Disposition: form-data; name="creationTimestamp"
+
+2024-04-09T08:32:00.000
+--boundary
+
+> {%
+    client.log("PUT /API/documents/{metadataId} file does not exist");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Document with MetadataId:71 not found", `Expected response name "Document with MetadataId:71 not found" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/documents/{metadataId}/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/documents/1/
+
+> {%
+    client.log("GET /API/documents/{metadataId}/ correct request");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function () {
+        client.assert(response.body["name"] === "updatedDocument.txt", `Expected response name "newDocument.txt" but is ${response.body["name"]}`);
+        client.assert(response.body["size"] === 1549, `Expected response size 1539 but is ${response.body["size"]}`);
+        client.assert(response.body["content_type"] === "TXT", `Expected response content_type "TXT" but is ${response.body["content_type"]}`);
+        client.assert(response.body["creation_timestamp"] === "2024-04-09T08:32:00", `Expected response creation_timestamp "2024-04-09T08:32:00" but is ${response.body["creation_timestamp"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# negative metadataId
+GET http://localhost:8080/API/documents/-1/
+
+> {%
+    client.log("GET /API/documents/{metadataId}/ correct request");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function () {
+        client.assert(response.body["detail"] === "Invalid metadataId Parameter.", `Expected response detail "Invalid metadataId Parameter." but is ${response.body["name"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# file does not exist
+GET http://localhost:8080/API/documents/71/
+
+> {%
+    client.log("GET /API/documents/{metadataId}/ file does not exist");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Document Metadata with MetadataId:71 not found.", `Expected response name "Document with MetadataId:71 not found." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/documents/{metadataId}/data/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/documents/1/data/
+
+> {%
+    client.log("GET /API/documents/{metadataId}/data/ correct request");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.log(response);
+%}
+###
+# negative metadataId
+GET http://localhost:8080/API/documents/-1/data/
+
+> {%
+    client.log("GET /API/documents/{metadataId}/data/ file does not exist");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Invalid metadataId Parameter.", `Expected response detail "Invalid metadataId Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# file does not exist
+GET http://localhost:8080/API/documents/71/data/
+
+> {%
+    client.log("GET /API/documents/{metadataId}/data/ file does not exist");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Document Binary Data with MetadataId:71 not found.", `Expected response name "Document Binary Data with MetadataId:71 not found." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# DELETE /API/documents/{metadataId} TESTS
+#
+#
+#
+
+# correct request
+DELETE http://localhost:8080/API/documents/1/
+
+> {%
+    client.log("DELETE /API/documents/{metadataId} correct request");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 204, `Expected response status 204 but found ${response.status}`);
+    });
+    client.test("Test returned body", function () {
+        client.assert(response.body === null, `Response body should be null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+# negative metadataId
+DELETE http://localhost:8080/API/documents/-1/
+
+> {%
+    client.log("DELETE /API/documents/{metadataId} negative metadataId");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function () {
+        client.assert(response.body["detail"] === "Invalid metadataId Parameter.", `Expected response detail "Invalid metadataId Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# file does not exist
+DELETE http://localhost:8080/API/documents/71/
+
+> {%
+    client.log("DELETE /API/documents/{metadataId} file does not exist");
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Document with MetadataId:71 not found", `Expected response name "Document with MetadataId:71 not found" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###

@@ -1,0 +1,122 @@
+#
+#
+#
+# POST /API/emails/ TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8081/API/emails/
+Content-Type: application/json
+
+{
+  "from": "aw2g52024@gmail.com",
+  "to": "gagliardo9974@gmail.com",
+  "subject": "new email",
+  "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# wrong sender
+POST http://localhost:8081/API/emails/
+Content-Type: application/json
+
+{
+  "from": "aw252024@gmail.com",
+  "to": "gagliardo9974@gmail.com",
+  "subject": "new email",
+  "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Wrong sender provided: aw252024@gmail.com, only aw2g52024@gmail.com can be provided.", `Response body should be "Wrong sender provided: aw252024@gmail.com, only aw2g52024@gmail.com can be provided." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# wrong receiver
+POST http://localhost:8081/API/emails/
+Content-Type: application/json
+
+{
+  "from": "aw2g52024@gmail.com",
+  "to": "aw2g52024@gmail.com",
+  "subject": "new email",
+  "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Wrong receiver provided: aw2g52024@gmail.com, aw2g52024@gmail.com cannot be provided.", `Response body should be "Wrong receiver provided: aw2g52024@gmail.com, aw2g52024@gmail.com cannot be provided." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# wrong sender and receiver
+POST http://localhost:8081/API/emails/
+Content-Type: application/json
+
+{
+  "from": "gagliardo9974@gmail.com",
+  "to": "aw2g52024@gmail.com",
+  "subject": "new email",
+  "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Wrong sender provided: gagliardo9974@gmail.com, only aw2g52024@gmail.com can be provided; Wrong receiver provided: aw2g52024@gmail.com, aw2g52024@gmail.com cannot be provided.", `Response body should be "Wrong sender provided: gagliardo9974@gmail.com, only aw2g52024@gmail.com can be provided; Wrong receiver provided: aw2g52024@gmail.com, aw2g52024@gmail.com cannot be provided." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# invalid parameters
+POST http://localhost:8081/API/emails/
+Content-Type: application/json
+
+{
+  "from": "aw252024gmail.com",
+  "to": "gagliardo9974@gmail.com",
+  "subject": "",
+  "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid request content.", `Response body should be "Invalid request content." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###

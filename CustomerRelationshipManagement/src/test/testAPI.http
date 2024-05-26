@@ -1,0 +1,1859 @@
+#
+#
+#
+# POST /API/contacts/ TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/contacts/
+Content-Type: application/json
+
+{
+  "name": "John",
+  "surname": "Doe",
+  "ssncode": "111-23-9025",
+  "category": "customer",
+  "email": "john.doe@example.com",
+  "telephone": "+393312085641",
+  "address": "Corso Gaetano Scirea, 50, 10151 Torino TO"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# empty parameters
+POST http://localhost:8080/API/contacts/
+Content-Type: application/json
+
+{
+  "name": " ",
+  "surname": " ",
+  "ssncode": "111-23-9025",
+  "category": "customer",
+  "email": "john.doe@example.com",
+  "telephone": "+393312085641",
+  "address": "Corso Gaetano Scirea, 50, 10151 Torino TO"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid request content.", `Response body should be "Invalid request content." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# invalid parameters
+POST http://localhost:8080/API/contacts/
+Content-Type: application/json
+
+{
+  "name": "John",
+  "surname": "Doe",
+  "ssncode": "111-23-9025",
+  "category": "customer",
+  "email": "john.doeexample.com",
+  "telephone": "3312085641",
+  "address": "b"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid request content.", `Response body should be "Invalid request content." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+#
+#
+#
+# POST /API/messages/ TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/messages/
+Content-Type: application/json
+
+{
+  "channel": "email",
+  "priority": "low",
+  "subject": "Hello",
+  "body": "Hello, how are you?",
+  "email": "pablo.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# no sender provided
+POST http://localhost:8080/API/messages/
+Content-Type: application/json
+
+{
+  "channel": "email",
+  "priority": "low",
+  "subject": "Hello",
+  "body": "Hello, how are you?"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "No sender provided for the message", `Response body should be "No sender provided for the message" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# wrong channel
+POST http://localhost:8080/API/messages/
+Content-Type: application/json
+
+{
+  "channel": "phonecall",
+  "priority": "low",
+  "subject": "Hello",
+  "body": "Hello, how are you?",
+  "email": "john.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Wrong channel provided for the message", `Response body should be "Wrong channel provided for the message" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# multiple senders
+POST http://localhost:8080/API/messages/
+Content-Type: application/json
+
+{
+  "channel": "phonecall",
+  "priority": "low",
+  "subject": "Hello",
+  "body": "Hello, how are you?",
+  "telephone": "+393312085641",
+  "email": "john.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Multiple senders provided for the message", `Response body should be "Multiple senders provided for the message" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+#
+#
+#
+# POST /API/contacts/{contactId}/email TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/contacts/1/email
+Content-Type: application/json
+
+{
+  "email": "paul.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+
+###
+
+# invalid id
+POST http://localhost:8080/API/contacts/-1/email
+Content-Type: application/json
+
+{
+  "email": "paul.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Expected response detail "Invalid contactId Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not exist
+POST http://localhost:8080/API/contacts/5/email
+Content-Type: application/json
+
+{
+  "email": "paul.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Expected response detail "Contact with ContactId:5 not found" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# email already present
+POST http://localhost:8080/API/contacts/1/email
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 302, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Email john.doe@example.com already exists for this contact.", `Expected response detail "Email john.doe@example.com already exists for this contact." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# POST /API/contacts/{contactId}/address TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/contacts/1/address
+Content-Type: application/json
+
+{
+  "address": "Via San Francesco, 2"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+POST http://localhost:8080/API/contacts/-1/address
+Content-Type: application/json
+
+{
+  "address": "Via San Francesco, 2"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not exist
+POST http://localhost:8080/API/contacts/5/address
+Content-Type: application/json
+
+{
+  "address": "Via San Francesco, 2"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Expected response detail "Contact with ContactId:5 not found" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# address already present
+POST http://localhost:8080/API/contacts/1/address
+Content-Type: application/json
+
+{
+  "address": "Corso Gaetano Scirea, 50, 10151 Torino TO"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 302, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Address Corso Gaetano Scirea, 50, 10151 Torino TO already exists for this contact.", `Expected response detail Address "Corso Gaetano Scirea, 50, 10151 Torino TO already exists for this contact." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# POST /API/contacts/{contactId}/telephone TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/contacts/1/telephone
+Content-Type: application/json
+
+{
+  "telephone": "+393450590588"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 201, `Expected response status 201 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+POST http://localhost:8080/API/contacts/-1/telephone
+Content-Type: application/json
+
+{
+  "telephone": "+393450590588"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not exist
+POST http://localhost:8080/API/contacts/5/telephone
+Content-Type: application/json
+
+{
+  "telephone": "+393450590588"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Expected response detail "Contact with ContactId:5 not found" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# telephone already present
+POST http://localhost:8080/API/contacts/1/telephone
+Content-Type: application/json
+
+{
+  "telephone": "+393312085641"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 302, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Telephone +393312085641 already exists for this contact.", `Expected response detail "Telephone +393312085641 already exists for this contact." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/contacts/{contactId}/category TESTS
+#
+#
+#
+# TEST ILLEGAL TRANSITIONS
+# unknown -> customer
+PUT http://localhost:8080/API/contacts/1/category
+Content-Type: application/json
+
+{
+  "category": "customer"
+}
+###
+# customer -> professional test
+PUT http://localhost:8080/API/contacts/1/category
+Content-Type: application/json
+
+{
+  "category": "professional"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Cannot Pass from Customer to Professional or Vice versa, must Create 2 Accounts for that.", `Response body should be "Cannot Pass from Customer to Professional or Vice versa, must Create 2 Accounts for that." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+# customer -> unknown
+PUT http://localhost:8080/API/contacts/1/category
+Content-Type: application/json
+
+{
+  "category": "unknown"
+}
+###
+# unknown -> professional
+PUT http://localhost:8080/API/contacts/1/category
+Content-Type: application/json
+
+{
+  "category": "professional"
+}
+###
+# professional -> customer test
+PUT http://localhost:8080/API/contacts/1/category
+Content-Type: application/json
+
+{
+  "category": "customer"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Cannot Pass from Customer to Professional or Vice versa, must Create 2 Accounts for that.", `Response body should be "Cannot Pass from Customer to Professional or Vice versa, must Create 2 Accounts for that." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+# correct request
+PUT http://localhost:8080/API/contacts/1/category
+Content-Type: application/json
+
+{
+  "category": "professional"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+PUT http://localhost:8080/API/contacts/-1/category
+Content-Type: application/json
+
+{
+  "category": "professional"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+PUT http://localhost:8080/API/contacts/5/category
+Content-Type: application/json
+
+{
+  "category": "professional"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/contacts/{contactId}/name TESTS
+#
+#
+#
+
+# correct request
+PUT http://localhost:8080/API/contacts/1/name
+Content-Type: application/json
+
+{
+  "name": "Gennaro"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+PUT http://localhost:8080/API/contacts/-1/name
+Content-Type: application/json
+
+{
+  "name": "Gennaro"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+PUT http://localhost:8080/API/contacts/5/name
+Content-Type: application/json
+
+{
+  "name": "Gennaro"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/contacts/{contactId}/surname TESTS
+#
+#
+#
+
+# correct request
+PUT http://localhost:8080/API/contacts/1/surname
+Content-Type: application/json
+
+{
+  "surname": "Gagliardo"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+PUT http://localhost:8080/API/contacts/-1/surname
+Content-Type: application/json
+
+{
+  "surname": "Gagliardo"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+PUT http://localhost:8080/API/contacts/5/surname
+Content-Type: application/json
+
+{
+  "surname": "Gagliardo"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/contacts/{contactId}/ssncode TESTS
+#
+#
+#
+
+# correct request
+PUT http://localhost:8080/API/contacts/1/ssncode
+Content-Type: application/json
+
+{
+  "ssncode": "111-23-9018"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+PUT http://localhost:8080/API/contacts/-1/ssncode
+Content-Type: application/json
+
+{
+  "ssncode": "111-23-9018"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+PUT http://localhost:8080/API/contacts/5/ssncode
+Content-Type: application/json
+
+{
+  "ssncode": "111-23-9018"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+#
+#
+#
+# GET /API/contacts/{contactId}/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/contacts/1/
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+GET http://localhost:8080/API/contacts/-1/
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not exist
+GET http://localhost:8080/API/contacts/5/
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/contacts/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/contacts/?pageNumber=0&limit=10&telephone=393312085641&email=john.doe@example.com
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# only pageNumber provided
+GET http://localhost:8080/API/contacts/?pageNumber=1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "PageNumber and limit must be both provided or both not provided.", `Expected response detail "PageNumber and limit must be both provided or both not provided." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong pageNumber
+GET http://localhost:8080/API/contacts/?pageNumber=-1&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid pageNumber Parameter.", `Expected response detail "Invalid pageNumber Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong limit
+GET http://localhost:8080/API/contacts/?pageNumber=0&limit=0
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid limit Parameter.", `Expected response detail "Invalid limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber and limit
+GET http://localhost:8080/API/contacts/?pageNumber=-1&limit=0
+
+> {%
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Invalid pageNumber and limit Parameter.", `Expected response detail "Invalid pageNumber and limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber (string)
+GET http://localhost:8080/API/contacts/?pageNumber=gre&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Failed to convert 'pageNumber' with value: 'gre'", `Expected response name "Failed to convert 'pageNumber' with value: 'gre'" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid filtering params
+GET http://localhost:8080/API/contacts/?pageNumber=0&limit=10&telephone=393312085941&email=example.gmail.com
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Validation failure", `Expected response name "Validation failure" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/contacts/pendings/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=0&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# only pageNumber provided
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "PageNumber and limit must be both provided or both not provided.", `Expected response detail "PageNumber and limit must be both provided or both not provided." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong pageNumber
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=-1&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid pageNumber Parameter.", `Expected response detail "Invalid pageNumber Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong limit
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=0&limit=0
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid limit Parameter.", `Expected response detail "Invalid limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber and limit
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=-1&limit=0
+
+> {%
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Invalid pageNumber and limit Parameter.", `Expected response detail "Invalid pageNumber and limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber (string)
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=gre&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Failed to convert 'pageNumber' with value: 'gre'", `Expected response name "Failed to convert 'pageNumber' with value: 'gre'" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid filtering params
+GET http://localhost:8080/API/contacts/pendings/?pageNumber=0&limit=10&telephone=+393312085941&email=example.gmail.com
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Validation failure", `Expected response name "Validation failure" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# DELETE /API/contacts/{contactId}/email/{emailId} TESTS
+#
+#
+#
+
+# correct request
+DELETE http://localhost:8080/API/contacts/1/email/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong contact and email ids
+DELETE http://localhost:8080/API/contacts/-1/email/-3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId and emailId Parameter.", `Response body should be "Invalid contactId and emailId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong contact id
+DELETE http://localhost:8080/API/contacts/-1/email/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong email id
+DELETE http://localhost:8080/API/contacts/1/email/-3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid emailId Parameter.", `Response body should be "Invalid emailId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+DELETE http://localhost:8080/API/contacts/5/email/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# email not found
+DELETE http://localhost:8080/API/contacts/1/email/5
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Email with EmailId:5 not found", `Response body should be "Email with EmailId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# email already deleted
+DELETE http://localhost:8080/API/contacts/1/email/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Email with EmailId:3 already deleted.", `Response body should be "Email with EmailId:3 already deleted." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# no permission to delete
+DELETE http://localhost:8080/API/contacts/2/email/1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 403, `Expected response status 403 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Email with EmailId:1 does not belong to this contact.", `Response body should be "Email with EmailId:1 does not belong to this contact." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# DELETE /API/contacts/{contactId}/address/{addressId} TESTS
+#
+#
+#
+
+# correct request
+DELETE http://localhost:8080/API/contacts/1/address/2
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong contact and address ids
+DELETE http://localhost:8080/API/contacts/-1/address/-3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId and addressId.", `Response body should be "Invalid contactId and addressId." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong contact id
+DELETE http://localhost:8080/API/contacts/-1/address/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong address id
+DELETE http://localhost:8080/API/contacts/1/address/-3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid addressId Parameter.", `Response body should be "Invalid addressId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+DELETE http://localhost:8080/API/contacts/5/address/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# address not found
+DELETE http://localhost:8080/API/contacts/1/address/5
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Address with AddressId:5 not found", `Response body should be "Address with AddressId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# address already deleted
+DELETE http://localhost:8080/API/contacts/1/address/2
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Address with AddressId:2 already deleted.", `Response body should be "Address with AddressId:2 already deleted." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# no permission to delete
+DELETE http://localhost:8080/API/contacts/2/address/1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 403, `Expected response status 403 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Address with AddressId:1 does not belong to this contact.", `Response body should be "Email with EmailId:1 does not belong to this contact." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# DELETE /API/contacts/{contactId}/telephone/{telephoneId} TESTS
+#
+#
+#
+
+# correct request
+DELETE http://localhost:8080/API/contacts/1/telephone/2
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong contact and telephone ids
+DELETE http://localhost:8080/API/contacts/-1/telephone/-3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId and telephoneId.", `Response body should be "Invalid contactId and telephoneId." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong contact id
+DELETE http://localhost:8080/API/contacts/-1/telephone/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid contactId Parameter.", `Response body should be "Invalid contactId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong telephone id
+DELETE http://localhost:8080/API/contacts/1/telephone/-3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid telephoneId Parameter.", `Response body should be "Invalid telephoneId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# contact not found
+DELETE http://localhost:8080/API/contacts/5/telephone/3
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Contact with ContactId:5 not found", `Response body should be "Contact with ContactId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# telephone not found
+DELETE http://localhost:8080/API/contacts/1/telephone/5
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Telephone with TelephoneId:5 not found", `Response body should be "Telephone with TelephoneId:5 not found" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# telephone already deleted
+DELETE http://localhost:8080/API/contacts/1/telephone/2
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Telephone with TelephoneId:2 already deleted.", `Response body should be "Telephone with TelephoneId:2 already deleted." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# no permission to delete
+DELETE http://localhost:8080/API/contacts/2/telephone/1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 403, `Expected response status 403 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Telephone with TelephoneId:1 does not belong to this contact.", `Response body should be "Telephone with TelephoneId:1 does not belong to this contact." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/messages/ TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/messages/?pageNumber=0&limit=10&state=read&sort=ASC_id
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# only pageNumber provided
+GET http://localhost:8080/API/messages/?pageNumber=1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "PageNumber and limit must be both provided or both not provided.", `Expected response detail "PageNumber and limit must be both provided or both not provided." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong pageNumber
+GET http://localhost:8080/API/messages/?pageNumber=-1&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid pageNumber Parameter.", `Expected response detail "Invalid pageNumber Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong limit
+GET http://localhost:8080/API/messages/?pageNumber=0&limit=0
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function() {
+        client.assert(response.body["detail"] === "Invalid limit Parameter.", `Expected response detail "Invalid limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber and limit
+GET http://localhost:8080/API/messages/?pageNumber=-1&limit=0
+
+> {%
+    client.test("Test returned status code", function () {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned error message in body", function () {
+        client.assert(response.body["detail"] === "Invalid pageNumber and limit Parameter.", `Expected response detail "Invalid pageNumber and limit Parameter." but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+# wrong pageNumber (string)
+GET http://localhost:8080/API/messages/?pageNumber=gre&limit=10
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Failed to convert 'pageNumber' with value: 'gre'", `Expected response name "Failed to convert 'pageNumber' with value: 'gre'" but is ${response.body["detail"]}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong sort ASC/DESC with paging
+GET http://localhost:8080/API/messages/?pageNumber=0&limit=10&sort=SSS_id
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid sort Parameter.", `Response body should be "Invalid sort Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong sort id/date with paging
+GET http://localhost:8080/API/messages/?pageNumber=0&limit=10&sort=ASC_sss
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid sort Parameter.", `Response body should be "Invalid sort Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong sort ASC/DESC without paging
+GET http://localhost:8080/API/messages/?pageNumber=0&limit=10&sort=SSS_id
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid sort Parameter.", `Response body should be "Invalid sort Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# wrong sort id/date without paging
+GET http://localhost:8080/API/messages/?pageNumber=0&limit=10&sort=ASC_sss
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid sort Parameter.", `Response body should be "Invalid sort Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/messages/{messageId} TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/messages/1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+GET http://localhost:8080/API/messages/-1
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid messageId Parameter.", `Response body should be "Invalid messageId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# message not found
+GET http://localhost:8080/API/messages/5
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Message with messageId:5 not found.", `Response body should be "Message with messageId:5 not found." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# POST /API/messages/{messageId} TESTS
+#
+#
+#
+
+# correct request
+POST http://localhost:8080/API/messages/1
+Content-Type: application/json
+
+{
+  "targetState": "received"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+POST http://localhost:8080/API/messages/-1
+Content-Type: application/json
+
+{
+  "targetState": "received"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid messageId Parameter.", `Response body should be "Invalid messageId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# message not found
+POST http://localhost:8080/API/messages/5
+Content-Type: application/json
+
+{
+  "targetState": "received"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Message with messageId:5 not found.", `Response body should be "Message with messageId:5 not found." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid state transition
+POST http://localhost:8080/API/messages/1
+Content-Type: application/json
+
+{
+  "targetState": "processing"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid state transition", `Response body should be "Invalid state transition" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid current state
+# TRANSITIONS TO ARRIVE IN AN INVALID SITUATION
+POST http://localhost:8080/API/messages/1
+Content-Type: application/json
+
+{
+  "targetState": "read"
+}
+
+###
+
+POST http://localhost:8080/API/messages/1
+Content-Type: application/json
+
+{
+  "targetState": "discarded"
+}
+
+###
+
+POST http://localhost:8080/API/messages/1
+Content-Type: application/json
+
+{
+  "targetState": "read"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid current state: no state transition allowed", `Response body should be "Invalid current state: no state transition allowed" but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# GET /API/messages/{messageId}/history TESTS
+#
+#
+#
+
+# correct request
+GET http://localhost:8080/API/messages/1/history
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+GET http://localhost:8080/API/messages/-1/history
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid messageId Parameter.", `Response body should be "Invalid messageId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# message not found
+GET http://localhost:8080/API/messages/5/history
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Message with messageId:5 not found.", `Response body should be "Message with messageId:5 not found." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/messages/{messageId}/priority TESTS
+#
+#
+#
+
+# correct request
+PUT http://localhost:8080/API/messages/1/priority
+Content-Type: application/json
+
+{
+  "priority": "high"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+PUT http://localhost:8080/API/messages/-1/priority
+Content-Type: application/json
+
+{
+  "priority": "high"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid messageId Parameter.", `Response body should be "Invalid messageId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# message not found
+PUT http://localhost:8080/API/messages/5/priority
+Content-Type: application/json
+
+{
+  "priority": "high"
+}
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Message with messageId:5 not found.", `Response body should be "Message with messageId:5 not found." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+#
+#
+#
+# PUT /API/messages/{messageId}/discard TESTS
+#
+#
+#
+
+# correct request
+PUT http://localhost:8080/API/messages/1/discard
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 200, `Expected response status 200 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body !== null, `Response body should be not null but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# invalid id
+PUT http://localhost:8080/API/messages/-1/discard
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 400, `Expected response status 400 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Invalid messageId Parameter.", `Response body should be "Invalid messageId Parameter." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
+
+# message not found
+PUT http://localhost:8080/API/messages/5/discard
+
+> {%
+    client.test("Test returned status code", function() {
+        client.assert(response.status === 404, `Expected response status 404 but found ${response.status}`);
+    });
+    client.test("Test returned body", function() {
+        client.assert(response.body["detail"] === "Message with messageId:5 not found.", `Response body should be "Message with messageId:5 not found." but is ${response.body}`);
+    });
+    client.log(response.body);
+%}
+###
