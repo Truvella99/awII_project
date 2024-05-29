@@ -6,6 +6,7 @@ import it.polito.customerrelationshipmanagement.entities.jobOfferStatus
 import it.polito.customerrelationshipmanagement.services.JobOfferService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -18,6 +19,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/joboffers/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun createJobOffer(@RequestBody @Valid createUpdateJobOfferDTO: CreateUpdateJobOfferDTO): JobOfferDTO {
         return jobOfferService.createJobOffer(createUpdateJobOfferDTO)
     }
@@ -30,6 +32,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}")
+    @PreAuthorize("isAuthenticated()")
     fun getJobOfferById(@PathVariable("jobOfferId") jobOfferId: Long): JobOfferDTO {
         return jobOfferService.findJobOfferById(jobOfferId)
     }
@@ -42,6 +45,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/joboffers/{jobOfferId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun UpdateJobOfferById(
         @PathVariable("jobOfferId") jobOfferId: Long,
         @RequestBody @Valid createUpdateJobOfferDTO: CreateUpdateJobOfferDTO
@@ -57,6 +61,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}/history")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getJobOfferHistoryById(@PathVariable("jobOfferId") jobOfferId: Long): List<JobOfferHistoryDTO> {
         return jobOfferService.listJobOfferHistory(jobOfferId)
     }
@@ -72,6 +77,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/open/{customerId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getCustomerOpenJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -91,6 +97,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/accepted/{professionalId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getProfessionalAcceptedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -109,6 +116,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/aborted/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getAbortedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -125,6 +133,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     */
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/API/joboffers/{jobOfferId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateJobOfferStatus(
         @PathVariable("jobOfferId") jobOfferId: Long,
         @RequestBody data: UpdateJobOfferStatusDTO
@@ -138,6 +147,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}/value")
+    @PreAuthorize("isAuthenticated()")
     fun getJobOfferValue(@PathVariable("jobOfferId") jobOfferId: Long): Number {
         return jobOfferService.getJobOfferValue(jobOfferId)
     }

@@ -1,4 +1,4 @@
-package it.polito.apigatewayoauthserver
+package it.polito.wa2.g05.document_store
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration

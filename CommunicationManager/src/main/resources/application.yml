@@ -1,0 +1,24 @@
+camel:
+  component:
+    google-mail-stream:
+      application-name: 'WebAppOAuthClient'
+      client-id: '677529689861-7hcila8392i0sc6jcbsov4raqr00bf6f.apps.googleusercontent.com'
+      client-secret: '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'
+      refresh-token: '1//04iDK_5REWmThCgYIARAAGAQSNwF-L9IrcRIEB7EL4-Gv1bBQRnIBBDoTaFwKSaOuqCvLtHxiSmk-b6CMyEPLj9gCTWjmCoLSnvY'
+    google-mail:
+      application-name: 'WebAppOAuthClient'
+      client-id: '677529689861-7hcila8392i0sc6jcbsov4raqr00bf6f.apps.googleusercontent.com'
+      client-secret: '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'
+      refresh-token: '1//04iDK_5REWmThCgYIARAAGAQSNwF-L9IrcRIEB7EL4-Gv1bBQRnIBBDoTaFwKSaOuqCvLtHxiSmk-b6CMyEPLj9gCTWjmCoLSnvY'
+
+spring:
+  application:
+    name: CommunicationManager
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/CRMRealm
+
+server:
+  port: 8082

@@ -3,8 +3,11 @@ package it.polito.apigateway
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
 import java.time.LocalDateTime
@@ -30,15 +33,6 @@ class HomeController {
             "name" to "secure",
             "date" to LocalDateTime.now(),
             "principal" to authentication.principal
-        )
-    }
-
-    @GetMapping("/anon")
-    fun anon(principal: Principal): Map<String, Any?> {
-        return mapOf(
-            "name" to "anon",
-            "date" to LocalDateTime.now(),
-            "principal" to principal
         )
     }
 

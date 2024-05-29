@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -19,6 +20,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/documents/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getAllDocuments(@RequestParam("pageNumber")pageNumber: Int,
                         @RequestParam("limit")limit: Int) : List<MetadataDTO> {
         return documentService.listAll(pageNumber, limit)
@@ -31,6 +33,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/documents/{metadataId}/")
+    @PreAuthorize("isAuthenticated()")
     fun getDocument(@PathVariable("metadataId")metadataId: Long): MetadataDTO {
         return documentService.findById(metadataId)
     }
@@ -41,6 +44,7 @@ class HomeController(private val documentService: DocumentService){
      * Byte content of document {metadataId} or fail if it does not exist.
      */
     @GetMapping("/API/documents/{metadataId}/data/")
+    @PreAuthorize("isAuthenticated()")
     fun getByteDocument(@PathVariable("metadataId")metadataId: Long): ResponseEntity<ByteArrayResource> {
         val (metadata,document) = documentService.getBinaryById(metadataId)
 
@@ -57,6 +61,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/documents/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun createDocument(@ModelAttribute d: DocumentMetadataDTO): MetadataDTO {
         return documentService.createDocument(d)
     }
@@ -69,6 +74,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/documents/{metadataId}/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateDocument(@PathVariable("metadataId") metadataId: Long,@ModelAttribute d: DocumentMetadataDTO): MetadataDTO {
         return documentService.updateDocument(metadataId,d)
     }
@@ -80,6 +86,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/API/documents/{metadataId}/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun deleteDocument(@PathVariable("metadataId")metadataId: Long) {
         return documentService.deleteDocument(metadataId)
     }

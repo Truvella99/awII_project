@@ -9,6 +9,7 @@ import it.polito.customerrelationshipmanagement.services.MessageService
 import jakarta.validation.Valid
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -21,6 +22,7 @@ class CustomerController(private val customerService: CustomerService){
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/customers/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun createCustomer(@RequestBody @Valid c: CreateUpdateCustomerDTO): CustomerDTO {
         return customerService.createCustomer(c)
     }
@@ -31,6 +33,7 @@ class CustomerController(private val customerService: CustomerService){
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/customers/{customerId}/note")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun addCustomerNotes(@PathVariable("customerId") customerId: Long, @RequestBody note:CreateUpdateNoteDTO): NoteDTO {
         return customerService.addCustomerNote(customerId, note)
     }
@@ -41,6 +44,7 @@ class CustomerController(private val customerService: CustomerService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/customers/{customerId}")
+    @PreAuthorize("isAuthenticated()")
     fun getCustomer(@PathVariable("customerId") customerId: Long): CustomerDTO {
         return customerService.findCustomerById(customerId)
     }
@@ -52,6 +56,7 @@ class CustomerController(private val customerService: CustomerService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/customers/{customerId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateCustomer(
         @PathVariable("customerId") customerId: Long,
         @RequestBody  @Valid customer: CreateUpdateCustomerDTO

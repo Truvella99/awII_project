@@ -10,28 +10,21 @@ spring:
           - id: crm
             uri: http://localhost:8081
             predicates:
-              - Path=/crm
+              - Path=/crm/**
             filters:
               - StripPrefix=1
               - TokenRelay
           - id: communicationManager
             uri: http://localhost:8082
             predicates:
-              - Path=/communicationManager
+              - Path=/communicationManager/**
             filters:
               - StripPrefix=1
               - TokenRelay
           - id: docStore
             uri: http://localhost:8083
             predicates:
-              - Path=/docStore
-            filters:
-              - StripPrefix=1
-              - TokenRelay
-          - id: oAuthServer
-            uri: http://localhost:8084
-            predicates:
-              - Path=/oAuthServer/**
+              - Path=/docStore/**
             filters:
               - StripPrefix=1
               - TokenRelay

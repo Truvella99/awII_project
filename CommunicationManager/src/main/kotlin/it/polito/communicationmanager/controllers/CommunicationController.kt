@@ -5,6 +5,7 @@ import it.polito.communicationmanager.dtos.EmailDTO
 import it.polito.communicationmanager.services.CommunicationService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 
@@ -18,6 +19,7 @@ class CommunicationController(private val communicationService: CommunicationSer
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/emails/")
+    @PreAuthorize("isAuthenticated()")
     fun addContactEmail(@RequestBody @Valid data: CreateEmailDTO): EmailDTO {
         return communicationService.sendEmail(data)
     }

@@ -5,6 +5,7 @@ import it.polito.customerrelationshipmanagement.services.ContactService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -19,6 +20,7 @@ class ContactController(private val contactService: ContactService) {
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/contacts/")
+    @PreAuthorize("isAuthenticated()")
     fun listAllContacts(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -38,6 +40,7 @@ class ContactController(private val contactService: ContactService) {
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/contacts/pendings/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun listAllPendingContacts(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -55,6 +58,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/contacts/{contactId}/")
+    @PreAuthorize("isAuthenticated()")
     fun getContact(@PathVariable("contactId") contactId: Long): ContactDTO {
         return contactService.findById(contactId)
     }
@@ -66,6 +70,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/contacts/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun createContact(@RequestBody @Valid c: CreateContactDTO): ContactDTO {
         return contactService.createContact(c)
     }
@@ -77,6 +82,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/contacts/{contactId}/category")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateContactCategory(
         @PathVariable("contactId") contactId: Long,
         @RequestBody @Valid c: UpdateCategoryDTO
@@ -92,6 +98,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/contacts/{contactId}/name")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateContactName(
         @PathVariable("contactId") contactId: Long,
         @RequestBody  nameDTO: UpdateNameDTO
@@ -106,6 +113,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/contacts/{contactId}/surname")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateContactSurname(
         @PathVariable("contactId") contactId: Long,
         @RequestBody  surname: UpdateSurnameDTO
@@ -120,6 +128,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/contacts/{contactId}/ssncode")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateContactSSNCode(
         @PathVariable("contactId") contactId: Long,
         @RequestBody @Valid ssnCodeDTO: UpdateSSNCodeDTO
@@ -133,6 +142,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/contacts/{contactId}/email")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun addContactEmail(@PathVariable("contactId") contactId: Long, @RequestBody @Valid e: CreateUpdateEmailDTO): ContactDTO {
         return contactService.addContactEmail(contactId, e)
     }
@@ -144,6 +154,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/API/contacts/{contactId}/email/{emailId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun deleteContactEmail(
         @PathVariable("contactId") contactId: Long,
         @PathVariable("emailId") emailId: Long
@@ -158,6 +169,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/contacts/{contactId}/address")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun addContactAddress(@PathVariable("contactId") contactId: Long, @RequestBody @Valid a: CreateUpdateAddressDTO): ContactDTO {
         return contactService.addContactAddress(contactId, a)
     }
@@ -169,6 +181,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/API/contacts/{contactId}/address/{addressId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun deleteContactAddress(
         @PathVariable("contactId") contactId: Long,
         @PathVariable("addressId") addressId: Long
@@ -183,6 +196,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/contacts/{contactId}/telephone")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun addContactTelephone(@PathVariable("contactId") contactId: Long, @RequestBody @Valid t: CreateUpdateTelephoneDTO): ContactDTO {
         return contactService.addContactTelephone(contactId, t)
     }
@@ -194,6 +208,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/API/contacts/{contactId}/telephone/{telephoneId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun deleteContactTelephone(
         @PathVariable("contactId") contactId: Long,
         @PathVariable("telephoneId") telephoneId: Long

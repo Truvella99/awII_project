@@ -12,6 +12,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -24,6 +25,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/professionals")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun createProfessional(@RequestBody @Valid p: CreateUpdateProfessionalDTO): ProfessionalDTO {
         println(p)
         return professionalService.createProfessional(p)
@@ -35,6 +37,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/professionals/{professionalId}/note")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun addProfessionalNotes(@PathVariable("professionalId") professionalId: Long, @RequestBody note:CreateUpdateNoteDTO): NoteDTO {
         return professionalService.addProfessionalNote(professionalId, note)
     }
@@ -47,6 +50,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/")
+    @PreAuthorize("isAuthenticated()")
     fun listAllProfessionals(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -64,6 +68,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/{professionalId}")
+    @PreAuthorize("isAuthenticated()")
     fun getProfessional(@PathVariable("professionalId") professionalId: Long): ProfessionalDTO {
         return professionalService.findProfessionalById(professionalId)
     }
@@ -74,6 +79,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/professionals/{professionalId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateProfessional(
         @PathVariable("professionalId") professionalId: Long,
         @RequestBody  @Valid professional: CreateUpdateProfessionalDTO

@@ -1,4 +1,4 @@
-package it.polito.apigatewayoauthserver
+package it.polito.communicationmanager
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

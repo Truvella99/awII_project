@@ -7,6 +7,7 @@ import it.polito.customerrelationshipmanagement.services.MessageService
 import jakarta.validation.Valid
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -21,6 +22,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/messages/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun listAllMessages(@RequestParam("pageNumber")pageNumber: Int?,
                         @RequestParam("limit")limit: Int?,
                         @RequestParam("state")state: state?,
@@ -38,6 +40,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/messages/")
+    @PreAuthorize("isAuthenticated()")
     fun addMessage(@RequestBody @Valid data: CreateMessageDTO): MessageDTO {
         return messageService.addMessage(data)
     }
@@ -50,6 +53,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/messages/{messageId}")
+    @PreAuthorize("isAuthenticated()")
     fun getMessageById(@PathVariable("messageId") messageId: Long): MessageDTO {
         return messageService.getMessageById(messageId)
     }
@@ -65,6 +69,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/API/messages/{messageId}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateMessageState(@PathVariable("messageId") messageId: Long,
                            @RequestBody @Valid data: UpdateMessageStateDTO): MessageDTO {
         return messageService.updateMessageState(messageId, data)
@@ -78,6 +83,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/messages/{messageId}/history")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getChanges(@PathVariable("messageId") messageId: Long): List<HistoryDTO> {
         return messageService.getChanges(messageId)
     }
@@ -91,6 +97,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/messages/{messageId}/priority")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateMessagePriority(@PathVariable("messageId") messageId: Long,
                               @RequestBody @Valid data: UpdateMessagePriorityDTO
     ): MessageDTO {
@@ -105,6 +112,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/messages/{messageId}/discard")
+    @PreAuthorize("isAuthenticated()")
     fun deleteMessage(@PathVariable("messageId") messageId: Long): MessageDTO {
         return messageService.deleteMessage(messageId)
     }

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestTemplate
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -32,6 +33,7 @@ class CommunicationServiceImpl() : CommunicationService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(CommunicationController::class.java)
     private val googleMail: Gmail = GmailConfig.gmailClient()
+    private val restTemplate = RestTemplate()
 
     override fun sendEmail(data: CreateEmailDTO): EmailDTO {
         if (data.from != USER && data.to == USER) {
@@ -44,7 +46,23 @@ class CommunicationServiceImpl() : CommunicationService {
         try {
             val message = createMessage(data)
             val msg = googleMail.users().messages().send(USER, message).execute()
-            logger.info("Email sended.")
+            logger.info("Email sended to Google.")
+            val createMessageDTO = CreateMessageDTO(
+                channel = channel.email,
+                priority = priority.medium,
+                date = Date(),
+                subject = data.subject,
+                body = data.body,
+                email = data.to,
+                telephone = null,
+                address = null
+            )
+            val responseEntity = restTemplate.postForEntity(
+                "http://localhost:8080/API/messages/",
+                createMessageDTO,
+                CreateMessageDTO::class.java
+            )
+            logger.info("Email sended to CRM with body: ${responseEntity.body}")
             return EmailDTO(
                 id = msg.id,
                 from = data.from,
@@ -152,7 +170,7 @@ class GmailConfig {
 
             // Set refresh token
             credential.refreshToken =
-                "1//04dj-Xf_bZh4hCgYIARAAGAQSNwF-L9Irj-XTyjM5Y7GEFIwckqXpCGFFVENgA8ZEcNP4VXcKZWqisKQvIaL22w1RX-zFpv0ySdg"
+                "1//04iDK_5REWmThCgYIARAAGAQSNwF-L9IrcRIEB7EL4-Gv1bBQRnIBBDoTaFwKSaOuqCvLtHxiSmk-b6CMyEPLj9gCTWjmCoLSnvY"
             return Gmail.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName("WebAppOAuthClient")
                 .build()
