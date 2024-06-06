@@ -46,8 +46,8 @@ function LoginForm(props) {
                     <Form.Group className="mb-3" controlId="username">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
-                            type="email"
-                            value={username} placeholder="Example: john.doe@polito.it"
+                            type="text"
+                            value={username} placeholder="Example: john.doe"
                             onChange={(ev) => setUsername(ev.target.value)}
                             required={true}
                         />
@@ -68,17 +68,13 @@ function LoginForm(props) {
     )
 }
 
-function LogoutButton(props) {
-    return (
-        <Button variant="outline-light" onClick={props.logout}>Logout</Button>
-    )
-}
 
+/*
 function LoginButton(props) {
     const navigate = useNavigate();
     return (
         <Button variant="outline-light" onClick={() => navigate('/login')}>Login</Button>
     )
 }
-
-export { LoginLayout, LogoutButton, LoginButton };
+*/
+export { LoginLayout };

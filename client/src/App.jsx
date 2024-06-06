@@ -4,9 +4,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Toast } from 'react-bootstrap/';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
-import { Navigation } from "./components/Navigation";
+import {Navigation, TopBar} from "./components/Navigation";
 import { LoginLayout } from "./components/Auth";
 import MessageContext from "./messageCtx";
+import './App.css';
 
 function App() {
   const [me, setMe] = useState(null);
@@ -21,12 +22,13 @@ function App() {
       try {
         const res = await fetch('/me');
         const me = await res.json();
+        console.log(me);
         setMe(me);
       } catch (error) {
         setMe(null);
       }
     };
-    fetchMe();
+    fetchMe()
   }, []);
 
   const handleLogout = () => {
@@ -43,10 +45,10 @@ function App() {
   return (
       <BrowserRouter>
         <MessageContext.Provider value={{ handleErrors }}>
-          <Navigation me={me} logout={handleLogout} user={user} loggedIn={loggedIn} />
+          <Navigation  me={me} logout={handleLogout} user={user} loggedIn={loggedIn} />
           <Container fluid className="mt-5">
             <Routes>
-              <Route path="/" element={<Home/>} />
+              <Route path="/" element={<Home me={me}/>} />
               <Route path="/login" element={!loggedIn ? <LoginLayout login={handleLogin} /> : <Navigate replace to='/' />} />
             </Routes>
             <Toast show={message !== ''} onClose={() => setMessage('')} delay={4000} autohide bg="danger">

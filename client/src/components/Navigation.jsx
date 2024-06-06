@@ -2,23 +2,21 @@ import React from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import {Navbar, Nav, Form, Button, Container} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { LogoutButton, LoginButton } from './Auth';
 
-function TopBar({ me }) {
+function TopBar(props) {
     return (
-        <Navbar bg="primary" variant="dark" className="justify-content-end" style={{ padding: '4px' }}>
+        <Navbar bg="primary" variant="dark" className="justify-content-end" >
             <Container>
                 <Navbar.Collapse className="justify-content-end">
-                    {me && me.principal != null && (
-                        <Form action={me.logoutUrl} method="post" inline>
-                            <Navbar.Text className="me-2">Welcome, {me.name}</Navbar.Text>
-                            <input type="hidden" name="_csrf" value={me.xsrfToken} />
+                    {props.me && props.me.principal != null && (
+                        <Form action={props.me.logoutUrl} method="post" inline>
+                            <Navbar.Text className="me-2">Welcome, {props.me.name}</Navbar.Text>
+                            <input type="hidden" name="_csrf" value={props.me.xsrfToken} />
                             <Button type="submit" variant="outline-light">Logout</Button>
                         </Form>
                     )}
-
-                    {me && me.principal == null && me.loginUrl != null && (
-                        <Button variant="outline-light" onClick={() => window.location.href = me.loginUrl}>Login</Button>
+                    {props.me && props.me.principal == null && props.me.loginUrl != null && (
+                        <Button variant="outline-light" onClick={() => window.location.href = props.me.loginUrl}>Login</Button>
                     )}
                 </Navbar.Collapse>
             </Container>
@@ -28,7 +26,7 @@ function TopBar({ me }) {
 
 const Navigation = (props) => {
     return (
-        <Navbar bg="primary" expand="sm" variant="dark" fixed="top" className="py-1 px-3 ">
+        <Navbar bg="primary"  variant="dark" fixed="top" className="py-1 px-3 " style={{ marginBottom: '150px' }}>
             <Link to="/">
                 <Navbar.Brand>
                     <i className="bi bi-house"></i> Home
@@ -40,12 +38,17 @@ const Navigation = (props) => {
                 </Navbar.Brand>
             </Nav>
             <Nav className="ms-auto">
-                <Navbar.Text className="mx-2">
-                    {props.user && props.user.name && `Welcome, ${props.user.name}!`}
-                </Navbar.Text>
-                <Form className="mx-2">
-                    {props.loggedIn ? <LogoutButton logout={props.logout} /> : <LoginButton />}
-                </Form>
+                        {props.me && props.me.principal != null && (
+                                <Form action={props.me.logoutUrl} method="post" inline>
+                                    <Navbar.Text className="me-2">Welcome, {props.me.name}</Navbar.Text>
+                                    <input type="hidden" name="_csrf" value={props.me.xsrfToken} />
+                                    <Button type="submit" variant="outline-light">Logout</Button>
+                                </Form>
+                            )}
+
+                {props.me && props.me.principal == null && props.me.loginUrl != null && (
+                    <Button variant="outline-light" onClick={() => window.location.href = props.me.loginUrl}>Login</Button>
+                )}
             </Nav>
         </Navbar>
     );
