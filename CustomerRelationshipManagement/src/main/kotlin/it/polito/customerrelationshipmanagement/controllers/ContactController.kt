@@ -1,16 +1,28 @@
 package it.polito.customerrelationshipmanagement.controllers
 
+import com.nimbusds.jwt.JWT
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.services.ContactService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 class ContactController(private val contactService: ContactService) {
+
+    @GetMapping("/data")
+    fun getRoles(authentication: Authentication): Map<String, Any> {
+        val principal = authentication.principal as Jwt//prima era JWT TODO
+        val realmAccess = principal.getClaim<Map<String, List<String>>>("realm_access")
+        val roles = realmAccess["roles"] ?: emptyList()
+        return mapOf("roles" to roles)
+    }
+
     /**
      * GET /API/contacts/
      *

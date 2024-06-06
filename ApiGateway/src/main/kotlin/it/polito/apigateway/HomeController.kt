@@ -35,15 +35,7 @@ class HomeController {
             "principal" to authentication.principal
         )
     }
-    @PostMapping("/data")
-    fun postData(@RequestBody data: Map<String, String>,authentication: Authentication): Map<String, Any> {
-        val principal = authentication.principal as OidcUser//prima era JWT TODO
-        return data.entries.associate { e -> e.key to e.value.uppercase() }
-            .plus("username" to principal.getClaim("preferred_username"))
-            .plus("userInfo" to principal.getClaim("userInfo"))
-            .plus("roles" to principal.authorities.map { it.authority })
-            .plus("dateTime" to LocalDateTime.now().toString())
-    }
+
     @GetMapping("/me")
     fun me(
         @CookieValue(name="XSRF-TOKEN", required = false)

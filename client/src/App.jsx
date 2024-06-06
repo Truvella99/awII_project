@@ -4,8 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Toast } from 'react-bootstrap/';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
-import {Navigation, TopBar} from "./components/Navigation";
-import { LoginLayout } from "./components/Auth";
+import {Navigation} from "./components/Navigation";
 import MessageContext from "./messageCtx";
 import './App.css';
 
@@ -48,8 +47,7 @@ function App() {
           <Navigation  me={me} logout={handleLogout} user={user} loggedIn={loggedIn} />
           <Container fluid className="mt-5">
             <Routes>
-              <Route path="/" element={<Home me={me}/>} />
-              <Route path="/login" element={!loggedIn ? <LoginLayout login={handleLogin} /> : <Navigate replace to='/' />} />
+              <Route path="/ui" element={<Home me={me}/>} />
             </Routes>
             <Toast show={message !== ''} onClose={() => setMessage('')} delay={4000} autohide bg="danger">
               <Toast.Body>{message}</Toast.Body>
