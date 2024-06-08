@@ -22,7 +22,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/messages/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun listAllMessages(@RequestParam("pageNumber")pageNumber: Int?,
                         @RequestParam("limit")limit: Int?,
                         @RequestParam("state")state: state?,
@@ -53,7 +53,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/messages/{messageId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getMessageById(@PathVariable("messageId") messageId: Long): MessageDTO {
         return messageService.getMessageById(messageId)
     }
@@ -112,7 +112,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/messages/{messageId}/discard")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun deleteMessage(@PathVariable("messageId") messageId: Long): MessageDTO {
         return messageService.deleteMessage(messageId)
     }

@@ -32,7 +32,7 @@ class ContactController(private val contactService: ContactService) {
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/contacts/")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun listAllContacts(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -70,7 +70,7 @@ class ContactController(private val contactService: ContactService) {
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/contacts/{contactId}/")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getContact(@PathVariable("contactId") contactId: Long): ContactDTO {
         return contactService.findById(contactId)
     }

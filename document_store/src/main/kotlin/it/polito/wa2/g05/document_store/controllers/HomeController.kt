@@ -5,13 +5,22 @@ import it.polito.wa2.g05.document_store.services.DocumentService
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
 class HomeController(private val documentService: DocumentService){
+
+    @GetMapping("/data")
+    fun getRoles(authentication: Authentication): Map<String, Any> {
+        val principal = authentication.principal as Jwt//prima era JWT TODO
+        val realmAccess = principal.getClaim<Map<String, List<String>>>("realm_access")
+        val roles = realmAccess["roles"] ?: emptyList()
+        return mapOf("roles" to roles)
+    }
 
     /**
      * GET /API/documents/
@@ -20,7 +29,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/documents/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun getAllDocuments(@RequestParam("pageNumber")pageNumber: Int,
                         @RequestParam("limit")limit: Int) : List<MetadataDTO> {
         return documentService.listAll(pageNumber, limit)
@@ -33,7 +42,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/documents/{metadataId}/")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getDocument(@PathVariable("metadataId")metadataId: Long): MetadataDTO {
         return documentService.findById(metadataId)
     }
@@ -44,7 +53,7 @@ class HomeController(private val documentService: DocumentService){
      * Byte content of document {metadataId} or fail if it does not exist.
      */
     @GetMapping("/API/documents/{metadataId}/data/")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getByteDocument(@PathVariable("metadataId")metadataId: Long): ResponseEntity<ByteArrayResource> {
         val (metadata,document) = documentService.getBinaryById(metadataId)
 

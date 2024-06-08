@@ -44,7 +44,7 @@ class CustomerController(private val customerService: CustomerService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/customers/{customerId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getCustomer(@PathVariable("customerId") customerId: Long): CustomerDTO {
         return customerService.findCustomerById(customerId)
     }

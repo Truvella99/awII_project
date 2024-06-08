@@ -50,7 +50,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun listAllProfessionals(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -68,7 +68,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/{professionalId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getProfessional(@PathVariable("professionalId") professionalId: Long): ProfessionalDTO {
         return professionalService.findProfessionalById(professionalId)
     }

@@ -32,7 +32,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getJobOfferById(@PathVariable("jobOfferId") jobOfferId: Long): JobOfferDTO {
         return jobOfferService.findJobOfferById(jobOfferId)
     }
@@ -77,7 +77,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/open/{customerId}")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun getCustomerOpenJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -97,7 +97,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/accepted/{professionalId}")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun getProfessionalAcceptedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -116,7 +116,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/aborted/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun getAbortedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -147,7 +147,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}/value")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
     fun getJobOfferValue(@PathVariable("jobOfferId") jobOfferId: Long): Number {
         return jobOfferService.getJobOfferValue(jobOfferId)
     }
