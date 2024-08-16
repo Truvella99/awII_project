@@ -41,3 +41,5 @@ out/
 
 ### Support ###
 ./script.py
+# node modules
+**/node_modules

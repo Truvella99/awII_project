@@ -38,3 +38,5 @@ out/
 
 ### Kotlin ###
 .kotlin
+# node modules
+**/node_modules
