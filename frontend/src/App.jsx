@@ -49,9 +49,9 @@ function App() {
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
               <Route path="/ui/professionals" element={<></>} /> // Ale Costa
-              <Route path="/ui/professionals/professionalId" element={<></>} /> // Gaetano
+              <Route path="/ui/professionals/professionalId" element={<></>} /> // Gaetano view and edit
               <Route path="/ui/customers" element={<></>} /> // Ale Costa
-              <Route path="/ui/customers/customerId" element={<></>} /> // Gaetano
+              <Route path="/ui/customers/customerId" element={<></>} /> // Gaetano view and edit
               <Route path="/ui/jobOffers" element={<></>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<></>} /> // Minicucc
               <Route path="/ui/jobOffers/jobOfferId" element={<></>} />  // Minicucc view and edit
