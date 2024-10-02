@@ -48,14 +48,14 @@ function App() {
           <Container fluid className="mt-5">
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
-              <Route path="/ui/professionals" element={<></>} />
-              <Route path="/ui/professionals/professionalId" element={<></>} /> // view and edit
-              <Route path="/ui/customers" element={<></>} />
-              <Route path="/ui/customers/customerId" element={<></>} /> // view and edit
-              <Route path="/ui/jobOffers" element={<></>} />
-              <Route path="/ui/jobOffers/addJobOffer" element={<></>} />
-              <Route path="/ui/jobOffers/jobOfferId" element={<></>} />  // view and edit
-              <Route path="/ui/Registration" element={<></>} />
+              <Route path="/ui/professionals" element={<></>} /> // Ale Costa
+              <Route path="/ui/professionals/professionalId" element={<></>} /> // Gaetano
+              <Route path="/ui/customers" element={<></>} /> // Ale Costa
+              <Route path="/ui/customers/customerId" element={<></>} /> // Gaetano
+              <Route path="/ui/jobOffers" element={<></>} /> // Ale Costa
+              <Route path="/ui/jobOffers/addJobOffer" element={<></>} /> // Minicucc
+              <Route path="/ui/jobOffers/jobOfferId" element={<></>} />  // Minicucc view and edit
+              <Route path="/ui/Registration" element={<></>} /> // Giuseppe
               <Route path="/ui/Analytics" element={<></>} />
             </Routes>
             <Toast show={message !== ''} onClose={() => setMessage('')} delay={4000} autohide bg="danger">
