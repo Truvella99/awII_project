@@ -51,7 +51,7 @@ function Home({ me }) {
         postData().then();
     }, []);
     return (
-        me && me.principal !== null && (
+        me && me.principal !== null ? (
             <Container>
                 <Row className="mb-3">
                     <Col>
@@ -67,6 +67,10 @@ function Home({ me }) {
                         </div>
                     </Col>
                 </Row>
+            </Container>
+        ) : (
+            <Container style={{ display: 'flex', justifyContent: 'center' }}>
+                <h1>Please Log In</h1>
             </Container>
         )
     );
