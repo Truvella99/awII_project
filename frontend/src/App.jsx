@@ -74,7 +74,7 @@ function App() {
               <Route path="/ui/customers/customerId" element={<></>} /> // Gaetano view and edit
               <Route path="/ui/jobOffers" element={<></>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn}/>} /> // Minicucc
-              <Route path="/ui/jobOffers/:jobOfferId" element={<></>} />  // Minicucc view and edit
+              <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn}/>} />  // Minicucc view and edit
               <Route path="/ui/Registration" element={<></>} /> // Giuseppe
               <Route path="/ui/Analytics" element={<></>} />
             </Routes>
