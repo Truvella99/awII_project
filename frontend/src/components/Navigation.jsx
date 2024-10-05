@@ -22,7 +22,7 @@ const Navigation = (props) => {
                                 <Form action={props.me.logoutUrl} method="post" inline>
                                     <Navbar.Text className="me-2">Welcome, {props.me.name}</Navbar.Text>
                                     <input type="hidden" name="_csrf" value={props.me.xsrfToken} />
-                                    <Button type="submit" variant="outline-light">Logout</Button>
+                                    <Button type="submit" onClick={() => {props.handleLogout()}} variant="outline-light">Logout</Button>
                                 </Form>
                             )}
 

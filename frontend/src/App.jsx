@@ -12,8 +12,8 @@ import { JobOfferContainer } from './components/JobOffer';
 function App() {
   const [me, setMe] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [data, setData] = useState('');
+  //const [user, setUser] = useState(null);
+  //const [data, setData] = useState('');
   const [message, setMessage] = useState('');
   
   // function to handle the application errors, all displayed into the Alert under the NavHeader
@@ -47,7 +47,7 @@ function App() {
   const handleLogout = () => {
     // Perform logout actions
     setLoggedIn(false);
-    setUser(null);
+    //setUser(null);
   };
 
   const handleLogin = (credentials) => {
@@ -64,7 +64,7 @@ function App() {
               <Toast.Body>{message}</Toast.Body>
             </Toast>
           </Container>
-          <Navigation  me={me} logout={handleLogout} user={user} loggedIn={loggedIn} />
+          <Navigation  me={me} logout={handleLogout} loggedIn={loggedIn} />
           <Container fluid className="mt-5">
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
