@@ -1,3 +1,16 @@
 body {
     padding-top: 70px;
 }
+
+[role=button] {
+    color: #0d6efd;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.list-group{
+    max-height: 300px;
+    margin-bottom: 10px;
+    overflow-y:scroll;
+    -webkit-overflow-scrolling: touch;
+}

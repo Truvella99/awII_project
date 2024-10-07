@@ -269,6 +269,28 @@ async function createProfessional(professional, xsrfToken) {
 /*
  * This function is used to get a customer by his Id
 */
+async function getProfessionalById(professionalId, xsrfToken) {
+  const response = await fetch(`/crm/API/professionals/${professionalId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': xsrfToken,
+    }
+  }).catch(() => { throw { error: "Connection Error" } });
+  if (response.status === 200) {
+    // 200 status code, parse and return the object
+    const professional = await response.json();
+    return professional;
+  } else {
+    // json object provided by the server with the error
+    const error = await response.json();
+    throw error;
+  }
+};
+
+/*
+ * This function is used to get a customer by his Id
+*/
 async function getProfessionals(filter, xsrfToken) {
   const response = await fetch(`/crm/API/professionals/filters/${filter}`, {
     method: 'GET',
@@ -288,4 +310,18 @@ async function getProfessionals(filter, xsrfToken) {
   }
 };
 
-export default { createJobOffer, getJobOfferById, updateJobOfferById, updateJobOfferStatusbyId, getJobOfferHistoryById, getJobOfferValueById, getJobOfferHistoryById, createCustomer, getCustomerById, getCustomers, createProfessional, getProfessionals };
+export default { 
+  createJobOffer, 
+  getJobOfferById, 
+  updateJobOfferById, 
+  updateJobOfferStatusbyId, 
+  getJobOfferHistoryById, 
+  getJobOfferValueById, 
+  getJobOfferHistoryById, 
+  createCustomer, 
+  getCustomerById, 
+  getCustomers, 
+  createProfessional,
+  getProfessionalById, 
+  getProfessionals 
+};
