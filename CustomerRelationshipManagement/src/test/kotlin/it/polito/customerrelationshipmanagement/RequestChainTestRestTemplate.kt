@@ -336,7 +336,7 @@ class RequestChainTestRestTemplate: IntegrationTest() {
 
 		val updateJobOfferStatusDTO1 = UpdateJobOfferStatusDTO(
 			targetStatus = jobOfferStatus.selection_phase,
-			professionalId = null,
+			professionalsId = null,
 			note = null
 		)
 		url = BASE_URL + "joboffers/${createdJobOffer.id}"
@@ -356,7 +356,7 @@ class RequestChainTestRestTemplate: IntegrationTest() {
 
 		val updateJobOfferStatusDTO2 = UpdateJobOfferStatusDTO(
 			targetStatus = jobOfferStatus.candidate_proposal,
-			professionalId = createdProfessional.id,
+			professionalsId = createdProfessional.id,
 			note = null
 		)
 		url = BASE_URL + "joboffers/${createdJobOffer.id}"
@@ -449,7 +449,7 @@ class RequestChainTestRestTemplate: IntegrationTest() {
 
 		val updateJobOfferStatusDTO3 = UpdateJobOfferStatusDTO(
 			targetStatus = jobOfferStatus.aborted,
-			professionalId = null,
+			professionalsId = null,
 			note = null
 		)
 		url = BASE_URL + "joboffers/${createdJobOffer.id}"

@@ -320,53 +320,69 @@ class JobOfferServiceImpl(
 
             jobOfferStatus.selection_phase -> if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.candidate_proposal) {
                 throw JobOfferStatusException("Invalid jobOffer status transition (from 'selection_phase' only 'candidate_proposal/aborted' are possible).")
-            } else if (data.targetStatus == jobOfferStatus.candidate_proposal && data.professionalId == null) {
+            } else if (data.targetStatus == jobOfferStatus.candidate_proposal && data.professionalsId.isEmpty()) {
                 throw JobOfferStatusException("ProfessionalId is required for this status transition.")
-            } else if (data.targetStatus == jobOfferStatus.candidate_proposal && data.professionalId != null) {
-                val professional = professionalRepository.findById(data.professionalId).orElseThrow{
-                    throw ProfessionalNotFoundException("Professional with ProfessionalId:${data.professionalId} not found.")
+            } else if (data.targetStatus == jobOfferStatus.candidate_proposal && data.professionalsId.isNotEmpty()) {
+                data.professionalsId.forEach { professionalId ->
+                    val professional = professionalRepository.findById(professionalId).orElseThrow{
+                        throw ProfessionalNotFoundException("Professional with ProfessionalId:${data.professionalsId} not found.")
+                    }
+                    // not available is not added
+                    if (professional.employmentState == employmentState.available) {
+                        jobOffer.addCandidateProfessional(professional)
+                    }
                 }
-                if (professional.employmentState != employmentState.available) {
-                    throw ProfessionalStateException("Professional with ProfessionalId:${professional.id} is not available for work.")
-                }
-                jobOffer.professional = professional
             }
 
             jobOfferStatus.candidate_proposal -> if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.consolidated && data.targetStatus != jobOfferStatus.selection_phase) {
                 throw JobOfferStatusException("Invalid jobOffer status transition (from 'candidate_proposal' only 'consolidated/selection_phase/aborted' are possible).")
-            } else if (data.targetStatus == jobOfferStatus.consolidated && jobOffer.professional?.employmentState == employmentState.not_available) {
-                val pId = jobOffer.professional?.id
-                val history = JobOffersHistory()
-                jobOffer.professional?.addJobOffer(jobOffer)
-                jobOffer.professional?.currentJobOffer = null
-                jobOffer.currentState = jobOfferStatus.selection_phase
-                history.state = jobOfferStatus.selection_phase
-                history.note = data.note
-                history.date = Date()
-                val savedHistory = jobOfferHistoryRepository.save(history)
-                logger.info("History with historyId ${savedHistory.id} saved.")
-                jobOffer.addHistory(history)
-                logger.info("Professional with ProfessionalId:${pId} is not available for work anymore, thus the JobOffer returns to the selection phase.")
-                return jobOfferRepository.save(jobOffer).toDTO()
-            } else if (data.targetStatus == jobOfferStatus.selection_phase && jobOffer.professional?.employmentState == employmentState.available) {
-                throw JobOfferStatusException("Invalid jobOffer status transition (from 'candidate_proposal' is not possible to switch back to 'selection_phase' if the candidate is still available for work).")
-            } else if (data.targetStatus == jobOfferStatus.selection_phase && jobOffer.professional?.employmentState != employmentState.available) {
-                jobOffer.professional?.addJobOffer(jobOffer)
-                jobOffer.professional?.currentJobOffer = null
+            } else if (data.targetStatus == jobOfferStatus.consolidated && data.consolidatedProfessionalId != null) {
+                val pId = data.consolidatedProfessionalId
+                val consolidatedProfessional = professionalRepository.findById(pId).orElseThrow{
+                    throw ProfessionalNotFoundException("Professional with ProfessionalId:${data.professionalsId} not found.")
+                }
+                if(consolidatedProfessional.employmentState == employmentState.not_available) {
+                    throw ProfessionalException("Professional with ProfessionalId:${pId} is not available for work anymore.")
+                    /*val history = JobOffersHistory()
+                    jobOffer.professional?.addJobOffer(jobOffer)
+                    jobOffer.professional?.currentJobOffer = null
+                    jobOffer.currentState = jobOfferStatus.selection_phase
+                    history.state = jobOfferStatus.selection_phase
+                    history.note = data.note
+                    history.date = Date()
+                    val savedHistory = jobOfferHistoryRepository.save(history)
+                    logger.info("History with historyId ${savedHistory.id} saved.")
+                    jobOffer.addHistory(history)
+                    logger.info("Professional with ProfessionalId:${pId} is not available for work anymore, thus the JobOffer returns to the selection phase.")*/
+                }
+                //return jobOfferRepository.save(jobOffer).toDTO()
             } else if (data.targetStatus == jobOfferStatus.aborted) {
-                jobOffer.professional?.addJobOffer(jobOffer)
-                jobOffer.professional?.currentJobOffer = null
+                // flush the professional candidates
+                jobOffer.abortedProfessionals.addAll(jobOffer.candidateProfessionals)
+                jobOffer.candidateProfessionals.clear()
             } else {
-                // Update professional state to employed
-                jobOffer.professional?.employmentState = employmentState.employed
-                jobOffer.professional?.currentJobOffer = jobOffer
+                // Update consolidatedProfessional state to employed
+                val pId = data.consolidatedProfessionalId
+                if (pId != null) {
+                    val consolidatedProfessional = professionalRepository.findById(pId).orElseThrow{
+                        throw ProfessionalNotFoundException("Professional with ProfessionalId:${data.professionalsId} not found.")
+                    }
+                    consolidatedProfessional.employmentState = employmentState.employed
+                    consolidatedProfessional.currentJobOffer = jobOffer
+                    jobOffer.professional = consolidatedProfessional
+                    jobOffer.candidateProfessionals.remove(consolidatedProfessional)
+                    jobOffer.abortedProfessionals.addAll(jobOffer.candidateProfessionals)
+                    jobOffer.candidateProfessionals.clear()
+                }
             }
 
 
-            jobOfferStatus.consolidated -> if (jobOffer.professional?.employmentState != employmentState.employed) {
+            jobOfferStatus.consolidated -> /*
+            if (jobOffer.professional?.employmentState != employmentState.employed) {
                 val pId = jobOffer.professional?.id
                 val history = JobOffersHistory()
-                jobOffer.professional?.addJobOffer(jobOffer)
+                jobOffer.addAbortedProfessional(jobOffer.professional!!)
+                //jobOffer.professional?.addJobOffer(jobOffer)
                 jobOffer.professional?.currentJobOffer = null
                 jobOffer.currentState = jobOfferStatus.selection_phase
                 history.state = jobOfferStatus.selection_phase
@@ -377,10 +393,17 @@ class JobOfferServiceImpl(
                 jobOffer.addHistory(history)
                 logger.info("Professional with ProfessionalId:${pId} is not working anymore on this job, thus the JobOffer returns to the selection phase.")
                 return jobOfferRepository.save(jobOffer).toDTO()
-            } else if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.done) {
+            } else */if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.done) {
                 throw JobOfferStatusException("Invalid jobOffer status transition (from 'consolidated' only 'done/aborted' are possible).")
-            } else {
+            } else if (data.targetStatus == jobOfferStatus.aborted){
                 jobOffer.professional?.employmentState = employmentState.available
+                jobOffer.addAbortedProfessional(jobOffer.professional!!)
+                //jobOffer.professional?.addJobOffer(jobOffer)
+                jobOffer.professional?.currentJobOffer = null
+            } else {
+                // done status all correct
+                jobOffer.professional?.employmentState = employmentState.available
+                //jobOffer.addAbortedProfessional(jobOffer.professional!!)
                 jobOffer.professional?.addJobOffer(jobOffer)
                 jobOffer.professional?.currentJobOffer = null
             }
@@ -412,7 +435,7 @@ class JobOfferServiceImpl(
         return jobOfferRepository.save(jobOffer).toDTO()
     }
 
-    
+
     // ----- Get the value of a job offer -----
     override fun getJobOfferValue(jobOfferId: Long): Number {
         if (jobOfferId < 0) {

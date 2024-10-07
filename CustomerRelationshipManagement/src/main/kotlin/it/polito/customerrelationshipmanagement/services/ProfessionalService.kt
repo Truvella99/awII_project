@@ -21,4 +21,6 @@ interface ProfessionalService {
     // ale costa
     fun findProfessionalById(professionalId: Long): ProfessionalDTO
     fun updateProfessional(professionalId: Long,professional: CreateUpdateProfessionalDTO): ProfessionalDTO
+
+    fun findProfessionals(filter: String): List<ProfessionalDTO>
 }

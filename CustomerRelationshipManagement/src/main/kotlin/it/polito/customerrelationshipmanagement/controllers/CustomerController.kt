@@ -50,6 +50,18 @@ class CustomerController(private val customerService: CustomerService){
     }
 
     /**
+     * GET /API/customers/filters/{filter}
+     *
+     * find customers with the properties that match the filter passed.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/customers/filters/{filter}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    fun findCustomers(@PathVariable("filter") filter: String): List<CustomerDTO> {
+        return customerService.findCustomers(filter)
+    }
+
+    /**
      * PUT /API/customers/{customerId}
      *
      * update the customer {customerId}

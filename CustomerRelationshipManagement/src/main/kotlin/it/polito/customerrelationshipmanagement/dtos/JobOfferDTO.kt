@@ -18,6 +18,8 @@ data class JobOfferDTO(
     val profitMargin: Number,
     val customerId: Long,
     val professionalId: Long?,
+    val candidateProfessionalsId: List<Long>,
+    val abortedProfessionals: List<Long>,
     val skills: List<SkillDTO>
 )
 
@@ -33,6 +35,8 @@ fun JobOffer.toDTO(): JobOfferDTO =
         this.profitMargin,
         this.customer.id,
         this.professional?.id,
+        this.candidateProfessionals.map { it.id },
+        this.abortedProfessionals.map { it.id },
         this.skills.map { it.toDTO() }
     )
 

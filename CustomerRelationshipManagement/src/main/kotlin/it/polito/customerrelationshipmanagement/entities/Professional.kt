@@ -16,15 +16,33 @@ class Professional{
     @OneToOne
     lateinit var contact: Contact
 
+    // joboffer on which is currently working on
     @OneToOne
     var currentJobOffer: JobOffer? = null
 
+    // joboffers correctly completed
     @OneToMany(mappedBy = "professional")
     val jobOffers = mutableSetOf<JobOffer>()
 
     fun addJobOffer(jobOffer: JobOffer){
         jobOffer.professional = this
         jobOffers.add(jobOffer)
+    }
+
+    // joboffers to which the professional is candidate
+    @ManyToMany(mappedBy = "candidateProfessionals")
+    val candidateJobOffers = mutableSetOf<JobOffer>()
+    fun addCandidateJobOffer(jobOffer: JobOffer){
+        candidateJobOffers.add(jobOffer)
+        jobOffer.candidateProfessionals.add(this)
+    }
+
+    // joboffers to which the professional is aborted
+    @ManyToMany(mappedBy = "abortedProfessionals")
+    val abortedJobOffers = mutableSetOf<JobOffer>()
+    fun addAbortedJobOffer(jobOffer: JobOffer){
+        abortedJobOffers.add(jobOffer)
+        jobOffer.abortedProfessionals.add(this)
     }
 
     @OneToMany(mappedBy = "professional")

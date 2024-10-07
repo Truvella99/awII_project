@@ -11,4 +11,5 @@ interface CustomerService {
     fun addCustomerNote(customerId: Long, note: CreateUpdateNoteDTO): NoteDTO
     fun deleteCustomerNote(customerId: Long, noteId: Long): CustomerDTO
 
+    fun findCustomers(filter: String): List<CustomerDTO>
 }

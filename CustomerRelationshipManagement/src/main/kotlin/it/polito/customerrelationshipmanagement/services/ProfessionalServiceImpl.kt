@@ -182,11 +182,11 @@ class ProfessionalServiceImpl(
             if (p.employmentState != employmentState.available) {
                 throw ProfessionalStateException("Professional with ProfessionalId:${p.id} is not available for work, thus cannot be linked to the JobOffer with JobOfferId:${jobOffer.id}.")
             }
-            if (jobOffer.currentState != jobOfferStatus.candidate_proposal && p.id != jobOffer.professional?.id) {
+            if (jobOffer.currentState != jobOfferStatus.candidate_proposal && !jobOffer.candidateProfessionals.contains(p)) { // p.id != jobOffer.professional?.id) {
                 throw JobOfferStatusException("A proposal for candidate with ProfessionalId:${p.id} has not been made, thus JobOffer with JobOfferId:${jobOffer.id} cannot be linked to the professional.")
             }
-            p.currentJobOffer = jobOffer
-            updateJobOffer = true
+//            p.currentJobOffer = jobOffer
+//            updateJobOffer = true
         }
 
         if (professional.employmentState != null) {
@@ -197,19 +197,35 @@ class ProfessionalServiceImpl(
                 employmentState.employed -> if (professional.employmentState != employmentState.available) {
                     throw ProfessionalStateException("Invalid employmentState transition (from 'employed' only 'available' is possible).")
                 } else {
-                    p.addJobOffer(p.currentJobOffer!!)
+                    //p.addJobOffer(p.currentJobOffer!!)
+                    p.addAbortedJobOffer(p.currentJobOffer!!)
                     p.currentJobOffer = null
                 }
                 employmentState.available -> if (professional.employmentState == employmentState.available) {
                     throw ProfessionalStateException("Invalid employmentState transition (not possible to switch to the same employmentState).")
                 } else if (professional.employmentState == employmentState.employed && p.currentJobOffer == null) {
                     throw ProfessionalStateException("Professional with ProfessionalId:${p.id} is not linked to any JobOffer.")
+                } else if(professional.employmentState == employmentState.employed) {
+                    // available -> employed
+                    val jobOffer = jobOfferRepository.findById(professional.jobOfferId!!).orElseThrow {
+                        throw JobOfferNotFoundException("JobOffer with JobOfferId:${professional.jobOfferId} not found.")
+                    }
+                    p.currentJobOffer = jobOffer
+                    updateJobOffer = true
                 }
             }
             p.employmentState = professional.employmentState
             if (updateJobOffer) {
                 // Update JobOffer status to 'candidate_accepted'
-                jobOfferService.updateJobOfferStatus(p.currentJobOffer!!.id, UpdateJobOfferStatusDTO(targetStatus = jobOfferStatus.consolidated, note = null, professionalId = p.id))
+                jobOfferService.updateJobOfferStatus(
+                    p.currentJobOffer!!.id,
+                    UpdateJobOfferStatusDTO(
+                        targetStatus = jobOfferStatus.consolidated,
+                        note = null,
+                        professionalsId = p.currentJobOffer!!.candidateProfessionals.map { it.id }.toList(),
+                        consolidatedProfessionalId = p.id
+                    )
+                )
             }
         }
 
@@ -297,5 +313,9 @@ class ProfessionalServiceImpl(
         logger.info("Professional skill ${s.skill} of Professional ${professional.contact.name} marked as deleted.")
         return updatedProfessional
 
+    }
+
+    override fun findProfessionals(filter: String): List<ProfessionalDTO> {
+        return contactRepository.findByCategoryAndCustomFilter(category.professional,filter,filter,filter,filter,filter).mapNotNull { it.professional?.toDTO() }
     }
 }

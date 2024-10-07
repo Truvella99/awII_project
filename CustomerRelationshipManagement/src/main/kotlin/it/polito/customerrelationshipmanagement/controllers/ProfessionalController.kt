@@ -72,6 +72,19 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     fun getProfessional(@PathVariable("professionalId") professionalId: Long): ProfessionalDTO {
         return professionalService.findProfessionalById(professionalId)
     }
+
+    /**
+     * GET /API/professionals/filters/{filter}
+     *
+     * find professionals with the properties that match the filter passed.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/professionals/filters/{filter}")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    fun findProfessionals(@PathVariable("filter") filter: String): List<ProfessionalDTO> {
+        return professionalService.findProfessionals(filter)
+    }
+
     /**
      * PUT /API/professionals/{professionalId}
      *

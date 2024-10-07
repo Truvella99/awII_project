@@ -229,6 +229,9 @@ class CustomerServiceImpl(
         return updatedCustomer
     }
 
+    override fun findCustomers(filter: String): List<CustomerDTO> {
+        return contactRepository.findByCategoryAndCustomFilter(category.customer,filter,filter,filter,filter,filter).mapNotNull { it.customer?.toDTO() }
+    }
 
 }
 
