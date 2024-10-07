@@ -19,8 +19,8 @@ function App() {
   // function to handle the application errors, all displayed into the Alert under the NavHeader
   function handleErrors(err) {
     let errMsg = 'Unkwnown error';
-    if (err.error) {
-      errMsg = err.error;
+    if (err.detail) {
+      errMsg = err.detail;
     }
   
     setMessage(errMsg);

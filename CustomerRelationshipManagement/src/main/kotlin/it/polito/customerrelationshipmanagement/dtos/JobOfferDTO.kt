@@ -19,7 +19,7 @@ data class JobOfferDTO(
     val customerId: Long,
     val professionalId: Long?,
     val candidateProfessionalsId: List<Long>,
-    val abortedProfessionals: List<Long>,
+    val abortedProfessionalsId: List<Long>,
     val skills: List<SkillDTO>
 )
 

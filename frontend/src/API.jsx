@@ -99,7 +99,8 @@ async function updateJobOfferStatusbyId(jobOfferStatus, jobOfferId, xsrfToken) {
     body: JSON.stringify(Object.assign({}, {
       targetStatus: jobOfferStatus.targetStatus,
       note: jobOfferStatus.note,
-      professionalId: jobOfferStatus.professionalId
+      professionalId: jobOfferStatus.professionalId,
+      professionalsId: jobOfferStatus.professionalsId
     })),
   }).catch(() => { throw { error: "Connection Error" } });
   if (response.status === 200) {
