@@ -361,16 +361,11 @@ class JobOfferServiceImpl(
                 consolidatedProfessional.currentJobOffer = jobOffer
                 jobOffer.professional = consolidatedProfessional
                 jobOffer.candidateProfessionals.remove(consolidatedProfessional)
-
                 consolidatedProfessional.candidateJobOffers.remove(jobOffer)
-
-                // TODO also professional side ( i use it in the frontend)
-
                 jobOffer.candidateProfessionals.forEach { professional ->
                     professional.candidateJobOffers.remove(jobOffer)
                     professional.abortedJobOffers.add(jobOffer)
                 }
-
                 jobOffer.abortedProfessionals.addAll(jobOffer.candidateProfessionals)
                 jobOffer.candidateProfessionals.clear()
             } else if (data.targetStatus == jobOfferStatus.aborted) {
@@ -397,7 +392,7 @@ class JobOfferServiceImpl(
                 // selection_phase case remove the candidates
                 jobOffer.candidateProfessionals.forEach { professional ->
                     professional.candidateJobOffers.remove(jobOffer)
-                    professional.abortedJobOffers.add(jobOffer)
+                    professional.abortedJobOffers.remove(jobOffer)
                 }
                 jobOffer.abortedProfessionals.clear()
                 jobOffer.candidateProfessionals.clear()
