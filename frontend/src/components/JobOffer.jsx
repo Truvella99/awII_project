@@ -273,7 +273,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     name: name.trim(),
                     description: description.trim(),
                     currentState: currentState,
-                    currentStateNote: (currentStateNote) ? currentState.trim() : null,
+                    currentStateNote: (currentStateNote) ? currentStateNote.trim() : null,
                     duration: parseFloat(duration.trim()),
                     profitMargin: parseFloat(profitMargin.trim()),
                     customerId: customer.id,
@@ -287,7 +287,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     // handle also joboffer status
                     let updateStatus = {
                         targetStatus: currentState,
-                        note: currentStateNote,
+                        note: (currentStateNote) ? currentStateNote.trim() : null,
                         consolidatedProfessionalId: professional && professional.id ? professional.id : null,
                         professionalsId: professionals.map(professional => professional.id)
                     }
