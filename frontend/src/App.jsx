@@ -8,6 +8,7 @@ import {Navigation} from "./components/Navigation";
 import {MessageContext,  TokenContext } from "./messageCtx";
 import './App.css';
 import { JobOfferContainer } from './components/JobOffer';
+import { RegistrationForm } from './components/Registration';
 
 function App() {
   const [me, setMe] = useState(null);
@@ -75,7 +76,7 @@ function App() {
               <Route path="/ui/jobOffers" element={<></>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn}/>} /> // Minicucc
               <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn}/>} />  // Minicucc view and edit
-              <Route path="/ui/Registration" element={<></>} /> // Giuseppe
+              <Route path="/ui/Registration" element={<RegistrationForm me={me}/>} /> // Giuseppe
               <Route path="/ui/Analytics" element={<></>} />
             </Routes>
           </Container>
