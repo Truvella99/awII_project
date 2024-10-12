@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const Navigation = (props) => {
     return (
-        <Navbar bg="primary"  variant="dark" fixed="top" className="py-1 px-3 " style={{ marginBottom: '150px' }}>
+        <Navbar bg="primary"  variant="dark" fixed="top" className="py-1 px-3 " /*style={{ marginBottom: '150px' }}*/>
             <Link to="/ui">
                 <Navbar.Brand>
                     <i className="bi bi-house"></i> Home
