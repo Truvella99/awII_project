@@ -143,12 +143,12 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                 </Badge>
                             )}
 
-                            {/* Display Geographical Location */}
-                            {geographicalLocation && (
-                                <Card.Text className="mt-2">
-                                    <i className="bi bi-geo-alt-fill"></i> Location: {`Lat: ${geographicalLocation.first}, Lng: ${geographicalLocation.second}`}
-                                </Card.Text>
-                            )}
+                            {/*/!* Display Geographical Location *!/*/}
+                            {/*{geographicalLocation && (*/}
+                            {/*    <Card.Text className="mt-2">*/}
+                            {/*        <i className="bi bi-geo-alt-fill"></i> Address: {`Lat: ${geographicalLocation.first}, Lng: ${geographicalLocation.second}`}*/}
+                            {/*    </Card.Text>*/}
+                            {/*)}*/}
 
                             {/* Contact Button */}
                             {emails && (
@@ -162,7 +162,6 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
 
                                 {candidateJobOffers && candidateJobOffers.length > 0 && (
                                     <Row>
-
                                     <h3 className="mt-4">Candidate For:</h3>
                                     <ul className="list-unstyled">
                                         {candidateJobOffers.map((offer, index) => (

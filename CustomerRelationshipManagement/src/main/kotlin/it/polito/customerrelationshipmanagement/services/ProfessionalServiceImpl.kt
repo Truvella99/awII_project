@@ -82,11 +82,11 @@ class ProfessionalServiceImpl(
         contact.professional = p
         contactRepository.save(contact)
 
-        if (professional.employmentState == null || professional.geographicalLocation == null || professional.dailyRate == null ) {
-            throw ProfessionalException("EmploymentState, geographicalLocation and dailyRate cannot be empty.")
+        if (professional.employmentState == null || professional.dailyRate == null ) {
+            throw ProfessionalException("EmploymentState and dailyRate cannot be empty.")
         }
         p.employmentState = professional.employmentState
-        p.geographicalLocation =  professional.geographicalLocation//Pair(0.0, 0.0)
+        p.geographicalLocation =  professional.geographicalLocation //Pair(0.0, 0.0)
         p.dailyRate = professional.dailyRate.toDouble()
 
         professionalRepository.save(p)

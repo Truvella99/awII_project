@@ -18,7 +18,7 @@ data class ProfessionalDTO(
     val skills: List<SkillDTO>,
     val jobOffer: JobOfferDTO?,
     val employmentState: employmentState,
-    val geographicalLocation: Pair<Double,Double>,
+    val geographicalLocation: Pair<Double,Double>?,
     val dailyRate: Number
 )
 

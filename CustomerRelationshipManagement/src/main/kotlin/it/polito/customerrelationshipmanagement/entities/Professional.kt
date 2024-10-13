@@ -10,7 +10,7 @@ class Professional{
     var id: Long = 0
 
     lateinit var employmentState: employmentState
-    lateinit var geographicalLocation: Pair<Double,Double>
+    var geographicalLocation: Pair<Double,Double>? = null
     lateinit var dailyRate: Number
 
     @OneToOne

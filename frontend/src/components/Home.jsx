@@ -57,8 +57,11 @@ function Home({ me }) {
             <Container>
                 <Row className="mb-3">
                     <Col>
+
                         <Button onClick={()=>navigate("/ui/customers/8")}>Go to customer</Button>
-                        <Button onClick={()=>navigate("/ui/professionals/10")}>Go to professional</Button>
+                        <Button onClick={()=>navigate("/ui/professionals/15")}>Go to professional</Button>
+                        <Button onClick={()=>navigate("/ui/professionals/addProfessional")}>Add Professional Page</Button>
+
                         <Button onClick={async () => {
                             let customer = {
                                 name: "Gennaro",
@@ -136,53 +139,6 @@ function Home({ me }) {
                                 skills: [
                                     { skill: "Skill 1" },
                                     { skill: "Skill 2" }
-                                ] ,
-                                jobOffers: [
-                                    {
-                                        first: null,
-                                        second: {
-                                            name: 'Software Engineer',
-                                            description: 'Develop and maintain web applications.',
-                                            currentState: 'done',
-                                            currentStateNote: 'Looking for suitable candidates',
-                                            duration: 6,
-                                            profitMargin: 10,
-                                            skills: [
-                                                { skill: "Skill 1" },
-                                                { skill: "Skill 2" }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        first: null,
-                                        second: {
-                                            name: 'Data Scientist',
-                                            description: 'Analyze complex data sets to assist decision-making.',
-                                            currentState: 'aborted',
-                                            currentStateNote: 'Position filled',
-                                            duration: 12,
-                                            profitMargin: 15,
-                                            skills: [
-                                                { skill: "Skill 3" },
-                                                { skill: "Skill 4" }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        first: null,
-                                        second: {
-                                            name: 'Data Scientist',
-                                            description: 'Analyze complex data sets to assist decision-making.',
-                                            currentState: 'candidate_proposal',
-                                            currentStateNote: 'Position filled',
-                                            duration: 12,
-                                            profitMargin: 15,
-                                            skills: [
-                                                { skill: "Skill 5" },
-                                                { skill: "Skill 6" }
-                                            ]
-                                        }
-                                    }
                                 ]
                             };
 

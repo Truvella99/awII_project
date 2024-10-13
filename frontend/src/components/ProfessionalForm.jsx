@@ -1,0 +1,522 @@
+import React, { useEffect, useState } from 'react';
+import {Container, Row, Col, Card, Button, Form, Alert, InputGroup} from 'react-bootstrap';
+import API from '../API'; // API per gestire il salvataggio e il recupero dei dati
+import 'react-phone-number-input/style.css';
+import PhoneInput from 'react-phone-number-input';
+import {DropdownButton,Dropdown} from "react-bootstrap";
+import {AddressSelector} from "./Utils.jsx";
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
+
+const AddProfessional = ({ xsrfToken, handleErrors }) => {
+    const [professional, setProfessional] = useState({
+        name: '',
+        surname: '',
+        ssncode: '',
+        category: 'professional',
+        employmentState: 'available',
+        geographicalLocation: { first: "0", second: "0"},
+        dailyRate: 1,
+        email: '',
+        telephone: '',
+        address: '',
+        skills: [{ skill: '' }],
+        notes: ['']
+    });
+    const formatEmploymentState = (state) => {
+        switch (state) {
+            case 'employed':
+                return 'Employed';
+            case 'available':
+                return 'Available';
+            case 'not_available':
+                return 'Not Available';
+            default:
+                return state;
+        }
+    };
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
+    const [address, setAddress] = useState({ text: '', lat: 0.0, lng: 0.0, invalid: false });
+    const navigate= useNavigate()
+    // Regex patterns for validation
+    const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
+    const SSN_CODE = /^(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/;
+    const EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
+    const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
+    function addressValidation(address, setAddress) {
+        return new Promise((resolve, reject) => {
+            // Create a Geocoder instance
+            const geocoder = new google.maps.Geocoder();
+
+            // Define the Geocoding request
+            const geocodeRequest = {
+                address: address.text,
+            };
+
+            // Perform Geocoding
+            geocoder.geocode(geocodeRequest, (results, status) => {
+
+                if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
+
+                    // Address is valid
+                    setAddress({ text: address.text, lat: address.lat, lng: address.lng, invalid: false });
+                    console.log("Address is valid", address);
+
+                    resolve(undefined); // Resolve with undefined for a valid address
+                } else {
+                    // Address is invalid
+                    setAddress({ text: address.text, lat: address.lat, lng: address.lng, invalid: true });
+                    reject(true); // Resolve with true for an invalid address
+                }
+            });
+        });
+    }
+
+    const fetchGeographicalLocation = async () => {
+
+
+        setLoading(true);
+
+        try {
+            const API_KEY = 'AIzaSyCO5hFwnkcQjDkoivao8qpJbKvITf_vb1g';  // Inserisci la tua chiave API di Google Maps
+            const response = await axios.get(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address.text)}&key=${API_KEY}`
+            );
+
+            const location = response.data.results[0].geometry.location;
+            setProfessional((prevProfessional) => ({
+                ...prevProfessional,
+                geographicalLocation: {
+                    latitude: location.lat,
+                    longitude: location.lng
+                }
+            }));
+            setProfessional((prevProfessional) => ({
+                ...prevProfessional,
+                address: response.data.results[0].formatted_address
+            }));
+            console.log("Geographical location fetched", professional.geographicalLocation);
+        } catch (error) {
+            console.error("Error fetching geographical location", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setProfessional((prevProfessional) => ({
+            ...prevProfessional,
+            [name]: value,
+        }));
+    };
+    // Funzione per gestire la selezione del Dropdown
+    const handleEmploymentStateChange = (selectedState) => {
+        setProfessional((prevState) => ({
+            ...prevState,
+            employmentState: selectedState
+        }));
+    };
+    const handleMultiInputChange = (e, index, field, key) => {
+        const { value } = e.target;
+        setProfessional((prevProfessional) => {
+            const updatedField = [...prevProfessional[field]];
+            updatedField[index] = { ...updatedField[index], [key]: value };
+            return {
+                ...prevProfessional,
+                [field]: updatedField,
+            };
+        });
+    };
+// Funzioni per gestire le note
+    const handleNoteChange = (index, value) => {
+        const updatedNotes = [...professional.notes];
+        updatedNotes[index] = value; // Imposta direttamente la stringa
+        setProfessional({ ...professional, notes: updatedNotes });
+    };
+
+    const handleAddNote = () => {
+        setProfessional({ ...professional, notes: [...professional.notes, ''] }); // Aggiungi una nuova stringa vuota
+    };
+
+    const handleRemoveNote = (index) => {
+        const updatedNotes = professional.notes.filter((_, i) => i !== index);
+        setProfessional({ ...professional, notes: updatedNotes });
+    };
+
+    // Funzioni per gestire le skills
+    const handleSkillChange = (index, value) => {
+        const updatedSkills = professional.skills.map((skill, i) =>
+            i === index ? { ...skill, skill: value } : skill
+        );
+        setProfessional({ ...professional, skills: updatedSkills });
+    };
+
+    const handleAddSkill = () => {
+        setProfessional({ ...professional, skills: [...professional.skills, { skill: '' }] });
+    };
+
+    const handleRemoveSkill = (index) => {
+        const updatedSkills = professional.skills.filter((_, i) => i !== index);
+        setProfessional({ ...professional, skills: updatedSkills });
+    };
+
+    const validateForm = async () => {
+        const errors = {};
+
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.name)) {
+            errors.name = "Name cannot be empty or null.";
+        }
+
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.surname)) {
+            errors.surname = "Surname cannot be empty or null.";
+        }
+
+        if (!SSN_CODE.test(professional.ssncode)) {
+            errors.ssncode = "SSN Code must be valid in the format XXX-XX-XXXX.";
+        }
+
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.employmentState)) {
+            errors.employmentState = "Employment state is required.";
+        }
+
+
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.dailyRate)) {
+            errors.dailyRate = "Daily rate is required.";
+        }
+        professional.dailyRate = parseFloat(professional.dailyRate);
+
+        if (professional.email && !EMAIL.test(professional.email)) {
+            errors.email = "Please enter a valid email address.";
+        }
+
+        if (professional.telephone && !TELEPHONE.test(professional.telephone)) {
+            errors.telephone = "Please enter a valid telephone number.";
+        }
+        if(professional.telephone == ""){
+            //altrimenti non funziona createProfessional
+            professional.telephone = null;
+        }
+
+        if (professional.address && !ADDRESS.test(professional.address)) {
+            errors.address = "Please enter a valid address.";
+        }
+
+        try {
+            if(address.text) {
+                // Wait for the promise to settle before moving to the next line
+                await addressValidation(address, setAddress);
+                await fetchGeographicalLocation();
+                professional.address = address.text;
+                professional.geographicalLocation = {first: address.lat.toString(), second: address.lng.toString()};
+            }else {
+                professional.address = null;
+            }
+        } catch (error) {
+            errors.address = "Please enter a valid address.";
+        }
+        if (!professional.skills.length || professional.skills.some(skill => !skill.skill)) {
+            errors.skills = 'At least one skill is required and it cannot be empty';
+        }
+        if (professional.notes.some(note => !note)) {
+            errors.notes = 'Notes cannot be empty';
+        }
+        setFormErrors(errors);
+        console.log(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isValid = await validateForm().then((res) => res).catch((err) => false)   ;
+        console.log(isValid);
+        if (!isValid) return;
+
+        setLoading(true);
+        try {
+
+            // Chiamata API per creare un nuovo Professional
+            await API.createProfessional(professional, xsrfToken);
+            setLoading(false);
+            navigate("/ui")
+        } catch (err) {
+            setError(err.error || 'Error saving professional');
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <Alert variant="danger">{error}</Alert>;
+    }
+
+    return (
+        <Container fluid className="py-5">
+            <Row>
+                <Col className="mx-auto">
+                    <Card className="shadow-lg">
+                        <Card.Header className="bg-primary text-white">
+                            <h3>Add Professional</h3>
+                        </Card.Header>
+                        <Card.Body>
+                            <Form noValidate onSubmit={handleSubmit}>
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="name">
+                                            <Form.Label>Name</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="name"
+                                                value={professional.name}
+                                                onChange={handleInputChange}
+                                                isInvalid={!!formErrors.name}
+                                                placeholder="Enter name"
+                                                required
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.name}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="surname">
+                                            <Form.Label>Surname</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="surname"
+                                                placeholder="Enter surname"
+                                                value={professional.surname}
+                                                onChange={handleInputChange}
+                                                isInvalid={!!formErrors.surname}
+                                                required
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.surname}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="ssncode">
+                                            <Form.Label>SSN Code</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="ssncode"
+                                                placeholder="Enter SSN code"
+                                                value={professional.ssncode}
+                                                onChange={handleInputChange}
+                                                isInvalid={!!formErrors.ssncode}
+                                                required
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.ssncode}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="category">
+                                            <Form.Label>Category</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="category"
+                                                value={professional.category}
+                                                disabled={true}
+                                                required
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="employmentState">
+                                            <Form.Label>Employment State</Form.Label>
+                                            <DropdownButton
+                                                id="employmentStateDropdown"
+                                                title={formatEmploymentState(professional.employmentState || 'available')}
+                                                onSelect={handleEmploymentStateChange} // Funzione per gestire la selezione
+                                            >
+                                                <Dropdown.Item  eventKey="employed">Employed</Dropdown.Item>
+                                                <Dropdown.Item eventKey="available">Available</Dropdown.Item>
+                                                <Dropdown.Item eventKey="not_available">Not Available</Dropdown.Item>
+                                            </DropdownButton>
+
+                                            {formErrors.employmentState && (
+                                                <Form.Control.Feedback type="invalid">
+                                                    {formErrors.employmentState}
+                                                </Form.Control.Feedback>
+                                            )}
+                                        </Form.Group>
+                                    </Col>
+
+                                </Row>
+
+                                {/* Geographical Location and Daily Rate */}
+                                <Row>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="dailyRate">
+                                            <Form.Label>Daily Rate (€)</Form.Label>
+                                            <Form.Control
+                                                type="number"
+                                                name="dailyRate"
+                                                min={1}
+                                                placeholder="Enter daily rate"
+                                                value={professional.dailyRate}
+                                                onChange={handleInputChange}
+                                                isInvalid={!!formErrors.dailyRate}
+                                                required
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.dailyRate}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                {/* Email */}
+                                <Row>
+                                    <Col>
+                                        <Form.Group className="mb-3" controlId="email">
+                                            <Form.Label>Email</Form.Label>
+                                            <Form.Control
+                                                type="email"
+                                                name="email"
+                                                placeholder="Enter Email"
+                                                value={professional.email}
+                                                onChange={handleInputChange}
+                                                isInvalid={!!formErrors.email}
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.email}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+
+                                {/* Telephone */}
+                                <Row>
+                                    <Col>
+                                        <Form.Group className="mb-3" controlId="telephone">
+                                            <Form.Label>Telephone</Form.Label>
+                                            <PhoneInput
+                                                className={professional.telephone ? '' : 'is-invalid'}
+                                                name="telephone"
+                                                value={professional.telephone}
+                                                defaultCountry='IT'
+                                                placeholder="Enter telephone"
+                                                onChange={(value) =>
+                                                    handleInputChange({
+                                                        target: { name: 'telephone', value },
+                                                    })
+                                                }
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.telephone}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                {/* Address */}
+                                <Row>
+                                    <Col>
+                                <Form.Group className="mb-3" controlId="address">
+                                    <Form.Label>Address</Form.Label>
+                                    <AddressSelector  address={address} setAddress={setAddress} />
+
+                                    <Form.Control.Feedback type="invalid">
+                                        {formErrors.address}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                    </Col>
+                                    {/* Notes */}
+                                    <Row >
+                                        <Col md={6}>
+                                            <Form.Group>
+                                                <Form.Label className="mb-3">Notes (optional)</Form.Label>
+                                                {professional.notes.map((note, index) => (
+                                                    <InputGroup key={index} >
+                                                        <Form.Control
+                                                            type="text"
+                                                            value={note} // Usa la stringa direttamente
+                                                            placeholder="Enter a note"
+                                                            onChange={(e) => handleNoteChange(index, e.target.value)} // Passa direttamente la stringa
+                                                            isInvalid={!!formErrors.notes}
+                                                        />
+                                                        <Button variant="danger" onClick={() => handleRemoveNote(index)}>
+                                                            Remove
+                                                        </Button>
+                                                        <Form.Control.Feedback type="invalid">
+                                                            {formErrors.notes}
+                                                        </Form.Control.Feedback>
+                                                    </InputGroup>
+                                                ))}
+
+                                                <div className="mt-2"> {/* Add some margin if necessary */}
+                                                    <Button variant="warning" onClick={handleAddNote}>
+                                                        Add Note
+                                                    </Button>
+                                                </div>
+                                            </Form.Group>
+                                        </Col>
+
+                                        <Col md={6}>
+                                            <Form.Group>
+                                                <Form.Label  className="mb-3">Skills </Form.Label>
+                                                {professional.skills.map((skill, index) => (
+                                                    <InputGroup key={index} className="mb-3">
+                                                        <Form.Control
+                                                            type="text"
+                                                            value={skill.skill}
+                                                            placeholder="Enter a skill"
+                                                            isInvalid={!!formErrors.skills}
+                                                            onChange={(e) => handleSkillChange(index, e.target.value)}
+                                                        />
+                                                        <Button variant="danger" hidden={ index === 0} onClick={() => handleRemoveSkill(index)}>
+                                                            Remove
+                                                        </Button>
+                                                        <Form.Control.Feedback type="invalid">
+                                                            {formErrors.skills}
+                                                        </Form.Control.Feedback>
+                                                    </InputGroup>
+                                                ))}
+                                                <Button variant="warning" className="mb-3" onClick={handleAddSkill}>
+                                                    Add Skill
+                                                </Button>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+
+            </Row>
+
+            {professional.geographicalLocation.latitude && (
+                <Row>
+                    <Col>
+                        <p>
+                            Latitude: {professional.geographicalLocation.latitude}, Longitude: {professional.geographicalLocation.longitude}
+                        </p>
+                    </Col>
+                </Row>
+            )}
+
+
+
+                                <Button variant="primary" type="submit">
+                                    Save
+                                </Button>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
+    );
+};
+
+export default AddProfessional;

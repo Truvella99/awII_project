@@ -293,13 +293,14 @@ async function getCustomers(filter, xsrfToken) {
  * This function is used to create a professional
 */
 async function createProfessional(professional, xsrfToken) {
+    console.log(professional);
     const response = await fetch('/crm/API/professionals', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-XSRF-TOKEN': xsrfToken,
         },
-        body: JSON.stringify(Object.assign({}, {
+            body: JSON.stringify({
             name: professional.name,
             surname: professional.surname,
             ssncode: professional.ssncode,
@@ -311,9 +312,8 @@ async function createProfessional(professional, xsrfToken) {
             geographicalLocation: professional.geographicalLocation,
             dailyRate: professional.dailyRate,
             skills: professional.skills,
-            notes: professional.notes,
-            jobOffers: professional.jobOffers
-        })),
+            notes: professional.notes
+        }),
     }).catch(() => {
         throw {error: "Connection Error"}
     });

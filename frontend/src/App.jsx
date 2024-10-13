@@ -8,7 +8,9 @@ import {Navigation} from "./components/Navigation";
 import {MessageContext,  TokenContext } from "./messageCtx";
 import './App.css';
 import { JobOfferContainer } from './components/JobOffer';
-import { RegistrationForm } from './components/Registration';
+import CustomerProfile from "./components/Customer.jsx";
+import ProfessionalProfile from "./components/Professional.jsx";
+import ProfessionalForm from "./components/ProfessionalForm.jsx";
 
 function App() {
   const [me, setMe] = useState(null);
@@ -16,14 +18,14 @@ function App() {
   //const [user, setUser] = useState(null);
   //const [data, setData] = useState('');
   const [message, setMessage] = useState('');
-  
+
   // function to handle the application errors, all displayed into the Alert under the NavHeader
   function handleErrors(err) {
     let errMsg = 'Unkwnown error';
     if (err.detail) {
       errMsg = err.detail;
     }
-  
+
     setMessage(errMsg);
     //setDirty(true);
   }
@@ -70,13 +72,14 @@ function App() {
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
               <Route path="/ui/professionals" element={<></>} /> // Ale Costa
-              <Route path="/ui/professionals/professionalId" element={<></>} /> // Gaetano view and edit
+              <Route path="/ui/professionals/:professionalId" element={<ProfessionalProfile xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
+              <Route path="/ui/professionals/addProfessional" element={<ProfessionalForm xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/customers" element={<></>} /> // Ale Costa
-              <Route path="/ui/customers/customerId" element={<></>} /> // Gaetano view and edit
+              <Route path="/ui/customers/:customerId" element={<CustomerProfile xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/jobOffers" element={<></>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn}/>} /> // Minicucc
               <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn}/>} />  // Minicucc view and edit
-              <Route path="/ui/Registration" element={<RegistrationForm me={me}/>} /> // Giuseppe
+              <Route path="/ui/Registration" element={<></>} /> // Giuseppe
               <Route path="/ui/Analytics" element={<></>} />
             </Routes>
           </Container>
