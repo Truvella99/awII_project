@@ -81,7 +81,7 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
                             </Card.Title>
                             <Card.Subtitle className="text-muted mb-2">
                                 <Badge bg="info" pill>
-                                    {category}
+                                    {category.toUpperCase()}
                                 </Badge>
                             </Card.Subtitle>
                             <Card.Text className="text-muted"><strong>SSN:</strong>{` ${ssncode}`}</Card.Text>

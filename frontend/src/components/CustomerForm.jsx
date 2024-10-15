@@ -1,46 +1,30 @@
-import React, {useEffect, useState} from 'react';
-import {Container, Row, Col, Card, Button, Form, Alert, InputGroup} from 'react-bootstrap';
-import API from '../API'; // API per gestire il salvataggio e il recupero dei dati
-import 'react-phone-number-input/style.css';
-import PhoneInput from 'react-phone-number-input';
-import {DropdownButton, Dropdown} from "react-bootstrap";
-import {AddressSelector} from "./Utils.jsx";
-import axios from "axios";
+import React, { useState } from 'react';
+import {Form, Button, InputGroup, Col, Alert, Container, Row, Card, DropdownButton, Dropdown} from 'react-bootstrap';
+import API from "../API.jsx";
 import {useNavigate} from "react-router-dom";
-import InputMask from "react-input-mask";
+import axios from "axios";
+import PhoneInput from "react-phone-number-input";
+import {AddressSelector} from "./Utils.jsx";
+import InputMask from 'react-input-mask';
 
-const AddProfessional = ({xsrfToken, handleErrors}) => {
-    const [professional, setProfessional] = useState({
+const CreateCustomer = ({xsrfToken}) => {
+    const [customer, setCustomer] = useState({
         name: '',
         surname: '',
         ssncode: '',
-        category: 'professional',
-        employmentState: 'available',
-        geographicalLocation: {first: "0", second: "0"},
-        dailyRate: 1,
-        email: "",
+        category: 'customer',
+        email: '',
         telephone: '',
         address: '',
-        skills: [{skill: ''}],
-        notes: ['']
+        notes: [''],
     });
-    const formatEmploymentState = (state) => {
-        switch (state) {
-            case 'employed':
-                return 'Employed';
-            case 'available':
-                return 'Available';
-            case 'not_available':
-                return 'Not Available';
-            default:
-                return state;
-        }
-    };
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+
     const [formErrors, setFormErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
     const navigate = useNavigate()
+    const [error, setError] = useState(null);
+
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
     const SSN_CODE = /^(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/;
@@ -89,18 +73,11 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
             );
 
             const location = response.data.results[0].geometry.location;
-            setProfessional((prevProfessional) => ({
-                ...prevProfessional,
-                geographicalLocation: {
-                    latitude: location.lat,
-                    longitude: location.lng
-                }
-            }));
-            setProfessional((prevProfessional) => ({
-                ...prevProfessional,
+
+            setCustomer((prevCustomer) => ({
+                ...prevCustomer,
                 address: response.data.results[0].formatted_address
             }));
-            console.log("Geographical location fetched", professional.geographicalLocation);
         } catch (error) {
             console.error("Error fetching geographical location", error);
         } finally {
@@ -109,137 +86,85 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
     };
 
     const handleInputChange = (e) => {
-        const {name, value} = e.target;
-        setProfessional((prevProfessional) => ({
-            ...prevProfessional,
-            [name]: value,
-        }));
+        const { name, value } = e.target;
+        setCustomer((prev) => ({ ...prev, [name]: value }));
     };
-    // Funzione per gestire la selezione del Dropdown
-    const handleEmploymentStateChange = (selectedState) => {
-        setProfessional((prevState) => ({
-            ...prevState,
-            employmentState: selectedState
-        }));
-    };
-    const handleMultiInputChange = (e, index, field, key) => {
-        const {value} = e.target;
-        setProfessional((prevProfessional) => {
-            const updatedField = [...prevProfessional[field]];
-            updatedField[index] = {...updatedField[index], [key]: value};
-            return {
-                ...prevProfessional,
-                [field]: updatedField,
-            };
-        });
-    };
+
 // Funzioni per gestire le note
     const handleNoteChange = (index, value) => {
-        const updatedNotes = [...professional.notes];
+        const updatedNotes = [...customer.notes];
         updatedNotes[index] = value; // Imposta direttamente la stringa
-        setProfessional({...professional, notes: updatedNotes});
+        setCustomer({...customer, notes: updatedNotes});
     };
 
     const handleAddNote = () => {
-        setProfessional({...professional, notes: [...professional.notes, '']}); // Aggiungi una nuova stringa vuota
+        setCustomer({...customer, notes: [...customer.notes, '']}); // Aggiungi una nuova stringa vuota
     };
 
     const handleRemoveNote = (index) => {
-        const updatedNotes = professional.notes.filter((_, i) => i !== index);
-        setProfessional({...professional, notes: updatedNotes});
+        const updatedNotes = customer.notes.filter((_, i) => i !== index);
+        setCustomer({...customer, notes: updatedNotes});
     };
 
-    // Funzioni per gestire le skills
-    const handleSkillChange = (index, value) => {
-        const updatedSkills = professional.skills.map((skill, i) =>
-            i === index ? {...skill, skill: value} : skill
-        );
-        setProfessional({...professional, skills: updatedSkills});
-    };
-
-    const handleAddSkill = () => {
-        setProfessional({...professional, skills: [...professional.skills, {skill: ''}]});
-    };
-
-    const handleRemoveSkill = (index) => {
-        const updatedSkills = professional.skills.filter((_, i) => i !== index);
-        setProfessional({...professional, skills: updatedSkills});
-    };
 
     const validateForm = async () => {
         const errors = {};
 
-        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.name)) {
+        if (!NOT_EMPTY_IF_NOT_NULL.test(customer.name)) {
             errors.name = "Name cannot be empty or null.";
         }
 
-        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.surname)) {
+        if (!NOT_EMPTY_IF_NOT_NULL.test(customer.surname)) {
             errors.surname = "Surname cannot be empty or null.";
         }
 
-        if (!SSN_CODE.test(professional.ssncode)) {
+        if (!SSN_CODE.test(customer.ssncode)) {
             errors.ssncode = "SSN Code must be valid in the format XXX-XX-XXXX.";
         }
 
-        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.employmentState)) {
-            errors.employmentState = "Employment state is required.";
-        }
-
-
-        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.dailyRate)) {
-            errors.dailyRate = "Daily rate is required.";
-        }
-        professional.dailyRate = parseFloat(professional.dailyRate);
-
-        if (professional.email && !EMAIL.test(professional.email)) {
+        if (customer.email && !EMAIL.test(customer.email)) {
             errors.email = "Please enter a valid email address.";
         }
 
-        if (professional.telephone && !TELEPHONE.test(professional.telephone)) {
+        if (customer.telephone && !TELEPHONE.test(customer.telephone)) {
             errors.telephone = "Please enter a valid telephone number.";
         }
-        if (professional.telephone == "") {
-            //altrimenti non funziona createProfessional
-            professional.telephone = null;
+        if (customer.telephone == "") {
+            customer.telephone = null;
         }
-        if (professional.email == "") {
-            //altrimenti non funziona createProfessional
-            professional.email = null;
+        if (customer.email == "") {
+            customer.email = null;
         }
-        if (professional.address && !ADDRESS.test(professional.address)) {
+        if (customer.address && !ADDRESS.test(customer.address)) {
             errors.address = "Please enter a valid address.";
         }
 
         try {
             if (address.text) {
-                // Wait for the promise to settle before moving to the next line
                 await addressValidation(address, setAddress);
                 await fetchGeographicalLocation();
                 if (address.invalid === true) {
                     errors.address = "Please enter a valid address.";
                 }
-                professional.address = address.text;
-                professional.geographicalLocation = {first: address.lat.toString(), second: address.lng.toString()};
+                customer.address = address.text;
             } else {
-                professional.address = null;
+                customer.address = null;
             }
         } catch (error) {
             errors.address = "Please enter a valid address.";
         }
-        if (!professional.skills.length || professional.skills.some(skill => !skill.skill)) {
-            errors.skills = 'At least one skill is required and it cannot be empty';
-        }
-        if (professional.notes.some(note => !note)) {
+        if (customer.notes.some(note => !note)) {
             errors.notes = 'Notes cannot be empty';
         }
         // Aggiungi controllo per address, telephone, email: almeno uno è richiesto
-        if (!professional.email && !professional.telephone && !professional.address) {
+        if (!customer.email && !customer.telephone && !customer.address) {
             errors.contact = 'Please provide at least one valid contact method: email, telephone, or address.';
         }
         setFormErrors(errors);
         console.log(errors);
         return Object.keys(errors).length === 0;
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -253,11 +178,11 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
         try {
 
             // Chiamata API per creare un nuovo Professional
-            await API.createProfessional(professional, xsrfToken);
+            await API.createCustomer(customer, xsrfToken);
             setLoading(false);
             navigate("/ui")
         } catch (err) {
-            setError(err.error || 'Error saving professional');
+            setError(err.error || 'Error saving customer');
             setLoading(false);
         }
     };
@@ -267,13 +192,14 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
     if (error) {
         return <Alert variant="danger">{error}</Alert>;
     }
+
     return (
         <Container fluid className="py-5">
             <Row>
                 <Col className="mx-auto">
                     <Card className="shadow-lg">
                         <Card.Header className="bg-primary text-white">
-                            <h3>Add Professional</h3>
+                            <h3>Add Customer</h3>
                         </Card.Header>
                         <Card.Body>
                             <Form noValidate onSubmit={handleSubmit}>
@@ -284,7 +210,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                             <Form.Control
                                                 type="text"
                                                 name="name"
-                                                value={professional.name}
+                                                value={customer.name}
                                                 onChange={handleInputChange}
                                                 isInvalid={!!formErrors.name}
                                                 placeholder="Enter name"
@@ -302,7 +228,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                                 type="text"
                                                 name="surname"
                                                 placeholder="Enter surname"
-                                                value={professional.surname}
+                                                value={customer.surname}
                                                 onChange={handleInputChange}
                                                 isInvalid={!!formErrors.surname}
                                                 required
@@ -319,7 +245,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                             <Form.Label>SSN Code</Form.Label>
                                             <InputMask
                                                 mask="999-99-9999"
-                                                value={professional.ssncode}
+                                                value={customer.ssncode}
                                                 onChange={handleInputChange}
                                                 placeholder="Enter SSN code"
                                                 required
@@ -337,55 +263,14 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                             <Form.Control
                                                 type="text"
                                                 name="category"
-                                                value={professional.category}
+                                                value={customer.category}
                                                 disabled={true}
                                                 required
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="employmentState">
-                                            <Form.Label>Employment State</Form.Label>
-                                            <DropdownButton
-                                                id="employmentStateDropdown"
-                                                title={formatEmploymentState(professional.employmentState || 'available')}
-                                                onSelect={handleEmploymentStateChange} // Funzione per gestire la selezione
-                                            >
-                                                <Dropdown.Item eventKey="employed">Employed</Dropdown.Item>
-                                                <Dropdown.Item eventKey="available">Available</Dropdown.Item>
-                                                <Dropdown.Item eventKey="not_available">Not Available</Dropdown.Item>
-                                            </DropdownButton>
-
-                                            {formErrors.employmentState && (
-                                                <Form.Control.Feedback type="invalid">
-                                                    {formErrors.employmentState}
-                                                </Form.Control.Feedback>
-                                            )}
-                                        </Form.Group>
-                                    </Col>
                                 </Row>
-                                {/* Daily Rate */}
-                                <Row>
 
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="dailyRate">
-                                            <Form.Label>Daily Rate (€)</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                name="dailyRate"
-                                                min={1}
-                                                placeholder="Enter daily rate"
-                                                value={professional.dailyRate}
-                                                onChange={handleInputChange}
-                                                isInvalid={!!formErrors.dailyRate}
-                                                required
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {formErrors.dailyRate}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
                                 {/* Email */}
                                 <Row>
                                     <Col>
@@ -395,7 +280,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                                 type="email"
                                                 name="email"
                                                 placeholder="Enter Email"
-                                                value={professional.email}
+                                                value={customer.email}
                                                 onChange={handleInputChange}
                                                 isInvalid={!!formErrors.email}
                                             />
@@ -409,12 +294,11 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                 <Row>
                                     <Col>
                                         <Form.Group className="mb-3" controlId="telephone">
-                                            <Form.Label>Telephone</Form.Label>
+                                            <Form.Label >Telephone</Form.Label>
                                             <PhoneInput
-                                                className={professional.telephone ? '' : 'is-invalid'}
+                                                className={customer.telephone ? '' : 'is-invalid'}
                                                 name="telephone"
-                                                value={professional.telephone}
-                                                isInvalid={!!formErrors.telephone}
+                                                value={customer.telephone}
                                                 defaultCountry='IT'
                                                 placeholder="Enter telephone"
                                                 onChange={(value) =>
@@ -454,7 +338,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                         <Col md={6}>
                                             <Form.Group>
                                                 <Form.Label className="mb-3">Notes (optional)</Form.Label>
-                                                {professional.notes.map((note, index) => (
+                                                {customer.notes.map((note, index) => (
                                                     <InputGroup key={index} className="mb-3">
                                                         <Form.Control
                                                             type="text"
@@ -473,39 +357,13 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                                     </InputGroup>
                                                 ))}
                                                 <div className="mt-2">
-                                                    <Button variant="warning" onClick={handleAddNote}>
+                                                    <Button variant="warning" className="mb-3" onClick={handleAddNote}>
                                                         Add Note
                                                     </Button>
                                                 </div>
                                             </Form.Group>
                                         </Col>
 
-                                        <Col md={6}>
-                                            <Form.Group>
-                                                <Form.Label className="mb-3">Skills </Form.Label>
-                                                {professional.skills.map((skill, index) => (
-                                                    <InputGroup key={index} className="mb-3">
-                                                        <Form.Control
-                                                            type="text"
-                                                            value={skill.skill}
-                                                            placeholder="Enter a skill"
-                                                            isInvalid={!!formErrors.skills}
-                                                            onChange={(e) => handleSkillChange(index, e.target.value)}
-                                                        />
-                                                        <Button variant="danger" hidden={index === 0}
-                                                                onClick={() => handleRemoveSkill(index)}>
-                                                            Remove
-                                                        </Button>
-                                                        <Form.Control.Feedback type="invalid">
-                                                            {formErrors.skills}
-                                                        </Form.Control.Feedback>
-                                                    </InputGroup>
-                                                ))}
-                                                <Button variant="warning" className="mb-3" onClick={handleAddSkill}>
-                                                    Add Skill
-                                                </Button>
-                                            </Form.Group>
-                                        </Col>
                                     </Row>
 
                                 </Row>
@@ -522,4 +380,4 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
     );
 };
 
-export default AddProfessional;
+export default CreateCustomer;

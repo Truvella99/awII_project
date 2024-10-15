@@ -95,19 +95,30 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                             <Card.Title className="mb-1" style={{fontSize: '1.8rem', fontWeight: 'bold'}}>
                                 {`${name} ${surname}`}
                             </Card.Title>
-                            <Card.Subtitle className="text-muted mb-2">
-                                <Badge bg="info" pill>
-                                    {category}
-                                </Badge>
-                            </Card.Subtitle>
+                            <Row>
+                                <Card.Subtitle className="text-muted mb-2">
+                                    <Badge bg="info" pill>
+                                        {category.toUpperCase()}
+                                    </Badge>
+                                </Card.Subtitle>
+                                {/* Display Employment State */}
+                                {employmentState && (
+                                    <Card.Subtitle className="text-muted mb-2">
+                                        <Badge bg={getEmploymentBadgeVariant(employmentState)} >
+                                            {employmentState.toUpperCase()}
+                                        </Badge>
+                                    </Card.Subtitle>
+                                )}
+                            </Row>
+
                             <Card.Text className="text-muted"><strong>SSN:</strong>{` ${ssncode}`}</Card.Text>
-                            <Card.Text className="text-muted"><strong>Daily Rate:</strong>{` ${dailyRate}`}</Card.Text>
+                            <Card.Text className="text-muted"><strong>Daily Rate:</strong>{` ${dailyRate} €`}</Card.Text>
 
                             {/* Display Emails */}
                             {emails &&
                                 emails.map((email, index) => (
                                     <a href={`mailto:${emails[index].email}`}>
-                                        <Card.Text key={index} className="text-dark">
+                                        <Card.Text key={index} className="text-dark mb-2">
                                             <i className="bi bi-envelope-fill"></i> {email.email}
                                         </Card.Text>
                                     </a>
@@ -136,12 +147,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                 </a>
                             }
 
-                            {/* Display Employment State */}
-                            {employmentState && (
-                                <Badge bg={getEmploymentBadgeVariant(employmentState)} className="mt-2">
-                                    {employmentState.toUpperCase()}
-                                </Badge>
-                            )}
+
 
                             {/*/!* Display Geographical Location *!/*/}
                             {/*{geographicalLocation && (*/}
@@ -151,13 +157,16 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                             {/*)}*/}
 
                             {/* Contact Button */}
-                            {emails && (
-                                <a href={`mailto:${emails[0]}`}>
-                                    <Button variant="primary" className="mt-3 shadow-sm">
-                                        Contact
-                                    </Button>
-                                </a>
-                            )}
+                            <Row>
+
+                                {emails && (
+                                    <a href={`mailto:${emails[0]}`}>
+                                        <Button variant="primary" className="mt-3 shadow-sm">
+                                            Contact
+                                        </Button>
+                                    </a>
+                                )}
+                            </Row>
 
 
                                 {candidateJobOffers && candidateJobOffers.length > 0 && (
