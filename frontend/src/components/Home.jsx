@@ -52,86 +52,114 @@ function Home({ me }) {
         };
         postData().then();
     }, []);
+    let customer = {
+        name: "Gennaro",
+        surname: "Customer",
+        ssncode: "111-23-9025",
+        category: "customer",
+        email: "john.doe@example.com",
+        telephone: "+391234567890",
+        address: "Via Roma 1",
+        notes: ['Has been a customer for 5 years', 'Very punctual with payments'],
+        jobOffers: [
+            {
+                first: null,
+                second: {
+                    name: 'Software Engineer',
+                    description: 'Develop and maintain web applications.',
+                    currentState: 'done',
+                    currentStateNote: 'Looking for suitable candidates',
+                    duration: 6,
+                    profitMargin: 10,
+                    skills: [
+                        { skill: "Skill 1" },
+                        { skill: "Skill 2" }
+                    ]
+                }
+            },
+            {
+                first: null,
+                second: {
+                    name: 'Data Scientist',
+                    description: 'Analyze complex data sets to assist decision-making.',
+                    currentState: 'aborted',
+                    currentStateNote: 'Position filled',
+                    duration: 12,
+                    profitMargin: 15,
+                    skills: [
+                        { skill: "Skill 3" },
+                        { skill: "Skill 4" }
+                    ]
+                }
+            },
+            {
+                first: null,
+                second: {
+                    name: 'Data Scientist',
+                    description: 'Analyze complex data sets to assist decision-making.',
+                    currentState: 'candidate_proposal',
+                    currentStateNote: 'Position filled',
+                    duration: 12,
+                    profitMargin: 15,
+                    skills: [
+                        { skill: "Skill 5" },
+                        { skill: "Skill 6" }
+                    ]
+                }
+            }
+        ]
+    };
+    let createdCustomerId = 1;
     return (
         me && me.principal !== null ? (
             <Container>
                 <Row className="mb-3">
                     <Col>
 
-                        <Button onClick={()=>navigate("/ui/customers/8")}>Go to customer</Button>
-                        <Button onClick={()=>navigate("/ui/professionals/15")}>Go to professional</Button>
-                        <Button onClick={()=>navigate("/ui/professionals/addProfessional")}>Add Professional Page</Button>
-
+                        <Button onClick={()=>navigate("/ui/customers/1")}>Go to customer</Button>
+                        <Button onClick={()=>navigate("/ui/professionals/3")}>Go to professional</Button>
+                        <Button variant={"success"} onClick={()=>navigate("/ui/professionals/addProfessional")}>Add Professional Page</Button>
+                        <Button variant={"success"} onClick={()=>navigate("/ui/customers/addCustomer")}>Add Customer Page</Button>
+                        <Button variant={"warning"} onClick={()=>navigate("/ui/professionals/edit/1")}>Edit Professional Page</Button>
+                        <Button variant={"warning"} onClick={()=>navigate("/ui/customers/edit/1")}>Edit Customer Page</Button>
                         <Button onClick={async () => {
-                            let customer = {
-                                name: "Gennaro",
-                                surname: "Customer",
-                                ssncode: "111-23-9025",
-                                category: "customer",
-                                email: "john.doe@example.com",
-                                telephone: "+391234567890",
-                                address: "Via Roma 1",
-                                notes: ['Has been a customer for 5 years', 'Very punctual with payments'],
-                                jobOffers: [
-                                    {
-                                        first: null,
-                                        second: {
-                                            name: 'Software Engineer',
-                                            description: 'Develop and maintain web applications.',
-                                            currentState: 'done',
-                                            currentStateNote: 'Looking for suitable candidates',
-                                            duration: 6,
-                                            profitMargin: 10,
-                                            skills: [
-                                                { skill: "Skill 1" },
-                                                { skill: "Skill 2" }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        first: null,
-                                        second: {
-                                            name: 'Data Scientist',
-                                            description: 'Analyze complex data sets to assist decision-making.',
-                                            currentState: 'aborted',
-                                            currentStateNote: 'Position filled',
-                                            duration: 12,
-                                            profitMargin: 15,
-                                            skills: [
-                                                { skill: "Skill 3" },
-                                                { skill: "Skill 4" }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        first: null,
-                                        second: {
-                                            name: 'Data Scientist',
-                                            description: 'Analyze complex data sets to assist decision-making.',
-                                            currentState: 'candidate_proposal',
-                                            currentStateNote: 'Position filled',
-                                            duration: 12,
-                                            profitMargin: 15,
-                                            skills: [
-                                                { skill: "Skill 5" },
-                                                { skill: "Skill 6" }
-                                            ]
-                                        }
-                                    }
-                                ]
-                            };
 
                             console.log(JSON.stringify(customer, null, 2));
 
-                            await API.createCustomer(customer,me.xsrfToken);
-                        }}>add customer</Button>
+                             await API.createCustomer(customer,me.xsrfToken);
+
+                        }}>add customer prefixed</Button>
+                        <Button onClick={async () => {
+                            let updatedCustomer = {
+                                name: "Gennaro Updated afwsef",
+                                surname: "Customer sfd",
+                                ssncode: "111-23-9022",
+                                // email: "jj3@libero.it",
+                                // telephone: "+391234567892",
+                                // address: "Via Roma 23"
+                                // emailsToDelete: [1,2],
+                                // telephonesToDelete: [1],
+                                // addressesToDelete: [2],
+                                // notesToDelete: [1,2],
+                            };
+
+                            // Mostra i dati aggiornati del cliente nel log
+                            console.log("Updating customer:", JSON.stringify(updatedCustomer, null, 2));
+
+                            // Aggiornamento del cliente
+                            await API.updateCustomer(createdCustomerId, updatedCustomer, me.xsrfToken);
+                            console.log("Customer updated successfully");
+                        }
+                        }>update customer prefixed</Button>
+
                         <Button onClick={async () => {
                             let professional = {
                                 name: "Giuseppe",
                                 surname: "Professional",
                                 ssncode: "111-23-9025",
                                 category: "professional",
-                                email: "john.doe2@example.com",
+                                email: null,
+                                telephone: "+391234567890",
                                 employmentState: "available",
                                 geographicalLocation: { first: "12.0", second: "45.7"},
                                 dailyRate: 45.1,
@@ -144,7 +172,7 @@ function Home({ me }) {
 
 
                             await API.createProfessional(professional,me.xsrfToken);
-                        }}>add professional</Button>
+                        }}>add professional prefixed</Button>
                     </Col>
                 </Row>
             </Container>

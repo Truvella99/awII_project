@@ -207,7 +207,7 @@ async function createCustomer(customer, xsrfToken) {
 }
 
 async function updateCustomer(customerId, customer, xsrfToken) {
-    console.log(customer); // Log the customer data being updated
+    // console.log("API",customer); // Log the customer data being updated
     const response = await fetch(`/crm/API/customers/${customerId}`, {
         method: 'PUT', // Use PUT for updating existing resources
         headers: {
@@ -219,11 +219,14 @@ async function updateCustomer(customerId, customer, xsrfToken) {
             surname: customer.surname,
             ssncode: customer.ssncode,
             category: customer.category,
-            email: customer.emails[0]?.email, // Assuming you want to take the first email
-            telephone: customer.telephones[0]?.telephone, // Assuming you want to take the first telephone
-            address: customer.addresses[0]?.address, // Assuming you want to take the first address
+            email: customer.email,
+            telephone: customer.telephone,
+            address: customer.address,
             notes: customer.notes,
-            jobOffers: customer.jobOffers // Include jobOffers in the request body
+            emailsToDelete: customer.emailsToDelete, // Include emailsToDelete in the request body
+            addressesToDelete: customer.addressesToDelete, // Include addressesToDelete in the request body
+            telephonesToDelete: customer.telephonesToDelete, // Include telephonesToDelete in the request body
+            notesToDelete: customer.notesToDelete, // Include notesToDelete in the request body
         }),
     }).catch(() => {
         throw {error: "Connection Error"}; // Handle connection errors
@@ -241,6 +244,7 @@ async function updateCustomer(customerId, customer, xsrfToken) {
  * This function is used to get a customer by his Id
 */
 async function getCustomerById(customerId, xsrfToken) {
+    console.log(customerId);
     const response = await fetch(`/crm/API/customers/${customerId}`, {
         method: 'GET',
         headers: {

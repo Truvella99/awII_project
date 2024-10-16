@@ -28,7 +28,7 @@ const address_object_to_string = (addr) => {
  */
 function AddressSelector(props) {
     const handleError = useContext(MessageContext);
-    const { address, setAddress } = props;
+    const { address, setAddress, hidden } = props;
     const inputRef = useRef();
 
     const handlePlaceChanged = async () => {
@@ -62,6 +62,7 @@ function AddressSelector(props) {
         <StandaloneSearchBox onLoad={(ref) => (inputRef.current = ref)} onPlacesChanged={handlePlaceChanged}>
             <>
                 <Form.Control
+                    hidden={hidden}
                     isInvalid={address.invalid}
                     type="text"
                     placeholder="Enter Address"

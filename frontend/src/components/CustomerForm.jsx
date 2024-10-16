@@ -335,7 +335,7 @@ const CreateCustomer = ({xsrfToken}) => {
                                     </Col>
                                     {/* Notes */}
                                     <Row>
-                                        <Col md={6}>
+                                        <Col >
                                             <Form.Group>
                                                 <Form.Label className="mb-3">Notes (optional)</Form.Label>
                                                 {customer.notes.map((note, index) => (

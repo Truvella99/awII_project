@@ -20,5 +20,8 @@ data class CreateUpdateCustomerDTO(
     val address: String?,
     val notes: List<String>?,
     val notesToDelete: List<Long>? = null,
-    val jobOffers: List<Pair<Long?,CreateUpdateJobOfferDTO>>? = null
+    val jobOffers: List<Pair<Long?,CreateUpdateJobOfferDTO>>? = null,
+    val emailsToDelete: List<Long>? = null,
+    val telephonesToDelete: List<Long>? = null,
+    val addressesToDelete: List<Long>? = null
 )

@@ -132,6 +132,15 @@ class CustomerServiceImpl(
         if (customer.address != null) {
             contactService.addContactAddress(c.contact.id, CreateUpdateAddressDTO(address = customer.address))
         }
+        customer.emailsToDelete?.forEach { emailId ->
+            contactService.deleteContactEmail(c.contact.id, emailId)
+        }
+        customer.telephonesToDelete?.forEach { telephoneId ->
+            contactService.deleteContactTelephone(c.contact.id, telephoneId)
+        }
+        customer.addressesToDelete?.forEach { addressId ->
+            contactService.deleteContactAddress(c.contact.id, addressId)
+        }
         //Delete notes
         customer.notesToDelete?.forEach { noteId ->
             deleteCustomerNote(c.id, noteId)

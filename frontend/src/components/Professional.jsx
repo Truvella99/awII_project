@@ -118,7 +118,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                             {emails &&
                                 emails.map((email, index) => (
                                     <a href={`mailto:${emails[index].email}`}>
-                                        <Card.Text key={index} className="text-dark mb-2">
+                                        <Card.Text key={index}   hidden={email.state !== "active"} className="text-dark mb-2">
                                             <i className="bi bi-envelope-fill"></i> {email.email}
                                         </Card.Text>
                                     </a>
@@ -127,7 +127,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                             {/* Display Telephones */}
                             {telephones &&
                                 telephones.map((telephone, index) => (
-                                    <Card.Text key={index} className="text-dark">
+                                    <Card.Text key={index}  hidden={telephone.state !== "active"} className="text-dark">
                                         <i className="bi bi-telephone-fill"></i> {telephone.telephone}
                                     </Card.Text>
                                 ))}
@@ -135,7 +135,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                             {/* Display Addresses */}
                             {addresses &&
                                 addresses.map((address, index) => (
-                                    <Card.Text key={index} className="text-dark">
+                                    <Card.Text key={index}  hidden={address.state !== "active"} className="text-dark">
                                         <i className="bi bi-geo-alt-fill"></i> {address?.address}
                                     </Card.Text>
                                 ))}
@@ -197,9 +197,9 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                     <h5>Notes</h5>
                                 </Card.Header>
                                 <Card.Body className="bg-light">
-                                    {notes && notes.length
+                                    {notes && notes.filter(it=> it.state === "active").length
                                         ? notes.map((note, index) => (
-                                            <p key={index} className="mb-2">
+                                            <p key={index} hidden={note.state !== "active"} className="mb-2">
                                                 <i className="bi bi-chat-left-text"></i> {note.note}
                                             </p>
                                         ))
@@ -224,10 +224,10 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                     <h5>Skills</h5>
                                 </Card.Header>
                                 <Card.Body className="bg-light">
-                                    {skills && skills.length ? (
+                                    {skills && skills.filter(it=> it.state === "active").length? (
                                         <ul className="list-unstyled">
                                             {skills.map((skill, index) => (
-                                                <li key={index}>
+                                                <li hidden={skill.state !== "active"} key={index}>
                                                     <i className="bi bi-check-circle-fill"></i> {skill.skill}
                                                 </li>
                                             ))}
