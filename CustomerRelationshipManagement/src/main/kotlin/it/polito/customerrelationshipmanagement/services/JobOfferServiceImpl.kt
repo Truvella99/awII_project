@@ -321,7 +321,7 @@ class JobOfferServiceImpl(
             jobOfferStatus.selection_phase -> if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.candidate_proposal) {
                 throw JobOfferStatusException("Invalid jobOffer status transition (from 'selection_phase' only 'candidate_proposal/aborted' are possible).")
             } else if (data.targetStatus == jobOfferStatus.candidate_proposal && data.professionalsId.isEmpty()) {
-                throw JobOfferStatusException("One or more Professionals are required for this status transition.")
+                throw JobOfferStatusException("One or more Candidate Professionals are required for this status transition.")
             } else if (data.targetStatus == jobOfferStatus.candidate_proposal && data.professionalsId.isNotEmpty()) {
                 data.professionalsId.forEach { professionalId ->
                     val professional = professionalRepository.findById(professionalId).orElseThrow{

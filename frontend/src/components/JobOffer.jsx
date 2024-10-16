@@ -9,6 +9,7 @@ import CreatableSelect from 'react-select/creatable';
 import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 import API from "../API";
 import validator from 'validator';
+import InputMask from "react-input-mask";
 
 function JobOfferContainer({ loggedIn }) {
     const [mode, setMode] = useState('');
@@ -17,6 +18,12 @@ function JobOfferContainer({ loggedIn }) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
+
+    function convertDuration(duration) {
+        let hours = Math.floor(duration / 60);
+        let minutes = duration % 60;
+        return `${hours.toString().padStart(4, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
 
     useEffect(() => {
         // function used to retrieve page information in detail
@@ -43,7 +50,7 @@ function JobOfferContainer({ loggedIn }) {
                         candidateProfessionals = candidateProfessionals.map(professional => Object.assign({}, professional, { label: professional.name }));
                         let history = await API.getJobOfferHistoryById(jobOfferId, xsrfToken);
                         setMode('view');
-                        setJobOffer(Object.assign({}, jobOffer, { professionals: abortedProfessionals.concat(candidateProfessionals) ,professional: professional, customer: customer, value: jobOfferValue, history: history }));
+                        setJobOffer(Object.assign({}, jobOffer, { duration: convertDuration(jobOffer.duration), professionals: abortedProfessionals.concat(candidateProfessionals), professional: professional, customer: customer, value: jobOfferValue, history: history }));
                     } else {
                         // add jobOffer
                         setMode('add');
@@ -241,13 +248,16 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
     function handleJobOfferNumbers() {
         let valid = true;
-        if (!validator.isFloat(duration.toString()) || parseFloat(duration.toString()) <= 0) {
+        let time = duration.split(":")
+        let hours = time[0];
+        let minutes = time[1];
+        if (!validator.isInt(hours) || !validator.isInt(minutes) || parseInt(minutes) >= 60) {
             setInvalidDuration(true);
             valid = false;
         } else {
             setInvalidDuration(false);
         }
-        if (!validator.isFloat(profitMargin.toString()) || parseFloat(profitMargin.toString()) <= 0) {
+        if (!validator.isInt(profitMargin.toString()) || parseInt(profitMargin.toString()) <= 0 || parseInt(profitMargin.toString()) > 100) {
             setInvalidProfitMargin(true);
             valid = false;
         } else {
@@ -264,18 +274,23 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
             // FORM VALIDATION:
             // currentStateNote is optional, so it is not validated
             // skills and skillstodelete need no validation
-            if (name.length > 0 && description.length > 0 && handleJobOfferNumbers() && customer.id) {
+            if (handleJobOfferNumbers() && name.length > 0 && description.length > 0 && customer.id) {
                 valid = true;
             }
 
             if (valid) {
+                // convert all in minutes to send
+                let time = duration.split(":")
+                let hours = time[0];
+                let minutes = time[1];
+                console.log(parseInt(parseInt(hours) * 60 + parseInt(minutes)))
                 let jobOffer = {
                     name: name.trim(),
                     description: description.trim(),
                     currentState: currentState,
                     currentStateNote: (currentStateNote) ? currentStateNote.trim() : null,
-                    duration: parseFloat(duration.trim()),
-                    profitMargin: parseFloat(profitMargin.trim()),
+                    duration: parseInt(parseInt(hours) * 60 + parseInt(minutes)),
+                    profitMargin: parseInt(profitMargin.trim()),
                     customerId: customer.id,
                     professionalId: professional && professional.id ? professional.id : null,
                     skills: skills.filter(skill => skill.id === undefined).map(skill => ({ skill: skill.value })),
@@ -307,23 +322,34 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
     };
 
     return (
-        <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        <Form noValidate onSubmit={handleSubmit}>
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formGridName">
                     <Form.Label>Name</Form.Label>
-                    <Form.Control defaultValue={name} onChange={e => setName(e.target.value)} required placeholder="Enter JobOffer Name" disabled={readOnlyBoolean} />
+                    <Form.Control value={name} isInvalid={name.length === 0 && validated} onChange={e => setName(e.target.value)} required placeholder="Enter JobOffer Name" disabled={readOnlyBoolean} />
                     <Form.Control.Feedback type="invalid">Please insert JobOffer Name.</Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group as={Col} controlId="formGridDuration">
-                    <Form.Label>Duration</Form.Label>
-                    <Form.Control type="number" step="0.1" min={0} isValid={!invalidDuration && validated} isInvalid={invalidDuration} value={duration} onChange={e => setDuration(e.target.value)} placeholder="Enter JobOffer Duration" disabled={readOnlyBoolean} />
-                    <Form.Control.Feedback type="invalid">Please insert a valid positive number as JobOffer Duration.</Form.Control.Feedback>
+                    <Form.Label>Duration (Working Hours)</Form.Label>
+                    {(readOnlyBoolean) ?
+                        <Form.Control type="text" value={duration.replace(/^0*(\d{1,2}):/, (match, p1) => p1.padStart(2, '0') + ':')} disabled={readOnlyBoolean} />
+                        :
+                        <InputMask
+                            mask="9999:99"
+                            value={duration}
+                            onChange={e => setDuration(e.target.value)}
+                            placeholder="Enter JobOffer Duration"
+                            required
+                            className={`form-control ${(invalidDuration) ? 'is-invalid' : ''}`}
+                            name="duration"
+                        />}
+                    <Form.Control.Feedback type="invalid">Please insert the duration in the format HHHH:MM, e.g., 0036:30 for 36 hours and 30 minutes.</Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group as={Col} controlId="formGridProfit">
-                    <Form.Label>Profit Margin</Form.Label>
-                    <Form.Control type="number" step="0.1" min={0} isValid={!invalidProfitMargin && validated} isInvalid={invalidProfitMargin} value={profitMargin} onChange={e => setProfitMargin(e.target.value)} placeholder="Enter JobOffer Profit Margin" disabled={readOnlyBoolean} />
+                    <Form.Label>Profit Margin (in Percentage)</Form.Label>
+                    <Form.Control type="number" step="1" min={1} max={100} isInvalid={invalidProfitMargin} required value={profitMargin} onChange={e => setProfitMargin(e.target.value)} placeholder="Enter JobOffer Profit Margin" disabled={readOnlyBoolean} />
                     <Form.Control.Feedback type="invalid">Please insert a valid positive number as JobOffer Profit Margin.</Form.Control.Feedback>
                 </Form.Group>
             </Row>
@@ -344,13 +370,13 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
                 <Form.Group as={Col} className="mb-3" controlId="formGridDescription">
                     <Form.Label>JobOffer Current State Note</Form.Label>
-                    <Form.Control defaultValue={currentStateNote} onChange={e => setCurrentStateNote(e.target.value)} as="textarea" rows={1} placeholder="Enter Current State Note" disabled={readOnlyBoolean} />
+                    <Form.Control value={currentStateNote} onChange={e => setCurrentStateNote(e.target.value)} as="textarea" rows={1} placeholder="Enter Current State Note" disabled={readOnlyBoolean} />
                 </Form.Group>
             </Row>
 
             <Form.Group className="mb-3" controlId="formGridDescription">
                 <Form.Label>JobOffer Description</Form.Label>
-                <Form.Control defaultValue={description} onChange={e => setDescription(e.target.value)} required as="textarea" rows={3} placeholder="Enter JobOffer Description" disabled={readOnlyBoolean} />
+                <Form.Control value={description} isInvalid={description.length === 0 && validated} onChange={e => setDescription(e.target.value)} required as="textarea" rows={3} placeholder="Enter JobOffer Description" disabled={readOnlyBoolean} />
                 <Form.Control.Feedback type="invalid">Please insert JobOffer Description.</Form.Control.Feedback>
             </Form.Group>
 
@@ -367,7 +393,8 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                             style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
                             onClick={() => { if (customer.id) window.open(`/ui/customers/${customer.id}`, '_blank'); }}
                             type="text"
-                            defaultValue={customer.name}
+                            value={customer.name}
+                            isInvalid={customer.id === undefined && validated}
                             required
                             onKeyDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         />
@@ -391,7 +418,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                         <Form.Label>ChosenProfessional</Form.Label>
                         <InputGroup>
                             <Form.Control
-                                defaultValue={professional.name}
+                                value={professional.name}
                                 type="text"
                                 onKeyDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                                 onClick={() => { if (professional.id) window.open(`/ui/professionals/${professional.id}`, '_blank'); }}
