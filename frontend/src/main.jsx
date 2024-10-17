@@ -6,9 +6,7 @@ import {LoadScript} from "@react-google-maps/api";
 const libraries = ['places']; // Include Places Library
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <LoadScript googleMapsApiKey={API_KEY} libraries={libraries}>
-            <App />
-        </LoadScript>
-    </React.StrictMode>
+    <LoadScript googleMapsApiKey={API_KEY} libraries={libraries}>
+        <App />
+    </LoadScript>
 )
