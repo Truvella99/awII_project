@@ -22,7 +22,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
         telephone: '',
         address: '',
         skills: [{skill: ''}],
-        notes: ['']
+        notes: []
     });
     const formatEmploymentState = (state) => {
         switch (state) {
@@ -170,11 +170,11 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
         const errors = {};
 
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.name)) {
-            errors.name = "Name cannot be empty or null.";
+            errors.name = "Name cannot be empty.";
         }
 
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.surname)) {
-            errors.surname = "Surname cannot be empty or null.";
+            errors.surname = "Surname cannot be empty.";
         }
 
         if (!SSN_CODE.test(professional.ssncode)) {
@@ -184,11 +184,15 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.employmentState)) {
             errors.employmentState = "Employment state is required.";
         }
-
+        console.log(professional.dailyRate);
+        if ( parseInt(professional.dailyRate) < 0) {
+            errors.dailyRate = "Daily rate cannot be negative.";
+        }
 
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.dailyRate)) {
             errors.dailyRate = "Daily rate is required.";
         }
+
         professional.dailyRate = parseFloat(professional.dailyRate);
 
         if (professional.email && !EMAIL.test(professional.email)) {
@@ -377,6 +381,11 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                                 placeholder="Enter daily rate"
                                                 value={professional.dailyRate}
                                                 onChange={handleInputChange}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === '-') {
+                                                        e.preventDefault(); // Previene l'inserimento del simbolo meno
+                                                    }
+                                                }}
                                                 isInvalid={!!formErrors.dailyRate}
                                                 required
                                             />

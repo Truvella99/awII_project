@@ -16,7 +16,7 @@ const CreateCustomer = ({xsrfToken}) => {
         email: '',
         telephone: '',
         address: '',
-        notes: [''],
+        notes: [],
     });
 
     const [formErrors, setFormErrors] = useState({});
@@ -111,11 +111,11 @@ const CreateCustomer = ({xsrfToken}) => {
         const errors = {};
 
         if (!NOT_EMPTY_IF_NOT_NULL.test(customer.name)) {
-            errors.name = "Name cannot be empty or null.";
+            errors.name = "Name cannot be empty.";
         }
 
         if (!NOT_EMPTY_IF_NOT_NULL.test(customer.surname)) {
-            errors.surname = "Surname cannot be empty or null.";
+            errors.surname = "Surname cannot be empty.";
         }
 
         if (!SSN_CODE.test(customer.ssncode)) {
