@@ -117,7 +117,7 @@ function Home({ me }) {
                     <Col>
 
                         <Button onClick={()=>navigate("/ui/customers/1")}>Go to customer</Button>
-                        <Button onClick={()=>navigate("/ui/professionals/3")}>Go to professional</Button>
+                        <Button onClick={()=>navigate("/ui/professionals/1")}>Go to professional</Button>
                         <Button variant={"success"} onClick={()=>navigate("/ui/professionals/addProfessional")}>Add Professional Page</Button>
                         <Button variant={"success"} onClick={()=>navigate("/ui/customers/addCustomer")}>Add Customer Page</Button>
                         <Button variant={"warning"} onClick={()=>navigate("/ui/professionals/edit/1")}>Edit Professional Page</Button>
@@ -132,15 +132,15 @@ function Home({ me }) {
                         <Button onClick={async () => {
                             let updatedCustomer = {
                                 name: "Gennaro Updated afwsef",
-                                surname: "Customer sfd",
+                                surname: "Prof sfd",
                                 ssncode: "111-23-9022",
-                                // email: "jj3@libero.it",
-                                // telephone: "+391234567892",
-                                // address: "Via Roma 23"
-                                // emailsToDelete: [1,2],
-                                // telephonesToDelete: [1],
-                                // addressesToDelete: [2],
-                                // notesToDelete: [1,2],
+                                email: "jj3@libero.it",
+                                telephone: "+391234567892",
+                                address: "Via Roma 23",
+                                emailsToDelete: [1],
+                                telephonesToDelete: [1],
+                                addressesToDelete: [1],
+                                notesToDelete: [1],
                             };
 
                             // Mostra i dati aggiornati del cliente nel log
@@ -151,7 +151,25 @@ function Home({ me }) {
                             console.log("Customer updated successfully");
                         }
                         }>update customer prefixed</Button>
+                        <Button onClick={async () => {
+                            let updateProfessional = {
+                                name: "Gennaro Updated afwsef",
+                                surname: "Prof sfd",
+                                ssncode: "111-23-9022",
+                                skills: [
+                                    { skill: "Skill 1" },
+                                    { skill: "Skill 2" }
+                                ]
+                            };
 
+                            // Mostra i dati aggiornati del cliente nel log
+                            console.log("Updating professional:", JSON.stringify(updateProfessional, null, 2));
+
+                            // Aggiornamento del cliente
+                            await API.updateProfessional(1, updateProfessional, me.xsrfToken);
+                            console.log("professional updated successfully");
+                        }
+                        }>update prof prefixed</Button>
                         <Button onClick={async () => {
                             let professional = {
                                 name: "Giuseppe",

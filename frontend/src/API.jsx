@@ -239,7 +239,44 @@ async function updateCustomer(customerId, customer, xsrfToken) {
 
     return await response.json(); // Return the updated customer data
 }
+async function updateProfessional(professionalId, professional, xsrfToken) {
+    // console.log("API",customer); // Log the customer data being updated
+    const response = await fetch(`/crm/API/professionals/${professionalId}`, {
+        method: 'PUT', // Use PUT for updating existing resources
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        },
+        body: JSON.stringify({
+            name: professional.name,
+            surname: professional.surname,
+            ssncode: professional.ssncode,
+            category: professional.category,
+            email: professional.email,
+            telephone: professional.telephone,
+            address: professional.address,
+            // employmentState: professional.employmentState,
+            geographicalLocation: professional.geographicalLocation,
+            dailyRate: professional.dailyRate,
+            skills: professional.skills,
+            notes: professional.notes,
+            emailsToDelete: professional.emailsToDelete, // Include emailsToDelete in the request body
+            addressesToDelete: professional.addressesToDelete, // Include addressesToDelete in the request body
+            telephonesToDelete: professional.telephonesToDelete, // Include telephonesToDelete in the request body
+            notesToDelete: professional.notesToDelete, // Include notesToDelete in the request body
+            skillsToDelete: professional.skillsToDelete, // Include notesToDelete in the request body
+        }),
+    }).catch(() => {
+        throw {error: "Connection Error"}; // Handle connection errors
+    });
 
+    if (!response.ok) {
+        const error = await response.json();
+        throw {error: error.message || 'Error updating professional'}; // Handle non-200 responses
+    }
+
+    return await response.json(); // Return the updated customer data
+}
 /*
  * This function is used to get a customer by his Id
 */
@@ -389,6 +426,7 @@ export default {
     getJobOfferValueById,
     createCustomer,
     updateCustomer,
+    updateProfessional,
     getCustomerById,
     getCustomers,
     createProfessional,

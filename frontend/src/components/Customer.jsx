@@ -111,8 +111,8 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
                                         <i className="bi bi-geo-alt-fill"></i> {address.address}
                                     </Card.Text>
                                 ))}
-                            {emails && emails.length > 1 &&
-                                <a href={`mailto:${emails[0].email}`}>
+                            {emails && emails.filter(email=> email.state==="active").length > 0 &&
+                                <a href={`mailto:${emails.filter(email=> email.state==="active")[0]?.email}`}>
                                 <Button variant="primary" className="mt-3 shadow-sm">
                                     Contact
                                 </Button>

@@ -1,49 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import {Container, Row, Col, Card, Button, Form, Alert, InputGroup} from 'react-bootstrap';
-import API from '../API'; // API to handle saving and fetching data
-import 'react-phone-number-input/style.css';
-import PhoneInput from 'react-phone-number-input';
+import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
-import InputMask from "react-input-mask";
 import axios from "axios";
+import API from "../API.jsx";
+import {Alert, Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap";
+import InputMask from "react-input-mask";
+import PhoneInput from "react-phone-number-input";
 import {AddressSelector} from "./Utils.jsx";
 
-const EditCustomer = ({ xsrfToken }) => {
-    const [customer, setCustomer] = useState({
-        name: '',
-        surname: '',
-        ssncode: '',
-        category: 'Customer',
+const EditProfessional = ({ xsrfToken }) => {
+    const [professional, setProfessional] = useState({
+        name:  '',
+        surname:  '',
+        ssncode:  '',
         email: null,
         telephone: null,
         address: null,
         emails: [],//emails already present
         telephones: [],//telephones already present
         addresses: [],//addresses already present
-        emailsToDelete: [],
-        telephonesToDelete: [],
-        addressesToDelete: [],
-        notesToDelete: [],
-        notes: ['']
+        category: '',
+        employmentState: '',
+        geographicalLocation: {first: "0", second: "0"},
+        dailyRate: 1,
+        notes: [],
+        skills: [{skill: ''}],
+        emailsToDelete: [], // Add new fields
+        addressesToDelete: [], // Add new fields
+        telephonesToDelete: [], // Add new fields
+        notesToDelete: [], // Add new fields
+        skillsToDelete: [] // Add new fields
     });
-    const {customerId} = useParams();
+
+    const formatEmploymentState = (state) => {
+        switch (state) {
+            case 'employed':
+                return 'Employed';
+            case 'available':
+                return 'Available';
+            case 'not_available':
+                return 'Not Available';
+            default:
+                return state;
+        }
+    };
+
+    const {professionalId} = useParams();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [formErrors, setFormErrors] = useState({});
     const [showNewEmailField, setShowNewEmailField] = useState(false);
     const [showNewTelephoneField, setShowNewTelephoneField] = useState(false);
     const [showNewNoteField, setShowNewNoteField] = useState(false);
+    const [showNewSkillField, setShowNewSkillField] = useState(false);
     const [showNewAddressField, setShowNewAddressField] = useState(false);
     const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
     const navigate = useNavigate()
     const [newNotes, setNewNotes] = useState([]);
-
+    const [newSkills, setNewSkills] = useState([]);
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
     const SSN_CODE = /^(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/;
     const EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
+
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
             // Create a Geocoder instance
@@ -85,11 +105,18 @@ const EditCustomer = ({ xsrfToken }) => {
             );
 
             const location = response.data.results[0].geometry.location;
-
-            setCustomer((prevCustomer) => ({
-                ...prevCustomer,
+            setProfessional((prevProfessional) => ({
+                ...prevProfessional,
+                geographicalLocation: {
+                    latitude: location.lat,
+                    longitude: location.lng
+                }
+            }));
+            setProfessional((prevProfessional) => ({
+                ...prevProfessional,
                 address: response.data.results[0].formatted_address
             }));
+            console.log("Geographical location fetched", professional.geographicalLocation);
         } catch (error) {
             console.error("Error fetching geographical location", error);
         } finally {
@@ -98,27 +125,27 @@ const EditCustomer = ({ xsrfToken }) => {
     };
 
     useEffect(() => {
-        if (customerId) {
-            const fetchCustomer = async () => {
+        if (professionalId) {
+            const fetchProfessional = async () => {
                 try {
                     setLoading(true);
-                    const fetchedCustomer = await API.getCustomerById(customerId, xsrfToken);
-                    console.log("fetchedCustomer", fetchedCustomer);
-                    setCustomer(fetchedCustomer);
+                    const fetchedProfessional = await API.getProfessionalById(professionalId, xsrfToken);
+                    console.log("fetchedProf", fetchedProfessional);
+                    setProfessional(fetchedProfessional);
                     setLoading(false);
                 } catch (err) {
-                    setError(err.error || 'Error fetching customer data');
+                    setError(err.error || 'Error fetching professional data');
                     setLoading(false);
                 }
             };
-            fetchCustomer();
+            fetchProfessional();
         }
-    }, [customerId, xsrfToken]);
+    }, [professionalId, xsrfToken]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setCustomer((prevCustomer) => ({
-            ...prevCustomer,
+        setProfessional((prevProfessional) => ({
+            ...prevProfessional,
             [name]: value,
         }));
     };
@@ -140,11 +167,44 @@ const EditCustomer = ({ xsrfToken }) => {
             setShowNewNoteField(false)
 
     };
+// // Gestisci il cambiamento di una skill
+//     const handleSkillChange = (index, value) => {
+//         const updatedSkills = [...newSkills];
+//         updatedSkills[index] = value;
+//         setNewSkills(updatedSkills);
+//     };
+//
+// // Aggiungi una nuova skill
+//     const handleAddSkill = () => {
+//         setNewSkills([...newSkills, '']);
+//     };
+//
+// // Rimuovi una skill
+//     const handleRemoveSkill = (index) => {
+//         const updatedSkills = newSkills.filter((_, i) => i !== index);
+//         setNewSkills(updatedSkills);
+//     };
+    // Funzioni per gestire le skills
+    const handleSkillChange = (index, value) => {
+        const updatedSkills =newSkills.map((skill, i) =>
+            i === index ? {...skill, skill: value} : skill
+        );
+        setNewSkills(updatedSkills);
+    };
 
+    const handleAddSkill = () => {
+        setNewSkills([...newSkills, { skill: '' }]); // Aggiunge una nuova skill vuota
+    };
+
+
+    const handleRemoveSkill = (index) => {
+        const updatedSkills = newSkills.filter((_, i) => i !== index); // Rimuove la skill all'indice specificato
+        setNewSkills(updatedSkills);
+    };
 
     const handleRemoveField = (field, index) => {
-        setCustomer((prevCustomer) => {
-            const updatedField = [...prevCustomer[field]];
+        setProfessional((prevProfessional) => {
+            const updatedField = [...prevProfessional[field]];
             const removedItem = updatedField[index];
 
             // Cambia lo stato in "deleted" se esiste un ID
@@ -153,71 +213,76 @@ const EditCustomer = ({ xsrfToken }) => {
                 // Aggiungi l'ID alla lista corretta per la cancellazione
                 if (field === 'emails') {
                     return {
-                        ...prevCustomer,
+                        ...prevProfessional,
                         [field]: updatedField,
-                        emailsToDelete: prevCustomer.emailsToDelete ? [...prevCustomer.emailsToDelete, removedItem.id] : [removedItem.id],
+                        emailsToDelete: prevProfessional.emailsToDelete ? [...prevProfessional.emailsToDelete, removedItem.id] : [removedItem.id],
                     };
                 } else if (field === 'telephones') {
                     return {
-                        ...prevCustomer,
+                        ...prevProfessional,
                         [field]: updatedField,
-                        telephonesToDelete: prevCustomer.telephonesToDelete ? [...prevCustomer.telephonesToDelete, removedItem.id] : [removedItem.id],
+                        telephonesToDelete: prevProfessional.telephonesToDelete ? [...prevProfessional.telephonesToDelete, removedItem.id] : [removedItem.id],
                     };
                 } else if (field === 'addresses') {
                     return {
-                        ...prevCustomer,
+                        ...prevProfessional,
                         [field]: updatedField,
-                        addressesToDelete: prevCustomer.addressesToDelete ? [...prevCustomer.addressesToDelete, removedItem.id] : [removedItem.id],
+                        addressesToDelete: prevProfessional.addressesToDelete ? [...prevProfessional.addressesToDelete, removedItem.id] : [removedItem.id],
                     };
                 } else if (field === 'notes') {
                     return {
-                        ...prevCustomer,
+                        ...prevProfessional,
                         [field]: updatedField,
-                        notesToDelete: prevCustomer.notesToDelete ? [...prevCustomer.notesToDelete, removedItem.id] : [removedItem.id],
+                        notesToDelete: prevProfessional.notesToDelete ? [...prevProfessional.notesToDelete, removedItem.id] : [removedItem.id],
+                    };
+                }else if (field === 'skills') {
+                    return {
+                        ...prevProfessional,
+                        [field]: updatedField,
+                        skillsToDelete: prevProfessional.skillsToDelete ? [...prevProfessional.skillsToDelete, removedItem.id] : [removedItem.id],
                     };
                 }
             } else {
                 // Rimuovi nuovi campi aggiunti (non salvati nel database)
                 updatedField.splice(index, 1);
-                return { ...prevCustomer, [field]: updatedField };
+                return { ...prevProfessional, [field]: updatedField };
             }
         });
     };
-
     const validateForm = async () => {
         const errors = {};
 
-        if (!NOT_EMPTY_IF_NOT_NULL.test(customer.name)) {
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.name)) {
             errors.name = "Name cannot be empty.";
         }
 
-        if (!NOT_EMPTY_IF_NOT_NULL.test(customer.surname)) {
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.surname)) {
             errors.surname = "Surname cannot be empty.";
         }
 
-        if (!SSN_CODE.test(customer.ssncode)) {
+        if (!SSN_CODE.test(professional.ssncode)) {
             errors.ssncode = "SSN Code must be valid in the format XXX-XX-XXXX.";
         }
 
 
-        if (customer.email && !EMAIL.test(customer.email)) {
+        if (professional.email && !EMAIL.test(professional.email)) {
             errors.email = "Please enter a valid email address.";
         }
-        if(customer.emails.some(email =>email.state==="active" &&  email.email === customer.email?.trim()) ){
+        if(professional.emails.some(email =>email.state==="active" &&  email.email === professional.email?.trim()) ){
             errors.email = "Email already present";
         }
 
-        if (customer.telephone && !TELEPHONE.test(customer.telephone)) {
+        if (professional.telephone && !TELEPHONE.test(professional.telephone)) {
             errors.telephone = "Please enter a valid telephone number.";
         }
-        if(customer.telephones.some(telephone =>telephone.state==="active" && telephone.telephone === customer.telephone)){
+        if(professional.telephones.some(telephone =>telephone.state==="active" && telephone.telephone === professional.telephone)){
             errors.telephone = "Telephone already present";
         }
 
-        if (customer.address && !ADDRESS.test(customer.address)) {
+        if (professional.address && !ADDRESS.test(professional.address)) {
             errors.address = "Please enter a valid address.";
         }
-        if(customer.addresses.some(address => address.state==="active" && address.address === customer.address)){
+        if(professional.addresses.some(address => address.state==="active" && address.address === professional.address)){
             errors.address = "Address already present";
         }
         try {
@@ -227,9 +292,9 @@ const EditCustomer = ({ xsrfToken }) => {
                 if (address.invalid === true) {
                     errors.address = "Please enter a valid address.";
                 }
-                customer.address = address.text;
+                professional.address = address.text;
             } else {
-                customer.address = null;
+                professional.address = null;
             }
         } catch (error) {
             errors.address = "Please enter a valid address.";
@@ -237,15 +302,44 @@ const EditCustomer = ({ xsrfToken }) => {
         if (newNotes.some(note => !note)) {
             errors.notes = 'Notes cannot be empty';
         }
+        if ( parseInt(professional.dailyRate) < 0) {
+            errors.dailyRate = "Daily rate cannot be negative.";
+        }
+
+        if (!NOT_EMPTY_IF_NOT_NULL.test(professional.dailyRate)) {
+            errors.dailyRate = "Daily rate is required.";
+        }
+
+        professional.dailyRate = parseFloat(professional.dailyRate);
+
+        if(professional.skills.some(skill =>skill.state==="active" && newSkills.map(skill => skill.skill).includes(skill.skill))){
+            errors.skills = "Skill already present";
+        }
+        const skillValues = newSkills.map(newSkill => newSkill.skill.toLowerCase().trim());
+        const hasDuplicates = skillValues.some((skill, index) => skillValues.indexOf(skill) !== index);
+        if (hasDuplicates) {
+            errors.skills = "Duplicate skills are not allowed.";
+        }
+        if (newSkills.some(skill => !skill)) {
+            errors.skills = 'Skills cannot be empty';
+        }
+        if (professional.skills.filter(it =>it.state ==="active").length === 0&& newSkills.length === 0 || newSkills.some(skill => !skill.skill) ) {
+            errors.skills = 'At least one skill is required and skills cannot be empty';
+        }
         // Aggiungi controllo per address, telephone, email: almeno uno è richiesto
-        if (!customer.email && !customer.telephone && (!customer.address) && customer.emails.filter(it =>it.state ==="active").length === 0 && customer.telephones.filter(it =>it.state ==="active").length === 0 && customer.addresses.filter(it =>it.state ==="active").length === 0) {
+        if (!professional.email && !professional.telephone && (!professional.address) && professional.emails.filter(it =>it.state ==="active").length === 0 && professional.telephones.filter(it =>it.state ==="active").length === 0 && professional.addresses.filter(it =>it.state ==="active").length === 0) {
             errors.contact = 'Please provide at least one valid contact method: email, telephone, or address.';
         }
         setFormErrors(errors);
+        console.log("formErrors", professional.emails.length , professional.telephones.length ,professional.addresses.length )
+        console.log("professional.email", professional.email)
+        console.log("professional.telephone", professional.telephone)
 
+        console.log("professional.address", professional.address)
+        console.log("professional", professional)
+        console.log("errors", errors);
         return Object.keys(errors).length === 0;
     };
-
 
 
     const handleSubmit = async (e) => {
@@ -258,16 +352,17 @@ const EditCustomer = ({ xsrfToken }) => {
 
         setLoading(true);
         try {
-            // Only update customer functionality
-            customer.notes = newNotes
+            // Only update professional functionality
+            professional.notes = newNotes
+            professional.skills = newSkills
 
-            await API.updateCustomer(customerId, customer, xsrfToken);
+            await API.updateProfessional(professionalId, professional, xsrfToken);
             setLoading(false);
             navigate("/ui")
 
             // Optionally, navigate back or display a success message
         } catch (err) {
-            setError(err.error || 'Error saving customer');
+            setError(err.error || 'Error saving professional');
             setLoading(false);
         }
     };
@@ -286,7 +381,7 @@ const EditCustomer = ({ xsrfToken }) => {
                 <Col className="mx-auto">
                     <Card className="shadow-lg">
                         <Card.Header className="bg-primary text-white">
-                            <h3>Edit Customer</h3>
+                            <h3>Edit Professional</h3>
                         </Card.Header>
                         <Card.Body>
                             <Form noValidate onSubmit={handleSubmit}>
@@ -297,7 +392,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                             <Form.Control
                                                 type="text"
                                                 name="name"
-                                                value={customer.name}
+                                                value={professional.name}
                                                 onChange={handleInputChange}
                                                 isInvalid={!!formErrors.name}
                                                 placeholder="Enter name"
@@ -315,7 +410,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                                 type="text"
                                                 name="surname"
                                                 placeholder="Enter surname"
-                                                value={customer.surname}
+                                                value={professional.surname}
                                                 onChange={handleInputChange}
                                                 isInvalid={!!formErrors.surname}
                                                 required
@@ -332,7 +427,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                             <Form.Label>SSN Code</Form.Label>
                                             <InputMask
                                                 mask="999-99-9999"
-                                                value={customer.ssncode}
+                                                value={professional.ssncode}
                                                 onChange={handleInputChange}
                                                 placeholder="Enter SSN code"
                                                 required
@@ -350,38 +445,75 @@ const EditCustomer = ({ xsrfToken }) => {
                                             <Form.Control
                                                 type="text"
                                                 name="category"
-                                                value={customer.category.toUpperCase()}
+                                                value={professional.category.toUpperCase()}
                                                 disabled={true}
                                                 required
                                             />
                                         </Form.Group>
                                     </Col>
                                 </Row>
-
+                                {/* Employment State and Daily Rate*/}
+                                <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="employmentState">
+                                            <Form.Label>Employment State</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                name="EmploymentState"
+                                                value={professional.employmentState.toUpperCase()}
+                                                disabled={true}
+                                                required
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="dailyRate">
+                                            <Form.Label>Daily Rate (€)</Form.Label>
+                                            <Form.Control
+                                                type="number"
+                                                name="dailyRate"
+                                                min={1}
+                                                placeholder="Enter daily rate"
+                                                value={professional.dailyRate}
+                                                onChange={handleInputChange}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === '-') {
+                                                        e.preventDefault(); // Previene l'inserimento del simbolo meno
+                                                    }
+                                                }}
+                                                isInvalid={!!formErrors.dailyRate}
+                                                required
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.dailyRate}
+                                            </Form.Control.Feedback>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
                                 {/* Emails */}
 
                                 <Row>
                                     <Col lg={6}>
                                         <Form.Group>
                                             <Form.Label>Emails</Form.Label>
-                                            <div className="text-secondary mb-3" hidden={customer.emails.some(email => email.state === "active") || showNewEmailField}>
-                                                Customer has no emails
+                                            <div className="text-secondary mb-3" hidden={professional.emails.some(email => email.state === "active") || showNewEmailField}>
+                                                Professional has no emails
                                             </div>
-                                            {customer.emails.map((email, index) => (
+                                            {professional.emails.map((email, index) => (
                                                 email.state === "active" ? (
                                                     <div key={index} className="d-flex align-items-center mb-1">
-                                                    <Form.Control
-                                                        hidden={email.state === "deleted"} // Nasconde il campo se marcato come "deleted"
-                                                        disabled={true}
-                                                        type="email"
-                                                        name={`email${index}`}
-                                                        value={email.email}
-                                                        required
-                                                    />
-                                                    <Button hidden={email.state === "deleted"} variant="danger" onClick={() => handleRemoveField('emails', index)} className="ms-2"> {/* Aggiunto className per margine a sinistra */}
-                                                        Remove
-                                                    </Button>
-                                                </div>
+                                                        <Form.Control
+                                                            hidden={email.state === "deleted"} // Nasconde il campo se marcato come "deleted"
+                                                            disabled={true}
+                                                            type="email"
+                                                            name={`email${index}`}
+                                                            value={email.email}
+                                                            required
+                                                        />
+                                                        <Button hidden={email.state === "deleted"} variant="danger" onClick={() => handleRemoveField('emails', index)} className="ms-2"> {/* Aggiunto className per margine a sinistra */}
+                                                            Remove
+                                                        </Button>
+                                                    </div>
                                                 ) : null
                                             ))}
                                             {/* Bottone per aggiungere una nuova email */}
@@ -389,9 +521,9 @@ const EditCustomer = ({ xsrfToken }) => {
                                                 variant="primary"
                                                 onClick={() => {
                                                     setShowNewEmailField(true); // Show the new email field
-                                                    setCustomer((prev) => ({
+                                                    setProfessional((prev) => ({
                                                         ...prev,
-                                                        email: '', // Reset the email field in your customer state
+                                                        email: '', // Reset the email field in your professional state
                                                     }));
                                                 }}
                                                 hidden={showNewEmailField === true}
@@ -405,7 +537,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                                     hidden={!showNewEmailField} // Nasconde il campo se showNewEmailField è false
                                                     name="email"
                                                     placeholder="Enter Email"
-                                                    value={customer.email}
+                                                    value={professional.email}
                                                     onChange={handleInputChange}
                                                     isInvalid={!!formErrors.email}
                                                 />
@@ -415,9 +547,9 @@ const EditCustomer = ({ xsrfToken }) => {
                                                     variant="danger"
                                                     onClick={() => {
                                                         setShowNewEmailField(false); // Nasconde il campo della nuova email
-                                                        setCustomer((prev) => ({
+                                                        setProfessional((prev) => ({
                                                             ...prev,
-                                                            email: null, // Svuota il campo customer.email
+                                                            email: null, // Svuota il campo professional.email
                                                         }));
                                                     }}
                                                     className="ms-2" // Aggiunto className per margine a sinistra
@@ -436,22 +568,22 @@ const EditCustomer = ({ xsrfToken }) => {
                                     <Col lg={6}>
                                         <Form.Group>
                                             <Form.Label>Telephones</Form.Label>
-                                            <div className="text-secondary mb-3" hidden={customer.telephones.some(telephone => telephone.state === "active") || showNewTelephoneField}>
-                                                Customer has no telephones number
+                                            <div className="text-secondary mb-3" hidden={professional.telephones.some(telephone => telephone.state === "active") || showNewTelephoneField}>
+                                                Professional has no telephones number
                                             </div>
-                                            {customer.telephones.map((telephone, index) => (
+                                            {professional.telephones.map((telephone, index) => (
                                                 telephone.state === "active" ? (
                                                     <div key={index} className="d-flex align-items-center mb-1">
-                                                    <Form.Control
-                                                        hidden={telephone.state === "deleted"} // Nasconde il campo se marcato come "deleted"
-                                                        disabled={true}
-                                                        value={telephone.telephone}
-                                                        required
-                                                    />
-                                                    <Button hidden={telephone.state === "deleted"} variant="danger" onClick={() => handleRemoveField('telephones', index)} className="ms-2">
-                                                        Remove
-                                                    </Button>
-                                                </div>
+                                                        <Form.Control
+                                                            hidden={telephone.state === "deleted"} // Nasconde il campo se marcato come "deleted"
+                                                            disabled={true}
+                                                            value={telephone.telephone}
+                                                            required
+                                                        />
+                                                        <Button hidden={telephone.state === "deleted"} variant="danger" onClick={() => handleRemoveField('telephones', index)} className="ms-2">
+                                                            Remove
+                                                        </Button>
+                                                    </div>
                                                 ) : null
                                             ))}
                                             {/* Bottone per aggiungere un nuovo telefono */}
@@ -459,9 +591,9 @@ const EditCustomer = ({ xsrfToken }) => {
                                                 variant="primary"
                                                 onClick={() => {
                                                     setShowNewTelephoneField(true); // Show the new telephone field
-                                                    setCustomer((prev) => ({
+                                                    setProfessional((prev) => ({
                                                         ...prev,
-                                                        telephone: '', // Reset the telephone field in your customer state
+                                                        telephone: '', // Reset the telephone field in your professional state
                                                     }));
                                                 }}
                                                 hidden={showNewTelephoneField === true}
@@ -473,9 +605,9 @@ const EditCustomer = ({ xsrfToken }) => {
                                                 <PhoneInput
                                                     style={{ display: showNewTelephoneField ? 'flex' : 'none' }} // Usa display per nascondere completamente il campo
                                                     defaultCountry="IT"
-                                                    value={customer.telephone}
+                                                    value={professional.telephone}
                                                     onChange={(value) =>
-                                                        setCustomer((prev) => ({
+                                                        setProfessional((prev) => ({
                                                             ...prev,
                                                             telephone: value,
                                                         }))
@@ -488,9 +620,9 @@ const EditCustomer = ({ xsrfToken }) => {
                                                     variant="danger"
                                                     onClick={() => {
                                                         setShowNewTelephoneField(false); // Nasconde il campo del nuovo telefono
-                                                        setCustomer((prev) => ({
+                                                        setProfessional((prev) => ({
                                                             ...prev,
-                                                            telephone: null, // Svuota il campo customer.telephone
+                                                            telephone: null, // Svuota il campo professional.telephone
                                                         }));
                                                     }}
                                                     className="ms-2" // Aggiunto className per margine a sinistra
@@ -514,24 +646,24 @@ const EditCustomer = ({ xsrfToken }) => {
                                         <Form.Group className="mb-3">
                                             <Form.Label>Addresses</Form.Label>
 
-                                            <div className="text-secondary mb-3" hidden={customer.addresses.some(address => address.state === "active") || showNewAddressField}>
-                                                Customer has no addresses
+                                            <div className="text-secondary mb-3" hidden={professional.addresses.some(address => address.state === "active") || showNewAddressField}>
+                                                Professional has no addresses
                                             </div>
-                                            {customer.addresses.map((address, index) => (
+                                            {professional.addresses.map((address, index) => (
                                                 address.state === "active" ? (
                                                     <div key={index} className="d-flex align-items-center mb-2">
-                                                    <Form.Control
-                                                        hidden={address.state === "deleted"} // Nasconde il campo se marcato come "deleted"
-                                                        disabled={true}
-                                                        type="text"
-                                                        value={address.address}
-                                                        required
+                                                        <Form.Control
+                                                            hidden={address.state === "deleted"} // Nasconde il campo se marcato come "deleted"
+                                                            disabled={true}
+                                                            type="text"
+                                                            value={address.address}
+                                                            required
 
-                                                    />
-                                                    <Button className="ms-2" hidden={address.state === "deleted"} variant="danger" onClick={() => handleRemoveField('addresses', index)}>
-                                                        Remove
-                                                    </Button>
-                                                </div>
+                                                        />
+                                                        <Button className="ms-2" hidden={address.state === "deleted"} variant="danger" onClick={() => handleRemoveField('addresses', index)}>
+                                                            Remove
+                                                        </Button>
+                                                    </div>
                                                 ) : null
                                             ))}
 
@@ -540,7 +672,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                                 variant="primary"
                                                 onClick={() => {
                                                     setShowNewAddressField(true); // Show the new address field
-                                                    setAddress({text: '', lat: 0.0, lng: 0.0, invalid: false}); // Reset the address field in your customer state
+                                                    setAddress({text: '', lat: 0.0, lng: 0.0, invalid: false}); // Reset the address field in your professional state
                                                 }}
                                                 hidden={showNewAddressField === true}
                                             >
@@ -555,9 +687,9 @@ const EditCustomer = ({ xsrfToken }) => {
                                                     hidden={!showNewAddressField}
                                                     variant="danger"
                                                     onClick={() => {
-                                                        setCustomer((prev) => ({
+                                                        setProfessional((prev) => ({
                                                             ...prev,
-                                                            address: null, // Svuota il campo customer.address
+                                                            address: null, // Svuota il campo professional.address
                                                         }));
                                                         setShowNewAddressField(false); // Nasconde il campo del nuovo indirizzo
 
@@ -580,33 +712,101 @@ const EditCustomer = ({ xsrfToken }) => {
                                         </Form.Group>
                                     </Col>
 
+                                    {/* Skills */}
+                                    <Col md={6}>
+                                        <Form.Group>
+                                            <Form.Label className="mb-3">Skills</Form.Label>
+
+                                            <div className="text-secondary mb-3" hidden={professional.skills.some(skill => skill.state === "active") || showNewSkillField}>
+                                                Professional has no Skills
+                                            </div>
+                                            {professional.skills.map((skill, index) => (
+                                                skill.state === "active" ? (
+                                                    <div key={index} className="d-flex align-items-center mb-1">
+                                                        <Form.Control
+                                                            hidden={skill.state !== "active"} // Nasconde il campo se non attivo
+                                                            disabled={true}
+                                                            type="text"
+                                                            placeholder="Add Skill"
+                                                            value={skill.skill}
+                                                        />
+                                                        <Button
+                                                            hidden={skill.state !== "active"} // Nasconde il bottone se la nota non è attiva
+                                                            variant="danger"
+                                                            onClick={() => handleRemoveField('skills', index)} // Funzione per rimuovere la nota
+                                                            className="ms-2"
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </div>
+                                                ) : null
+
+                                            ))}
+                                        </Form.Group>
+
+
+                                        {/* Display new skills */}
+                                        {newSkills.map((skill, index) => (
+
+                                            <div key={index} className="d-flex align-items-center mb-1">
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="Enter New Skill"
+                                                    value={skill.skill} // Usa il valore della nuova nota
+                                                    onChange={(e) => handleSkillChange(index, e.target.value)} // Aggiorna il valore della nota specifica
+                                                />
+                                                <Button
+                                                    variant="danger"
+                                                    onClick={() => handleRemoveSkill(index)} // Funzione per rimuovere la nuova nota
+                                                    className="ms-2"
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </div>
+
+                                        ))}
+                                        {formErrors.skills && (
+                                            <div className="text-danger mb-3">
+                                                {formErrors.skills}
+                                            </div>
+                                        )}
+                                        <div className="mt-2">
+                                            <Button variant="primary" className="mb-3" onClick={handleAddSkill}>
+                                                Add Skill
+                                            </Button>
+                                        </div>
+
+                                    </Col>
+                                </Row>
+                                <Row>
+
                                     {/* Notes */}
                                     <Col>
                                         <Form.Group controlId="notes">
                                             <Form.Label>Notes</Form.Label>
-                                            <div className="text-secondary mb-3" hidden={customer.notes.some(note => note.state === "active") || showNewNoteField}>
-                                                Customer has no Notes
+                                            <div className="text-secondary mb-3" hidden={professional.notes.some(note => note.state === "active") || showNewNoteField}>
+                                                Professional has no Notes
                                             </div>
-                                            {customer.notes.map((note, index) => (
-                                            note.state === "active" ? (
-                                                <div key={index} className="d-flex align-items-center mb-1">
-                                                    <Form.Control
-                                                        hidden={note.state !== "active"} // Nasconde il campo se non attivo
-                                                        disabled={true}
-                                                        type="text"
-                                                        placeholder="Add note"
-                                                        value={note.note}
-                                                    />
-                                                    <Button
-                                                        hidden={note.state !== "active"} // Nasconde il bottone se la nota non è attiva
-                                                        variant="danger"
-                                                        onClick={() => handleRemoveField('notes', index)} // Funzione per rimuovere la nota
-                                                        className="ms-2"
-                                                    >
-                                                        Remove
-                                                    </Button>
-                                                </div>
-                                            ) : null
+                                            {professional.notes.map((note, index) => (
+                                                note.state === "active" ? (
+                                                    <div key={index} className="d-flex align-items-center mb-1">
+                                                        <Form.Control
+                                                            hidden={note.state !== "active"} // Nasconde il campo se non attivo
+                                                            disabled={true}
+                                                            type="text"
+                                                            placeholder="Add note"
+                                                            value={note.note}
+                                                        />
+                                                        <Button
+                                                            hidden={note.state !== "active"} // Nasconde il bottone se la nota non è attiva
+                                                            variant="danger"
+                                                            onClick={() => handleRemoveField('notes', index)} // Funzione per rimuovere la nota
+                                                            className="ms-2"
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </div>
+                                                ) : null
 
                                             ))}
                                         </Form.Group>
@@ -646,7 +846,6 @@ const EditCustomer = ({ xsrfToken }) => {
                                     </Col>
                                 </Row>
 
-
                                 {/* Submit Button */}
                                 <Button type="submit" className="btn-primary w-100">Save Changes</Button>
                             </Form>
@@ -658,8 +857,4 @@ const EditCustomer = ({ xsrfToken }) => {
     );
 };
 
-export default EditCustomer;
-/*
-IN EMAIL, TELEPHONE E ADDRESS NON SI SVUOTANO QUANDO FACCIO REMOVE E POI ADD. PERCHE?
-
- */
+export default EditProfessional;

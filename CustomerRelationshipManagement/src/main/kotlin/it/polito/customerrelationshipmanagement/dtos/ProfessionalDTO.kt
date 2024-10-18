@@ -13,6 +13,7 @@ data class ProfessionalDTO(
     val telephones: List<TelephoneDTO>,
     val addresses: List<AddressDTO>,
     val notes: List<NoteDTO>,
+    val jobOffers: List<JobOfferDTO>,
     val candidateJobOffers: List<JobOfferDTO>,
     val abortedJobOffers: List<JobOfferDTO>,
     val skills: List<SkillDTO>,
@@ -33,6 +34,7 @@ fun Professional.toDTO(): ProfessionalDTO =
         this.contact.telephones.map { it.toDTO() },
         this.contact.addresses.map { it.toDTO() },
         this.notes.map { it.toDTO() },
+        this.jobOffers.map { it.toDTO() },
         this.candidateJobOffers.map { it.toDTO() },
         this.abortedJobOffers.map { it.toDTO() },
         this.skills.map { it.toDTO() },
@@ -41,4 +43,5 @@ fun Professional.toDTO(): ProfessionalDTO =
         this.geographicalLocation,
         this.dailyRate
     )
+
 

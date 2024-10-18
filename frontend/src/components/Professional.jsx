@@ -82,7 +82,8 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
         notes,
         jobOffer,            // Attuale job offer
         abortedJobOffers,     // Offerte annullate
-        candidateJobOffers
+        candidateJobOffers,
+        jobOffers,  //Offerte history concluse bene
     } = professional;
 
     return (
@@ -159,8 +160,8 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                             {/* Contact Button */}
                             <Row>
 
-                                {emails && (
-                                    <a href={`mailto:${emails[0]}`}>
+                                {emails && emails.filter(email=> email.state==="active").length > 0 && (
+                                    <a href={`mailto:${emails.filter(email=> email.state==="active")[0]}`}>
                                         <Button variant="primary" className="mt-3 shadow-sm">
                                             Contact
                                         </Button>
@@ -241,51 +242,6 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                     </Row>
                     {/* Sezione delle Offerte di Lavoro */}
                     <Col >
-            {/*            /!* Sezione delle Offerte in fase di Candidatura *!/*/}
-            {/*            <Row className="mt-4">*/}
-            {/*                <Col>*/}
-            {/*        <Card className="shadow-lg" style={{ borderRadius: '15px' }}>*/}
-            {/*            <Card.Header className="bg-primary text-white">*/}
-            {/*                <h5>Candidate Job Offers</h5>*/}
-            {/*            </Card.Header>*/}
-            {/*            <Card.Body className="bg-light">*/}
-            {/*                {candidateJobOffers && candidateJobOffers.length > 0 ? (*/}
-            {/*                    <Row xs={1} sm={2} md={3} className="g-4">*/}
-            {/*                        {candidateJobOffers.map((offer, index) => (*/}
-            {/*                            <Col key={index}>*/}
-            {/*                                <Card className="shadow-sm h-100" style={{ minWidth: '200px', borderRadius: '10px' }}>*/}
-            {/*                                    <Card.Body>*/}
-            {/*                                        <Card.Title>{offer.name}</Card.Title>*/}
-            {/*                                        <Card.Subtitle className="mb-2 text-muted">*/}
-            {/*                                            {offer.description}*/}
-            {/*                                        </Card.Subtitle>*/}
-            {/*                                        <Badge*/}
-            {/*                                            bg={getStatusBadgeVariant(offer.currentState)}*/}
-            {/*                                            className="mb-2"*/}
-            {/*                                        >*/}
-            {/*                                            {offer.currentState.toUpperCase().replace('_', ' ')}*/}
-            {/*                                        </Badge>*/}
-            {/*                                        <Card.Text>*/}
-            {/*                                            <strong>Note:</strong> {offer.currentStateNote}*/}
-            {/*                                        </Card.Text>*/}
-            {/*                                        <Card.Text>*/}
-            {/*                                            <strong>Duration:</strong> {offer.duration} months*/}
-            {/*                                        </Card.Text>*/}
-            {/*                                        <Card.Text>*/}
-            {/*                                            <strong>Profit Margin:</strong> {offer.profitMargin}%*/}
-            {/*                                        </Card.Text>*/}
-            {/*                                    </Card.Body>*/}
-            {/*                                </Card>*/}
-            {/*                            </Col>*/}
-            {/*                        ))}*/}
-            {/*                    </Row>*/}
-            {/*                ) : (*/}
-            {/*                    'No candidate job offers available'*/}
-            {/*                )}*/}
-            {/*            </Card.Body>*/}
-            {/*        </Card>*/}
-            {/*    </Col>*/}
-            {/*</Row>*/}
 
                         {/* Sezione delle Offerte Attuali */}
                         <Row className="mt-4">
@@ -326,13 +282,59 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                                 ))}
                                             </Row>
                                         ) : (
-                                            'No current job offers available'
+                                            'No current job offer available'
                                         )}
                                     </Card.Body>
                                 </Card>
                             </Col>
                         </Row>
-            {/* Sezione delle Offerte Annullate */}
+                        {/* Sezione delle Offerte History */}
+                        <Row className="mt-4">
+                            <Col>
+                                <Card className="shadow-lg" style={{ borderRadius: '15px' }}>
+                                    <Card.Header className="bg-warning text-white">
+                                        <h5>Concluded Job Offers</h5>
+                                    </Card.Header>
+                                    <Card.Body className="bg-light">
+                                        {jobOffers && jobOffers.length > 0 ? (
+                                            <Row xs={1} sm={2} md={3} className="g-4">
+                                                {jobOffers.map((offer, index) => (
+                                                    <Col key={index}>
+                                                        <Card className="shadow-sm h-100" style={{ minWidth: '200px', borderRadius: '10px' }}>
+                                                            <Card.Body>
+                                                                <Card.Title>{offer.name}</Card.Title>
+                                                                <Card.Subtitle className="mb-2 text-muted">
+                                                                    {offer.description}
+                                                                </Card.Subtitle>
+                                                                <Badge
+                                                                    bg={getStatusBadgeVariant(offer.currentState)}
+                                                                    className="mb-2"
+                                                                >
+                                                                    {offer.currentState.toUpperCase().replace('_', ' ')}
+                                                                </Badge>
+                                                                <Card.Text>
+                                                                    <strong>Note:</strong> {offer.currentStateNote}
+                                                                </Card.Text>
+                                                                <Card.Text>
+                                                                    <strong>Duration:</strong> {offer.duration} months
+                                                                </Card.Text>
+                                                                <Card.Text>
+                                                                    <strong>Profit Margin:</strong> {offer.profitMargin}%
+                                                                </Card.Text>
+                                                            </Card.Body>
+                                                        </Card>
+                                                    </Col>
+                                                ))}
+                                            </Row>
+                                        ) : (
+                                            'No job offers available'
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        {/* Sezione delle Offerte Annullate */}
             <Row className="mt-4">
                 <Col>
                     <Card className="shadow-lg h-100" style={{ borderRadius: '15px' }}>

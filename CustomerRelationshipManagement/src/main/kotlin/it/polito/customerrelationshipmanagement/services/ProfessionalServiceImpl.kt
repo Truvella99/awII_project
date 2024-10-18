@@ -165,6 +165,15 @@ class ProfessionalServiceImpl(
             logger.info("Skill '${skillDTO.skill}' created and linked to Professional '${p.contact?.name} ${p.contact?.surname}'.")
             p.addSkill(skill)
         }
+        professional.emailsToDelete?.forEach { emailId ->
+            contactService.deleteContactEmail(p.contact.id, emailId)
+        }
+        professional.telephonesToDelete?.forEach { telephoneId ->
+            contactService.deleteContactTelephone(p.contact.id, telephoneId)
+        }
+        professional.addressesToDelete?.forEach { addressId ->
+            contactService.deleteContactAddress(p.contact.id, addressId)
+        }
         professional.notesToDelete?.forEach { noteId ->
             deleteProfessionalNote(p.id, noteId)
         }

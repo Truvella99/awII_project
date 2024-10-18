@@ -26,5 +26,8 @@ data class CreateUpdateProfessionalDTO(
     val skillsToDelete: List<Long>? = null,
     val notes: List<String>?,
     val notesToDelete: List<Long>? = null,
-    val jobOfferId: Long?
+    val jobOfferId: Long?,
+    val emailsToDelete: List<Long>? = null,
+    val telephonesToDelete: List<Long>? = null,
+    val addressesToDelete: List<Long>? = null
 )

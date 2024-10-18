@@ -184,7 +184,6 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.employmentState)) {
             errors.employmentState = "Employment state is required.";
         }
-        console.log(professional.dailyRate);
         if ( parseInt(professional.dailyRate) < 0) {
             errors.dailyRate = "Daily rate cannot be negative.";
         }
@@ -367,9 +366,8 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
                                             )}
                                         </Form.Group>
                                     </Col>
-                                </Row>
+
                                 {/* Daily Rate */}
-                                <Row>
 
                                     <Col md={6}>
                                         <Form.Group className="mb-3" controlId="dailyRate">
