@@ -34,4 +34,9 @@ interface JobOfferRepository: JpaRepository<JobOffer,Long> {
         professional: Professional? = null,
         p: PageRequest? = null
     ): List<JobOffer>
+
+    @Query("SELECT j FROM JobOffer j " +
+            "LEFT JOIN j.skills s " +
+            "WHERE (:skills IS NULL OR s.skill IN :skills)")
+    fun findBySkills(@Param("skills") skills: List<String>?): List<JobOffer>
 }

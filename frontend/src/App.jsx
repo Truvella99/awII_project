@@ -14,6 +14,11 @@ import ProfessionalForm from "./components/ProfessionalForm.jsx";
 import CreateCustomer from "./components/CustomerForm.jsx";
 import EditCustomer from "./components/EditCustomer.jsx";
 import EditProfessional from "./components/EditProfessional.jsx";
+import { RegistrationForm } from './components/Registration';
+import {Customers} from "./components/Customers.jsx";
+import {Professionals} from "./components/Professionals.jsx";
+import {JobOffers} from "./components/JobOffers.jsx";
+
 
 function App() {
   const [me, setMe] = useState(null);
@@ -74,15 +79,15 @@ function App() {
           <Container fluid className="mt-5">
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
-              <Route path="/ui/professionals" element={<></>} /> // Ale Costa
+              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn}/>} /> // Ale Costa
               <Route path="/ui/professionals/:professionalId" element={<ProfessionalProfile xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/professionals/edit/:professionalId" element={<EditProfessional xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/professionals/addProfessional" element={<ProfessionalForm xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
-              <Route path="/ui/customers" element={<></>} /> // Ale Costa
+              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn}/>} /> // Ale Costa
               <Route path="/ui/customers/:customerId" element={<CustomerProfile xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/customers/edit/:customerId" element={<EditCustomer xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/customers/addCustomer" element={<CreateCustomer xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
-              <Route path="/ui/jobOffers" element={<></>} /> // Ale Costa
+              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn}/>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn}/>} /> // Minicucc
               <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn}/>} />  // Minicucc view and edit
               <Route path="/ui/Registration" element={<></>} /> // Giuseppe

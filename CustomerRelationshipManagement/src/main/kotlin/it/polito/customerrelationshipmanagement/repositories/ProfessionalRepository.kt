@@ -18,4 +18,9 @@ interface ProfessionalRepository: JpaRepository<Professional,Long> {
             "AND (:geographicalLocation IS NULL OR (p.geographicalLocation = :geographicalLocation))")
     fun findBySkillsOrLocationOrEmploymentState(@Param("skills") skills: List<String>?, @Param("geographicalLocation") geographicalLocation: Pair<Double, Double>?, @Param("employmentState") employmentState: employmentState?, p: PageRequest?): List<Professional>
 
+
+    @Query("SELECT p FROM Professional p " +
+            "LEFT JOIN p.skills s " +
+            "WHERE (:skills IS NULL OR s.skill IN :skills)")
+    fun findBySkills(@Param("skills") skills: List<String>?): List<Professional>
 }

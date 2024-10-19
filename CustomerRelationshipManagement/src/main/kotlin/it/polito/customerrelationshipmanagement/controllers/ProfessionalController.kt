@@ -50,7 +50,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun listAllProfessionals(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -60,6 +60,23 @@ class ProfessionalController(private val professionalService: ProfessionalServic
         @RequestParam("employmentState") employmentState: employmentState?
     ): List<ProfessionalDTO> {
         return professionalService.listAllProfessionals(pageNumber, limit, skills, latitude,longitude, employmentState)
+    }
+    /**
+     * GET /API/professionals/distance/
+     *
+     * list registered professionals in the DB filtering by km distance.
+     */
+    @Validated
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/professionals/distance/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    fun listProfessionalsDistance(
+        @RequestParam("skills") skills: List<String>?,
+        @RequestParam("latitude") latitude: Double,
+        @RequestParam("longitude") longitude: Double,
+        @RequestParam("km") km: Double
+    ): List<ProfessionalDTO> {
+        return professionalService.listProfessionalsDistance(skills, latitude, longitude, km)
     }
     /**
      * GET /API/professionals/{professionalId}

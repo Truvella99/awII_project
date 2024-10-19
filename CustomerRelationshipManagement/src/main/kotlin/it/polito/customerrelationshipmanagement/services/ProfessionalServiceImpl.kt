@@ -24,6 +24,24 @@ class ProfessionalServiceImpl(
 ) : ProfessionalService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(ProfessionalController::class.java)
+
+    // functions for km distance
+    private fun deg2rad(deg: Double): Double {
+        return deg * (Math.PI/180)
+    }
+    private fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val R = 6371; // Radius of the earth in km
+        val dLat = deg2rad(lat2-lat1);  // deg2rad below
+        val dLon = deg2rad(lon2-lon1);
+        val a =
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2)
+        ;
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        println(R * c)
+        return R * c
+    }
     
     
     // ----- Get a list of all professionals -----
@@ -62,6 +80,24 @@ class ProfessionalServiceImpl(
         }
     }
 
+    // ----- Get a list of all professionals within km distance -----
+    override fun listProfessionalsDistance(
+        skills: List<String>?,
+        latitude: Double,
+        longitude: Double,
+        km: Double
+    ): List<ProfessionalDTO> {
+        if (latitude == null || longitude == null || km == null) {
+            throw IllegalGeographicalLocationException("Latitude, longitude and km distance must be provided.")
+        }
+
+        val professionals = professionalRepository.findBySkills(skills)
+        return professionals.filter { professional ->
+            val professionalLocation = professional.geographicalLocation ?: return@filter false
+            val calculatedDistance = haversine(latitude, longitude, professionalLocation.first, professionalLocation.second)
+            calculatedDistance <= km
+        }.map { it.toDTO() }
+    }
 
     // ----- Create a new professional -----
     override fun createProfessional(

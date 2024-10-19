@@ -2,11 +2,13 @@ package it.polito.customerrelationshipmanagement.controllers
 
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.category
+import it.polito.customerrelationshipmanagement.entities.employmentState
 import it.polito.customerrelationshipmanagement.entities.jobOfferStatus
 import it.polito.customerrelationshipmanagement.services.JobOfferService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -151,5 +153,15 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     fun getJobOfferValue(@PathVariable("jobOfferId") jobOfferId: Long): Number {
         return jobOfferService.getJobOfferValue(jobOfferId)
     }
-
+    /**
+     * GET /API/joboffers/
+     *
+     * get all the jobOffers in the DB. Allow for filtering by skills.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/joboffers/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    fun getAllJobOffers( @RequestParam("skills") skills: List<String>? ): List<JobOfferDTO> {
+        return jobOfferService.getAllJobOffers(skills)
+    }
 }

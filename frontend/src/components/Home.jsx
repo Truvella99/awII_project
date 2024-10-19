@@ -8,6 +8,7 @@ function Home({ me }) {
     const [cmResult, setCmResult] = useState(null);
     const [docStoreresult, setDocStoreResult] = useState(null);
     const navigate = useNavigate()
+    
     useEffect(() => {
         const postData = async () => {
             try {
@@ -179,7 +180,7 @@ function Home({ me }) {
                                 email: null,
                                 telephone: "+391234567890",
                                 employmentState: "available",
-                                geographicalLocation: { first: "12.0", second: "45.7"},
+                                geographicalLocation: { first: "41.06", second: "15.05"},
                                 dailyRate: 45.1,
                                 notes: ['Has been a customer for 5 years', 'Very punctual with payments'],
                                 skills: [
@@ -191,6 +192,7 @@ function Home({ me }) {
 
                             await API.createProfessional(professional,me.xsrfToken);
                         }}>add professional prefixed</Button>
+                        <Button variant="primary" onClick={() => navigate("/ui/customers")}> Go to Home </Button>
                     </Col>
                 </Row>
             </Container>

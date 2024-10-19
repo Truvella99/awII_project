@@ -242,6 +242,10 @@ class CustomerServiceImpl(
         return contactRepository.findByCategoryAndCustomFilter(category.customer,filter,filter,filter,filter,filter).mapNotNull { it.customer?.toDTO() }
     }
 
+    override fun getAllCustomers(): List<CustomerDTO> {
+        return customerRepository.findAll().map { it.toDTO() }
+    }
+
 }
 
 

@@ -30,4 +30,5 @@ interface JobOfferService {
     fun updateJobOfferStatus(jobOfferId: Long, data: UpdateJobOfferStatusDTO): JobOfferDTO
     //Pay attention that value is confirmed only if a job offer is bound to a professional
     fun getJobOfferValue(jobOfferId: Long): Number
+    fun getAllJobOffers(skills: List<String>?): List<JobOfferDTO>
 }

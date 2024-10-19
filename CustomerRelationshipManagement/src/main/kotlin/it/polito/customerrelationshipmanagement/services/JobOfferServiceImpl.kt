@@ -477,4 +477,9 @@ class JobOfferServiceImpl(
 
         return (jobOffer.duration.toDouble() * jobOffer.professional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
     }
+
+    // ----- Get all the job offers -----
+    override fun getAllJobOffers(skills: List<String>?): List<JobOfferDTO> {
+        return jobOfferRepository.findBySkills(skills).map { it.toDTO() }
+    }
 }

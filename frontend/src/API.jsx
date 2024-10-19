@@ -417,6 +417,102 @@ async function getProfessionals(filter, xsrfToken) {
     }
 };
 
+async function getAllCustomers(xsrfToken) {
+    const response = await fetch(`/crm/API/customers/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': xsrfToken,
+      }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+      return await response.json();
+    else
+      throw await response.json();
+  }
+  
+async function getAllProfessionals(xsrfToken) {
+const response = await fetch(`/crm/API/professionals/`, {
+    method: 'GET',
+    headers: {
+    'Content-Type': 'application/json',
+    'X-XSRF-TOKEN': xsrfToken,
+    }
+}).catch(() => { throw { error: "Connection Error" } });
+if (response.status === 200)
+    return await response.json();
+else
+    throw await response.json();
+}
+
+async function getProfessionalSkills(skills, xsrfToken) {
+    let params = new URLSearchParams();
+    skills.forEach(skill => params.append('skills', skill));
+
+    const response = await fetch(`/crm/API/professionals/?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+        return await response.json();
+    else
+        throw await response.json();
+}
+
+async function getProfessionalsDistance(skills, latitude, longitude, km, xsrfToken) {
+    let params = new URLSearchParams();
+    skills.forEach(skill => params.append('skills', skill));
+    params.append('latitude', latitude);
+    params.append('longitude', longitude);
+    params.append('km', km);
+
+    const response = await fetch(`/crm/API/professionals/distance/?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+        return await response.json();
+    else
+        throw await response.json();
+}
+
+async function getAllJobOffers(xsrfToken) {
+    const response = await fetch(`/crm/API/joboffers/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+        return await response.json();
+    else
+        throw await response.json();
+}
+
+async function getJobOfferSkills(skills, xsrfToken) {
+    let params = new URLSearchParams();
+    skills.forEach(skill => params.append('skills', skill));
+
+    const response = await fetch(`/crm/API/joboffers/?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+        return await response.json();
+    else
+        throw await response.json();
+}
+
 export default {
     createJobOffer,
     getJobOfferById,
@@ -431,5 +527,11 @@ export default {
     getCustomers,
     createProfessional,
     getProfessionalById,
-    getProfessionals
+    getProfessionals,
+    getAllCustomers,
+    getAllProfessionals,
+    getProfessionalSkills,
+    getProfessionalsDistance,
+    getAllJobOffers,
+    getJobOfferSkills
 };

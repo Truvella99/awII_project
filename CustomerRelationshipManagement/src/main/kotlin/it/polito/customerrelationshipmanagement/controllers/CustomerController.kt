@@ -75,4 +75,16 @@ class CustomerController(private val customerService: CustomerService){
     ): CustomerDTO {
         return customerService.updateCustomer(customerId, customer)
     }
+
+    /**
+     * GET /API/customers/
+     *
+     * get all the customers in the DB.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/customers/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    fun getAllCustomers(): List<CustomerDTO> {
+        return customerService.getAllCustomers()
+    }
 }

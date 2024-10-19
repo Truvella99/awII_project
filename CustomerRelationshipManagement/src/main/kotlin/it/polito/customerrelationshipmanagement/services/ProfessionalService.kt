@@ -17,6 +17,11 @@ interface ProfessionalService {
         longitude: Double?,
         employmentState: employmentState?
     ): List<ProfessionalDTO>
+    fun listProfessionalsDistance(
+        skills: List<String>?,
+        latitude: Double,
+        longitude: Double,
+        km: Double): List<ProfessionalDTO>
     fun createProfessional(professional: CreateUpdateProfessionalDTO): ProfessionalDTO
     // ale costa
     fun findProfessionalById(professionalId: Long): ProfessionalDTO
