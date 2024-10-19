@@ -377,7 +377,7 @@ function Professionals({loggedIn}) {
                     </div>
                     <Row style={{marginBottom: '100px'}}>
                         <Col className="d-flex justify-content-center">
-                            <Button variant="info" onClick={() => navigate('/ui/Registration')}> <i className="bi bi-plus-lg"></i> Add professional </Button>
+                            <Button variant="info" onClick={() => navigate('/ui/professionals/addProfessional')}> <i className="bi bi-plus-lg"></i> Add professional </Button>
                         </Col>
                     </Row>
                     <h6> Filter by skills: </h6>
