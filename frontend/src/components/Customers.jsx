@@ -305,7 +305,7 @@ function Customers({loggedIn}) {
                     </div>
                     <Row style={{marginBottom: '100px'}}>
                         <Col className="d-flex justify-content-center">
-                            <Button variant="info" onClick={() => navigate('/ui/Registration')}> <i className="bi bi-plus-lg"></i> Add customer </Button>
+                            <Button variant="info" onClick={() => navigate('/ui/customers/addCustomer')}> <i className="bi bi-plus-lg"></i> Add customer </Button>
                         </Col>
                     </Row>
                 </Col>
