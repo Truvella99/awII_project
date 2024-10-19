@@ -253,33 +253,32 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                     <Card.Body className="bg-light">
                                         {jobOffer   ? (
                                             <Row  className="g-4">
-                                                {jobOffer.map((offer, index) => (
-                                                    <Col key={index}>
+                                                    <Col >
                                                         <Card className="shadow-sm h-100" style={{ minWidth: '200px', borderRadius: '10px' }}>
                                                             <Card.Body>
-                                                                <Card.Title>{offer.name}</Card.Title>
+                                                                <Card.Title>{jobOffer.name}</Card.Title>
                                                                 <Card.Subtitle className="mb-2 text-muted">
-                                                                    {offer.description}
+                                                                    {jobOffer.description}
                                                                 </Card.Subtitle>
                                                                 <Badge
-                                                                    bg={getStatusBadgeVariant(offer.currentState)}
+                                                                    bg={getStatusBadgeVariant(jobOffer.currentState)}
                                                                     className="mb-2"
                                                                 >
-                                                                    {offer.currentState.toUpperCase().replace('_', ' ')}
+                                                                    {jobOffer.currentState.toUpperCase().replace('_', ' ')}
                                                                 </Badge>
                                                                 <Card.Text>
-                                                                    <strong>Note:</strong> {offer.currentStateNote}
+                                                                    <strong>Note:</strong> {jobOffer.currentStateNote}
                                                                 </Card.Text>
                                                                 <Card.Text>
-                                                                    <strong>Duration:</strong> {offer.duration} months
+                                                                    <strong>Duration:</strong> {jobOffer.duration} months
                                                                 </Card.Text>
                                                                 <Card.Text>
-                                                                    <strong>Profit Margin:</strong> {offer.profitMargin}%
+                                                                    <strong>Profit Margin:</strong> {jobOffer.profitMargin}%
                                                                 </Card.Text>
                                                             </Card.Body>
                                                         </Card>
                                                     </Col>
-                                                ))}
+                                                ))
                                             </Row>
                                         ) : (
                                             'No current job offer available'
