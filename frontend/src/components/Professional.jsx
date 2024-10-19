@@ -278,7 +278,6 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                                             </Card.Body>
                                                         </Card>
                                                     </Col>
-                                                ))
                                             </Row>
                                         ) : (
                                             'No current job offer available'
