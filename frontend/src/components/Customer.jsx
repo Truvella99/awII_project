@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import API from "../API";
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import {FaEdit} from "react-icons/fa";
 // Function to map jobOfferStatus to color
 const getStatusBadgeVariant = (status) => {
     switch (status) {
@@ -207,6 +208,28 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
 
                 </Col>
             </Row>
+            {/* FAB for Editing Professional */}
+            {customerId &&
+                <Link to={`/ui/customers/edit/${customerId}`}>
+                    <Button
+                        variant="primary"
+                        className="shadow-lg"
+                        style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '20px',
+                            borderRadius: '50%',
+                            width: '60px',
+                            height: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <FaEdit size={30} />
+                    </Button>
+                </Link>
+            }
         </Container>
     );
 };

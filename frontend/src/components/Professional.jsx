@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {Container, Row, Col, Card, Button, Badge} from 'react-bootstrap';
 import API from "../API";
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import { FaEdit } from "react-icons/fa"; // Icona per il FAB
 
 // Function to map employmentState to badge color
 const getEmploymentBadgeVariant = (state) => {
@@ -175,7 +176,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                     <h3 className="mt-4">Candidate For:</h3>
                                     <ul className="list-unstyled">
                                         {candidateJobOffers.map((offer, index) => (
-                                            <li key={index}>
+                                            <li key={index} onClick={()=>navigate(`/ui/jobOffers/${offer.id}`)}>
                                                 <i className="bi bi-check-circle-fill"></i> {offer.name}
                                             </li>
                                         ))}
@@ -244,7 +245,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                     <Col >
 
                         {/* Sezione delle Offerte Attuali */}
-                        <Row className="mt-4">
+                        <Row className="mt-4" onClick={()=>navigate(`/ui/jobOffers/${jobOffer.id}`) }>
                             <Col>
                                 <Card className="shadow-lg h-100" style={{ borderRadius: '15px' }}>
                                     <Card.Header className="bg-primary text-white">
@@ -382,6 +383,28 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                 </Col>
 
             </Row>
+            {/* FAB for Editing Professional */}
+            {professionalId &&
+            <Link to={`/ui/professionals/edit/${professionalId}`}>
+                <Button
+                    variant="primary"
+                    className="shadow-lg"
+                    style={{
+                        position: 'fixed',
+                        bottom: '20px',
+                        right: '20px',
+                        borderRadius: '50%',
+                        width: '60px',
+                        height: '60px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <FaEdit size={30} />
+                </Button>
+            </Link>
+            }
         </Container>
     );
 };
