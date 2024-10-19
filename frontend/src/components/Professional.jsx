@@ -341,7 +341,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                         </Card.Header>
                         <Card.Body className="bg-light">
                             {abortedJobOffers && abortedJobOffers.length > 0 ? (
-                                <Row className="g-4">
+                                <Row xs={1} sm={2} md={3} className="g-4">
                                     {abortedJobOffers.map((offer, index) => (
                                         <Col key={index}>
                                             <Card className="shadow-sm h-100" style={{ minWidth: '200px', borderRadius: '10px' }}>
