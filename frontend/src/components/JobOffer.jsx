@@ -489,11 +489,6 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
 
             <Container className="d-flex justify-content-between">
-                {(mode !== 'view') ?
-                    <Button variant="primary" type="submit">
-                        Submit
-                    </Button> : ''}
-
                 {(mode === 'view') ?
                     <Button variant="warning" onClick={() => setMode('edit')}>
                         Edit
@@ -502,6 +497,11 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     <Button variant="danger" onClick={() => navigate("/ui/jobOffers")}>
                         Cancel
                     </Button>}
+
+                {(mode !== 'view') ?
+                    <Button variant="primary" type="submit">
+                        Submit
+                    </Button> : ''}
 
             </Container>
         </Form>

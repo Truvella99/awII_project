@@ -62,53 +62,7 @@ function Home({ me }) {
         telephone: "+391234567890",
         address: "Via Roma 1",
         notes: ['Has been a customer for 5 years', 'Very punctual with payments'],
-        jobOffers: [
-            {
-                first: null,
-                second: {
-                    name: 'Software Engineer',
-                    description: 'Develop and maintain web applications.',
-                    currentState: 'done',
-                    currentStateNote: 'Looking for suitable candidates',
-                    duration: 6,
-                    profitMargin: 10,
-                    skills: [
-                        { skill: "Skill 1" },
-                        { skill: "Skill 2" }
-                    ]
-                }
-            },
-            {
-                first: null,
-                second: {
-                    name: 'Data Scientist',
-                    description: 'Analyze complex data sets to assist decision-making.',
-                    currentState: 'aborted',
-                    currentStateNote: 'Position filled',
-                    duration: 12,
-                    profitMargin: 15,
-                    skills: [
-                        { skill: "Skill 3" },
-                        { skill: "Skill 4" }
-                    ]
-                }
-            },
-            {
-                first: null,
-                second: {
-                    name: 'Data Scientist',
-                    description: 'Analyze complex data sets to assist decision-making.',
-                    currentState: 'candidate_proposal',
-                    currentStateNote: 'Position filled',
-                    duration: 12,
-                    profitMargin: 15,
-                    skills: [
-                        { skill: "Skill 5" },
-                        { skill: "Skill 6" }
-                    ]
-                }
-            }
-        ]
+        jobOffers: []
     };
     let createdCustomerId = 1;
     return (
@@ -116,7 +70,10 @@ function Home({ me }) {
             <Container>
                 <Row className="mb-3">
                     <Col>
-
+                    <Button onClick={() => navigate("/ui/Registration")}>Registration</Button>
+                        <Button onClick={() => navigate("/ui/jobOffers/addJobOffer")}>add</Button>
+                        <Button onClick={() => navigate("/ui/jobOffers/1")}>view</Button>
+                        <Button onClick={()=>navigate("/ui/professionals/")}>professional</Button>
                         <Button onClick={()=>navigate("/ui/customers/1")}>Go to customer</Button>
                         <Button onClick={()=>navigate("/ui/professionals/1")}>Go to professional</Button>
                         <Button variant={"success"} onClick={()=>navigate("/ui/professionals/addProfessional")}>Add Professional Page</Button>
