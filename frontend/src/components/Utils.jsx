@@ -12,7 +12,16 @@ import professionalsImage from "../icons/professionals.png";
 const API_KEY = 'AIzaSyCO5hFwnkcQjDkoivao8qpJbKvITf_vb1g';
 const libraries = ['places']; // Include Places Library
 
-import API from "../API.jsx";
+function convertDuration(duration,asString=true) {
+    let days = Math.floor(duration / 24);
+    let hours = duration % 24;
+    if (asString) {
+        return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}`;
+    } else {
+        return { days: days, hours: hours };
+    }
+}
+
 const address_string_to_object = (addr) => {
     const main_infos = addr.split(';');
     const lat = parseFloat(main_infos[1].split(':')[1]);
@@ -196,4 +205,4 @@ function SideBar() {
     );
 }
 
-export {address_string_to_object, address_object_to_string, AddressSelector , API_KEY, SideBar};
+export {convertDuration, address_string_to_object, address_object_to_string, AddressSelector , API_KEY, SideBar};

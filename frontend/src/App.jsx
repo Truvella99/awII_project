@@ -76,7 +76,7 @@ function App() {
             </Toast>
           </Container>
           <Navigation  me={me} logout={handleLogout} loggedIn={loggedIn} />
-          <Container fluid className="mt-5">
+          <Container fluid /*className="mt-5"*/>
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
               <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn}/>} /> // Ale Costa

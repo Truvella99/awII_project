@@ -10,6 +10,8 @@ import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 import API from "../API";
 import validator from 'validator';
 import InputMask from "react-input-mask";
+import { FaEdit } from "react-icons/fa";
+import { convertDuration } from "./Utils";
 
 function JobOfferContainer({ loggedIn }) {
     const [mode, setMode] = useState('');
@@ -18,12 +20,6 @@ function JobOfferContainer({ loggedIn }) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
-
-    function convertDuration(duration) {
-        let hours = Math.floor(duration / 60);
-        let minutes = duration % 60;
-        return `${hours.toString().padStart(4, '0')}:${minutes.toString().padStart(2, '0')}`;
-    }
 
     useEffect(() => {
         // function used to retrieve page information in detail
@@ -38,9 +34,13 @@ function JobOfferContainer({ loggedIn }) {
                         let customer = await API.getCustomerById(jobOffer.customerId, xsrfToken);
                         let jobOfferValue = null;
                         let professional = null;
-                        if (jobOffer.professionalId) {
+                        if (jobOffer.completedProfessionalId) {
                             jobOfferValue = await API.getJobOfferValueById(jobOfferId, xsrfToken);
-                            professional = await API.getProfessionalById(jobOffer.professionalId, xsrfToken);
+                            professional = await API.getProfessionalById(jobOffer.completedProfessionalId, xsrfToken);
+                        }
+                        if (jobOffer.consolidatedProfessionalId) {
+                            jobOfferValue = await API.getJobOfferValueById(jobOfferId, xsrfToken);
+                            professional = await API.getProfessionalById(jobOffer.consolidatedProfessionalId, xsrfToken);
                         }
                         const abortedProfessionalPromises = jobOffer.abortedProfessionalsId.map(id => API.getProfessionalById(id));
                         let abortedProfessionals = (await Promise.all(abortedProfessionalPromises));
@@ -50,7 +50,7 @@ function JobOfferContainer({ loggedIn }) {
                         candidateProfessionals = candidateProfessionals.map(professional => Object.assign({}, professional, { label: professional.name }));
                         let history = await API.getJobOfferHistoryById(jobOfferId, xsrfToken);
                         setMode('view');
-                        setJobOffer(Object.assign({}, jobOffer, { duration: convertDuration(jobOffer.duration), professionals: abortedProfessionals.concat(candidateProfessionals), professional: professional, customer: customer, value: jobOfferValue, history: history }));
+                        setJobOffer(Object.assign({}, jobOffer, { duration: convertDuration(jobOffer.duration,false), professionals: abortedProfessionals.concat(candidateProfessionals), professional: professional, customer: customer, value: jobOfferValue, history: history }));
                     } else {
                         // add jobOffer
                         setMode('add');
@@ -86,16 +86,15 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
     const xsrfToken = useContext(TokenContext);
     const navigate = useNavigate();
     // jobOffer States
-    const oldprofessional = jobOffer.professional || null;
-    const oldprofessionals = jobOffer.professionals || [];
+    let oldCurrentState = jobOffer.currentState;
     const [id, setId] = useState(jobOffer.id || null);
     const [name, setName] = useState(jobOffer.name || '');
     const [description, setDescription] = useState(jobOffer.description || '');
     const [currentState, setCurrentState] = useState(jobOffer.currentState || 'created');
     const [currentStateNote, setCurrentStateNote] = useState(jobOffer.currentStateNote || null);
-    const [duration, setDuration] = useState(jobOffer.duration || '');
-    const [invalidDuration, setInvalidDuration] = useState(false);
-    const [value, setValue] = useState(jobOffer.value || '');
+    const [duration, setDuration] = useState(jobOffer.duration || {days: 0, hours: 1});
+    const [invalidDuration, setInvalidDuration] = useState({days: false, hours: false});
+    const [value, setValue] = useState(jobOffer.value || null);
     const [profitMargin, setProfitMargin] = useState(jobOffer.profitMargin || '');
     const [invalidProfitMargin, setInvalidProfitMargin] = useState(false);
     const [customer, setCustomer] = useState(jobOffer.customer || {});
@@ -119,9 +118,10 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
             setName(jobOffer.name || '');
             setDescription(jobOffer.description || '');
             setCurrentState(jobOffer.currentState || 'created');
+            oldCurrentState = jobOffer.currentState;
             setCurrentStateNote(jobOffer.currentStateNote || null);
-            setDuration(jobOffer.duration.toString() || '');
-            setValue((jobOffer.value) ? jobOffer.value.toString() : '');
+            setDuration(jobOffer.duration || {days: 0, hours: 1});
+            setValue(jobOffer.value || null);
             setProfitMargin(jobOffer.profitMargin.toString() || '');
             setCustomer(jobOffer.customer || {});
             setSkills(jobOffer.skills.filter(skill => skill.state === 'active').map(skill => Object.assign({}, skill, { label: skill.skill, value: skill.skill, __isNew__: true })) || []);
@@ -248,15 +248,21 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
     function handleJobOfferNumbers() {
         let valid = true;
-        let time = duration.split(":")
-        let hours = time[0];
-        let minutes = time[1];
-        if (!validator.isInt(hours) || !validator.isInt(minutes) || parseInt(minutes) >= 60) {
-            setInvalidDuration(true);
+        const isValidDays = validator.isInt(duration.days.toString()) && parseInt(duration.days) >= 0;
+        const isValidHours = validator.isInt(duration.hours.toString()) && parseInt(duration.hours) >= 0 && parseInt(duration.hours) < 24;
+        
+        // At least one of the fields must be valid
+        const isAtLeastOneValid = isValidDays || isValidHours;
+
+        setInvalidDuration({
+            days: !isValidDays || (parseInt(duration.days) === 0 && parseInt(duration.hours) === 0), // Invalid if days are 0 and no valid hours
+            hours: !isValidHours || (parseInt(duration.days) === 0 && parseInt(duration.hours) === 0) // Invalid if hours are 0 and no valid days
+        });
+
+        if(!isAtLeastOneValid) {
             valid = false;
-        } else {
-            setInvalidDuration(false);
         }
+
         if (!validator.isInt(profitMargin.toString()) || parseInt(profitMargin.toString()) <= 0 || parseInt(profitMargin.toString()) > 100) {
             setInvalidProfitMargin(true);
             valid = false;
@@ -279,17 +285,13 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
             }
 
             if (valid) {
-                // convert all in minutes to send
-                let time = duration.split(":")
-                let hours = time[0];
-                let minutes = time[1];
-                console.log(parseInt(parseInt(hours) * 60 + parseInt(minutes)))
                 let jobOffer = {
                     name: name.trim(),
                     description: description.trim(),
                     currentState: currentState,
                     currentStateNote: (currentStateNote) ? currentStateNote.trim() : null,
-                    duration: parseInt(parseInt(hours) * 60 + parseInt(minutes)),
+                    // convert all in hours to send
+                    duration: parseInt(parseInt(duration.days) * 24 + parseInt(duration.hours)),
                     profitMargin: parseInt(profitMargin.trim()),
                     customerId: customer.id,
                     professionalId: professional && professional.id ? professional.id : null,
@@ -300,14 +302,16 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                 if (mode === 'edit') {
                     await API.updateJobOfferById(jobOffer, id, xsrfToken);
                     // handle also joboffer status
-                    let updateStatus = {
-                        targetStatus: currentState,
-                        note: (currentStateNote) ? currentStateNote.trim() : null,
-                        consolidatedProfessionalId: professional && professional.id ? professional.id : null,
-                        professionalsId: professionals.map(professional => professional.id)
+                    if (oldCurrentState != currentState) {
+                        let updateStatus = {
+                            targetStatus: currentState,
+                            note: (currentStateNote) ? currentStateNote.trim() : null,
+                            consolidatedProfessionalId: professional && professional.id ? professional.id : null,
+                            professionalsId: professionals.map(professional => professional.id)
+                        }
+                        console.log(updateStatus)
+                        await API.updateJobOfferStatusbyId(updateStatus, id, xsrfToken);
                     }
-                    console.log(updateStatus)
-                    await API.updateJobOfferStatusbyId(updateStatus, id, xsrfToken);
                 } else {
                     await API.createJobOffer(jobOffer, xsrfToken);
                 }
@@ -331,20 +335,16 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                 </Form.Group>
 
                 <Form.Group as={Col} controlId="formGridDuration">
-                    <Form.Label>Duration (Working Hours)</Form.Label>
-                    {(readOnlyBoolean) ?
-                        <Form.Control type="text" value={duration.replace(/^0*(\d{1,2}):/, (match, p1) => p1.padStart(2, '0') + ':')} disabled={readOnlyBoolean} />
-                        :
-                        <InputMask
-                            mask="9999:99"
-                            value={duration}
-                            onChange={e => setDuration(e.target.value)}
-                            placeholder="Enter JobOffer Duration"
-                            required
-                            className={`form-control ${(invalidDuration) ? 'is-invalid' : ''}`}
-                            name="duration"
-                        />}
-                    <Form.Control.Feedback type="invalid">Please insert the duration in the format HHHH:MM, e.g., 0036:30 for 36 hours and 30 minutes.</Form.Control.Feedback>
+                    <Form.Label>Duration (Estimated Working Days and Hours)</Form.Label>
+                    <Row>
+                        <Col>
+                            <Form.Control type="number" step="1" min={0} isInvalid={invalidDuration.days} required value={duration.days} onChange={e => setDuration(Object.assign({},duration,{days: e.target.value}))} placeholder="Enter Duration Days" disabled={readOnlyBoolean} />
+                        </Col>
+                        <Col>
+                            <Form.Control type="number" step="1" min={0} max={23} isInvalid={invalidDuration.hours} required value={duration.hours} onChange={e => setDuration(Object.assign({},duration,{hours: e.target.value}))} placeholder="Enter Duration Hours" disabled={readOnlyBoolean} />
+                        </Col>
+                        <Form.Control.Feedback type="invalid" style={(invalidDuration.days || invalidDuration.hours) ? {display: 'block', visibility: 'visible'}:{}}>Please insert the duration (days and/or hours, hours max 23) as a positive integer number.</Form.Control.Feedback>
+                    </Row>
                 </Form.Group>
 
                 <Form.Group as={Col} controlId="formGridProfit">
@@ -352,11 +352,17 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     <Form.Control type="number" step="1" min={1} max={100} isInvalid={invalidProfitMargin} required value={profitMargin} onChange={e => setProfitMargin(e.target.value)} placeholder="Enter JobOffer Profit Margin" disabled={readOnlyBoolean} />
                     <Form.Control.Feedback type="invalid">Please insert a valid positive number as JobOffer Profit Margin.</Form.Control.Feedback>
                 </Form.Group>
+
+                {(value !== null) ? 
+                <Form.Group as={Col} controlId="formGridValue">
+                    <Form.Label>Value (€)</Form.Label>
+                    <Form.Control type="text" defaultValue={value} readOnly disabled={readOnlyBoolean}/>
+                </Form.Group> : ''}
             </Row>
 
             <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col} controlId="formGridState">
-                    <Form.Label>JobOffer Current State</Form.Label>
+                    <Form.Label>Current State</Form.Label>
                     <Form.Select value={currentState} onChange={e => setCurrentState(e.target.value)} disabled={readOnlyBoolean || mode === 'add'}>
                         <option>created</option>
                         <option>selection_phase</option>
@@ -368,25 +374,25 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     <Form.Control.Feedback type="invalid">Please insert JobOffer Current State.</Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group as={Col} className="mb-3" controlId="formGridDescription">
-                    <Form.Label>JobOffer Current State Note</Form.Label>
+                <Form.Group as={Col} className="mb-3" controlId="formGridCurrentState">
+                    <Form.Label>Current State Note</Form.Label>
                     <Form.Control value={currentStateNote} onChange={e => setCurrentStateNote(e.target.value)} as="textarea" rows={1} placeholder="Enter Current State Note" disabled={readOnlyBoolean} />
                 </Form.Group>
             </Row>
 
             <Form.Group className="mb-3" controlId="formGridDescription">
-                <Form.Label>JobOffer Description</Form.Label>
+                <Form.Label>Description</Form.Label>
                 <Form.Control value={description} isInvalid={description.length === 0 && validated} onChange={e => setDescription(e.target.value)} required as="textarea" rows={3} placeholder="Enter JobOffer Description" disabled={readOnlyBoolean} />
                 <Form.Control.Feedback type="invalid">Please insert JobOffer Description.</Form.Control.Feedback>
             </Form.Group>
 
             <Row className="mb-3 justify-content-center align-items-center">
-                {(mode !== 'view') ?
+                {(mode === 'add') ?
                     <Form.Group className="mb-3" as={Col} controlId="formGridSearchCustomer">
                         <Form.Label>Find Customer</Form.Label>
                         <ReactSearchAutocomplete placeholder="Search ..." items={searchedCustomers} onSearch={handleOnSearchCustomers} onSelect={handleOnSelectCustomers} autoFocus formatResult={formatResult} />
                     </Form.Group> : ''}
-                <Form.Group className="mb-3" as={Col} controlId="formGridCustomer">
+                <Form.Group key={customer.id} className="mb-3" as={Col} controlId="formGridCustomer">
                     <Form.Label>Customer Selected</Form.Label>
                     <InputGroup>
                         <Form.Control
@@ -398,7 +404,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                             required
                             onKeyDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         />
-                        {(mode !== 'view') ?
+                        {(mode === 'add') ?
                         <InputGroup.Text>
                             <CloseButton disabled={readOnlyBoolean || currentState === 'consolidated' || currentState === 'done'} onClick={() => setCustomer({})} />
                         </InputGroup.Text> : ''}
@@ -466,7 +472,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
             {(mode === 'view' && history.length > 0) ? (
                 <>
-                    <h4>JobOffer History:</h4>
+                    <h4>History:</h4>
                     <ListGroup>
                         {history
                             .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sorts in descending order by date
@@ -490,11 +496,28 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
             <Container className="d-flex justify-content-between">
                 {(mode === 'view') ?
-                    <Button variant="warning" onClick={() => setMode('edit')}>
-                        Edit
+
+                    <Button
+                        variant="primary"
+                        className="shadow-lg"
+                        style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '20px',
+                            borderRadius: '50%',
+                            width: '60px',
+                            height: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        onClick={() => setMode('edit')}
+                    >
+                        <FaEdit size={30} />
                     </Button>
+                    
                     :
-                    <Button variant="danger" onClick={() => navigate("/ui/jobOffers")}>
+                    <Button variant="danger" onClick={() => setMode('view')}>
                         Cancel
                     </Button>}
 
