@@ -359,7 +359,7 @@ class JobOfferServiceImpl(
                 // Update consolidatedProfessional state to employed
                 consolidatedProfessional.employmentState = employmentState.employed
                 consolidatedProfessional.currentJobOffer = jobOffer
-                jobOffer.professional = consolidatedProfessional
+                jobOffer.consolidatedProfessional = consolidatedProfessional
                 jobOffer.candidateProfessionals.remove(consolidatedProfessional)
                 consolidatedProfessional.candidateJobOffers.remove(jobOffer)
                 jobOffer.candidateProfessionals.forEach { professional ->
@@ -418,23 +418,27 @@ class JobOfferServiceImpl(
             } else */if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.done) {
                 throw JobOfferStatusException("Invalid jobOffer status transition (from 'consolidated' only 'done/aborted' are possible).")
             } else if (data.targetStatus == jobOfferStatus.aborted){
-                jobOffer.professional?.employmentState = employmentState.available
-                jobOffer.addAbortedProfessional(jobOffer.professional!!)
+                jobOffer.consolidatedProfessional?.employmentState = employmentState.available
+                jobOffer.addAbortedProfessional(jobOffer.consolidatedProfessional!!)
                 //jobOffer.professional?.addJobOffer(jobOffer)
-                jobOffer.professional?.currentJobOffer = null
+                jobOffer.consolidatedProfessional?.currentJobOffer = null
+                jobOffer.consolidatedProfessional = null
             } else {
                 // done status all correct
-                jobOffer.professional?.employmentState = employmentState.available
+                jobOffer.completedProfessional = jobOffer.consolidatedProfessional
+                jobOffer.consolidatedProfessional = null
+
+                jobOffer.completedProfessional?.employmentState = employmentState.available
                 //jobOffer.addAbortedProfessional(jobOffer.professional!!)
-                jobOffer.professional?.addJobOffer(jobOffer)
-                jobOffer.professional?.currentJobOffer = null
+                jobOffer.completedProfessional?.addJobOffer(jobOffer)
+                jobOffer.completedProfessional?.currentJobOffer = null
             }
 
             jobOfferStatus.done -> if (data.targetStatus != jobOfferStatus.selection_phase) {
                 throw JobOfferStatusException("Invalid jobOffer status transition (from 'done' only 'selection_phase' is possible).")
             } else {
                 // clean the jobOffer to be reused
-                jobOffer.professional = null
+                jobOffer.completedProfessional = null
                 jobOffer.abortedProfessionals.clear()
                 jobOffer.candidateProfessionals.clear()
             }
@@ -471,11 +475,11 @@ class JobOfferServiceImpl(
         val jobOffer = jobOfferRepository.findById(jobOfferId).orElseThrow{
             throw JobOfferNotFoundException("JobOffer with JobOfferId:$jobOfferId not found.")
         }
-        if (jobOffer.professional == null) {
+        if (jobOffer.completedProfessional == null) {
             throw JobOfferStatusException("JobOffer with JobOfferId:$jobOfferId is not bound to a professional.")
         }
 
-        return (jobOffer.duration.toDouble() * jobOffer.professional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
+        return (jobOffer.duration.toDouble() * jobOffer.completedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
     }
 
     // ----- Get all the job offers -----
