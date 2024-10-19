@@ -1,6 +1,5 @@
 package it.polito.customerrelationshipmanagement.entities
 
-import com.fasterxml.jackson.databind.BeanDescription
 import jakarta.persistence.*
 
 
@@ -17,6 +16,8 @@ class JobOffer {
     var value: Number? = null
     lateinit var profitMargin: Number
 
+    @OneToOne
+    var consolidatedProfessional: Professional? = null
 
     @ManyToOne
     lateinit var customer: Customer
@@ -31,7 +32,7 @@ class JobOffer {
 
     // professional who completed the joboffer
     @ManyToOne
-    var professional:Professional? = null
+    var completedProfessional:Professional? = null
 
     // professionals who are candidate for the joboffer
     @ManyToMany

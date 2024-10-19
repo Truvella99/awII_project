@@ -21,11 +21,11 @@ class Professional{
     var currentJobOffer: JobOffer? = null
 
     // joboffers correctly completed
-    @OneToMany(mappedBy = "professional")
+    @OneToMany(mappedBy = "completedProfessional")
     val jobOffers = mutableSetOf<JobOffer>()
 
     fun addJobOffer(jobOffer: JobOffer){
-        jobOffer.professional = this
+        jobOffer.completedProfessional = this
         jobOffers.add(jobOffer)
     }
 

@@ -1,10 +1,7 @@
 package it.polito.customerrelationshipmanagement.dtos
 
-import it.polito.customerrelationshipmanagement.entities.category
-import it.polito.customerrelationshipmanagement.entities.Contact
 import it.polito.customerrelationshipmanagement.entities.JobOffer
 import it.polito.customerrelationshipmanagement.entities.jobOfferStatus
-import jakarta.validation.constraints.Pattern
 
 
 data class JobOfferDTO(
@@ -17,7 +14,8 @@ data class JobOfferDTO(
     val value: Number?,
     val profitMargin: Number,
     val customerId: Long,
-    val professionalId: Long?,
+    val consolidatedProfessionalId: Long?,
+    val completedProfessionalId: Long?,
     val candidateProfessionalsId: List<Long>,
     val abortedProfessionalsId: List<Long>,
     val skills: List<SkillDTO>
@@ -34,7 +32,8 @@ fun JobOffer.toDTO(): JobOfferDTO =
         this.value,
         this.profitMargin,
         this.customer.id,
-        this.professional?.id,
+        this.consolidatedProfessional?.id,
+        this.completedProfessional?.id,
         this.candidateProfessionals.map { it.id },
         this.abortedProfessionals.map { it.id },
         this.skills.map { it.toDTO() }

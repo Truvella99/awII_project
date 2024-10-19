@@ -17,7 +17,7 @@ interface JobOfferRepository: JpaRepository<JobOffer,Long> {
     ): List<JobOffer>
     @Query(
         "SELECT DISTINCT jo FROM JobOffer jo " +
-                "LEFT JOIN jo.professional p " +
+                "LEFT JOIN jo.completedProfessional p " +
                 "WHERE (jo IN :jobOffers OR p = :professional) " +
                 "AND jo.currentState IN :states"
     )
@@ -27,7 +27,7 @@ interface JobOfferRepository: JpaRepository<JobOffer,Long> {
         @Param("states") states: List<jobOfferStatus>,
         pageable: PageRequest?
     ): List<JobOffer>
-    @Query("SELECT j FROM JobOffer j WHERE j.currentState = :state AND ((j.customer = :customer OR j.professional = :professional) OR (:customer is null AND :professional is null))")
+    @Query("SELECT j FROM JobOffer j WHERE j.currentState = :state AND ((j.customer = :customer OR j.completedProfessional = :professional) OR (:customer is null AND :professional is null))")
     fun findByCurrentStateAndCustomerOrProfessional(
         state: jobOfferStatus = jobOfferStatus.aborted,
         customer: Customer? = null,
