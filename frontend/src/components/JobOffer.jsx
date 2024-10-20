@@ -6,12 +6,11 @@ import { Button, Col, Row, Form, Card, Container, ListGroup, InputGroup, CloseBu
 import Select, { components } from 'react-select';
 import MultiValueLabel from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-import { ReactSearchAutocomplete } from 'react-search-autocomplete';
 import API from "../API";
 import validator from 'validator';
 import InputMask from "react-input-mask";
 import { FaEdit } from "react-icons/fa";
-import { convertDuration } from "./Utils";
+import { convertDuration, SearchContainer } from "./Utils";
 
 function JobOfferContainer({ loggedIn }) {
     const [mode, setMode] = useState('');
@@ -91,7 +90,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
     const [name, setName] = useState(jobOffer.name || '');
     const [description, setDescription] = useState(jobOffer.description || '');
     const [currentState, setCurrentState] = useState(jobOffer.currentState || 'created');
-    const [currentStateNote, setCurrentStateNote] = useState(jobOffer.currentStateNote || null);
+    const [currentStateNote, setCurrentStateNote] = useState(jobOffer.currentStateNote || '');
     const [duration, setDuration] = useState(jobOffer.duration || {days: 0, hours: 1});
     const [invalidDuration, setInvalidDuration] = useState({days: false, hours: false});
     const [value, setValue] = useState(jobOffer.value || null);
@@ -119,7 +118,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
             setDescription(jobOffer.description || '');
             setCurrentState(jobOffer.currentState || 'created');
             oldCurrentState = jobOffer.currentState;
-            setCurrentStateNote(jobOffer.currentStateNote || null);
+            setCurrentStateNote(jobOffer.currentStateNote || '');
             setDuration(jobOffer.duration || {days: 0, hours: 1});
             setValue(jobOffer.value || null);
             setProfitMargin(jobOffer.profitMargin.toString() || '');
@@ -198,12 +197,6 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
     const handleOnSelectProfessionals = (item) => {
         // the item selected
         setProfessionals(removeDuplicatesByPropertyCaseInsensitive([...professionals, item], 'id'));
-    }
-
-    const formatResult = (item) => {
-        return (
-            <><span style={{ display: 'block', textAlign: 'left' }}>{item.name}</span></>
-        )
     }
 
     // CustomMultiValue components to customize the Select
@@ -289,7 +282,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     name: name.trim(),
                     description: description.trim(),
                     currentState: currentState,
-                    currentStateNote: (currentStateNote) ? currentStateNote.trim() : null,
+                    currentStateNote: (currentStateNote !== '') ? currentStateNote.trim() : null,
                     // convert all in hours to send
                     duration: parseInt(parseInt(duration.days) * 24 + parseInt(duration.hours)),
                     profitMargin: parseInt(profitMargin.trim()),
@@ -305,7 +298,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     if (oldCurrentState != currentState) {
                         let updateStatus = {
                             targetStatus: currentState,
-                            note: (currentStateNote) ? currentStateNote.trim() : null,
+                            note: (currentStateNote !== '') ? currentStateNote.trim() : null,
                             consolidatedProfessionalId: professional && professional.id ? professional.id : null,
                             professionalsId: professionals.map(professional => professional.id)
                         }
@@ -363,7 +356,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
             <Row className="mb-3">
                 <Form.Group className="mb-3" as={Col} controlId="formGridState">
                     <Form.Label>Current State</Form.Label>
-                    <Form.Select value={currentState} onChange={e => setCurrentState(e.target.value)} disabled={readOnlyBoolean || mode === 'add'}>
+                    <Form.Select value={currentState} onChange={e => {setCurrentState(e.target.value); setCurrentStateNote('');}} disabled={readOnlyBoolean || mode === 'add'}>
                         <option>created</option>
                         <option>selection_phase</option>
                         <option>candidate_proposal</option>
@@ -388,10 +381,8 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
             <Row className="mb-3 justify-content-center align-items-center">
                 {(mode === 'add') ?
-                    <Form.Group className="mb-3" as={Col} controlId="formGridSearchCustomer">
-                        <Form.Label>Find Customer</Form.Label>
-                        <ReactSearchAutocomplete placeholder="Search ..." items={searchedCustomers} onSearch={handleOnSearchCustomers} onSelect={handleOnSelectCustomers} autoFocus formatResult={formatResult} />
-                    </Form.Group> : ''}
+                    <SearchContainer Subject={"Customers"} searchedContent={searchedCustomers} handleChange={handleOnSearchCustomers} handleItemSelection={handleOnSelectCustomers} />
+                    : ''}
                 <Form.Group key={customer.id} className="mb-3" as={Col} controlId="formGridCustomer">
                     <Form.Label>Customer Selected</Form.Label>
                     <InputGroup>
@@ -416,10 +407,8 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
             {(professional && professional.id && currentState !== 'created' && currentState !== 'selection_phase') ?
                 <Row className="mb-3 justify-content-center align-items-center">
                     {(mode !== 'view') ?
-                        <Form.Group className="mb-3" as={Col} controlId="formGridSearchProfessionals">
-                            <Form.Label>Find Candidate Professionals</Form.Label>
-                            <ReactSearchAutocomplete placeholder="Search ..." items={searchedProfessionals} onSearch={handleOnSearchProfessionals} onSelect={handleOnSelectProfessionals} autoFocus formatResult={formatResult} />
-                        </Form.Group> : ''}
+                        <SearchContainer Subject={"Professionals"} searchedContent={searchedProfessionals} handleChange={handleOnSearchProfessionals} handleItemSelection={handleOnSelectProfessionals} />
+                        : ''}
                     <Form.Group className="mb-3" as={Col} controlId="formGridChosenProfessional">
                         <Form.Label>ChosenProfessional</Form.Label>
                         <InputGroup>
@@ -445,10 +434,8 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                 :
                 <Row className="mb-3 justify-content-center align-items-center">
                     {(mode !== 'view' && currentState !== 'created' && currentState !== 'selection_phase') ?
-                        <Form.Group className="mb-3" as={Col} controlId="formGridSearchProfessionals">
-                            <Form.Label>Find Candidate Professionals</Form.Label>
-                            <ReactSearchAutocomplete placeholder="Search ..." items={searchedProfessionals} onSearch={handleOnSearchProfessionals} onSelect={handleOnSelectProfessionals} autoFocus formatResult={formatResult} />
-                        </Form.Group> : ''}
+                        <SearchContainer Subject={"Professionals"} searchedContent={searchedProfessionals} handleChange={handleOnSearchProfessionals} handleItemSelection={handleOnSelectProfessionals} />
+                        : ''}
                     {(currentState !== 'created' && currentState !== 'selection_phase') ?
                     <Form.Group className="mb-3" as={Col} controlId="formGridProfessionals">
                         <Form.Label>Candidate Professionals Selected</Form.Label>
@@ -517,7 +504,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     </Button>
                     
                     :
-                    <Button variant="danger" onClick={() => setMode('view')}>
+                    <Button variant="danger" onClick={() => (mode === 'edit') ? setMode('view') : navigate("/ui/jobOffers")}>
                         Cancel
                     </Button>}
 

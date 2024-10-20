@@ -1,13 +1,13 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import {MessageContext} from "../messageCtx.js";
-import {Form} from "react-bootstrap";
+import {Container, Form, Col} from "react-bootstrap";
 import {LoadScript, StandaloneSearchBox} from "@react-google-maps/api";
 import {Menu, menuClasses, MenuItem, Sidebar} from "react-pro-sidebar";
 import {Link, useLocation} from "react-router-dom";
 import jobOffersImage from "../icons/jobOffers.png";
 import customersImage from "../icons/customers.png";
 import professionalsImage from "../icons/professionals.png";
-
+import { FaInfoCircle } from "react-icons/fa";
 
 const API_KEY = 'AIzaSyCO5hFwnkcQjDkoivao8qpJbKvITf_vb1g';
 const libraries = ['places']; // Include Places Library
@@ -16,7 +16,7 @@ function convertDuration(duration,asString=true) {
     let days = Math.floor(duration / 24);
     let hours = duration % 24;
     if (asString) {
-        return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}`;
+        return `${days.toString()}d ${hours.toString()}h`;
     } else {
         return { days: days, hours: hours };
     }
@@ -205,4 +205,65 @@ function SideBar() {
     );
 }
 
-export {convertDuration, address_string_to_object, address_object_to_string, AddressSelector , API_KEY, SideBar};
+
+// SEARCH BAR COMPONENTS
+function SearchList({ searchedContent, handleItemSelection, setShowResults, setSearchText }) {
+    return (
+        <Container
+            style={{
+                position: 'absolute', // Overlay behavior
+                backgroundColor: 'white', // Background for visibility
+                zIndex: 10, // Ensure it's on top of other elements
+                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', // Shadow for depth
+                width: '47%', // Full width
+                maxHeight: '100px',
+                overflowY: 'scroll'
+            }}
+            onMouseDown={(e) => e.preventDefault()} // Prevent blur on click
+        >
+            {searchedContent.map((item, index) => (
+                <div key={index}>
+                    <span style={{cursor: 'pointer'}} onClick={() => {
+                        setSearchText('');
+                        setShowResults(false);
+                        handleItemSelection(item);
+                    }}>{item.name + ' ' + item.surname + ' '}
+                    </span>
+                    <span onClick={() => window.open(`/ui/customers/${item.id}`, '_blank')} style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}>
+                        More Info<FaInfoCircle />
+                    </span>
+                    <hr style={{ margin: 2 }} />
+                </div>
+            ))}
+        </Container>
+    );
+}
+
+function SearchBar({ handleChange, setShowResults, Subject, searchText, setSearchText }) {
+    return (
+        <Form.Control type='search' value={searchText} onChange={e => {
+            if (e.target.value === '') {
+                setShowResults(false);
+            } else {
+                setShowResults(true);
+            }
+            setSearchText(e.target.value);
+            handleChange(e.target.value);
+        }} onBlur={() => setShowResults(false)} placeholder={`Find ${Subject} ...`} />
+    );
+}
+
+function SearchContainer({ searchedContent, handleChange, handleItemSelection, Subject }) {
+    const [showResults, setShowResults] = useState(true);
+    const [searchText, setSearchText] = useState('');
+    return (
+        <Form.Group className="mb-3" as={Col} controlId="searchBar">
+            <Form.Label>Find {Subject}</Form.Label>
+            <SearchBar handleChange={handleChange} setShowResults={setShowResults} Subject={Subject} searchText={searchText} setSearchText={setSearchText}/>
+            {searchedContent && searchedContent.length > 0 && showResults ?
+                <SearchList searchedContent={searchedContent} handleItemSelection={handleItemSelection} setShowResults={setShowResults} setSearchText={setSearchText} /> : ''}
+        </Form.Group>
+    );
+}
+
+export {convertDuration, SearchContainer, address_string_to_object, address_object_to_string, AddressSelector , API_KEY, SideBar};
