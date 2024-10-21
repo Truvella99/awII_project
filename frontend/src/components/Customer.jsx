@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import API from "../API";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {FaEdit} from "react-icons/fa";
 // Function to map jobOfferStatus to color
 const getStatusBadgeVariant = (status) => {
@@ -38,7 +38,7 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
     const [customer, setCustomer] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const navigate = useNavigate();
     // Fetch customer data when the component mounts
     useEffect(() => {
 
@@ -164,12 +164,12 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
                                 </Card.Header>
                                 <Card.Body className="bg-light" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                     {jobOffers.length ? (
-                                        <Row xs={1} sm={2} md={3} className="g-4">
+                                        <Row xs={1} sm={2} md={3} className="g-4" >
                                             {jobOffers.map((offer, index) => (
-                                                <Col key={index}>
-                                                    <Card className="shadow-sm h-100" style={{ minWidth: '200px', borderRadius: '10px' }}>
+                                                <Col key={index} onClick={()=> navigate(`/ui/joboffers/${offer.id}`)}>
+                                                    <Card className="shadow-sm h-100" style={{ minWidth: '200px', borderRadius: '10px' }} >
                                                         <Card.Body>
-                                                            <Card.Title>{offer.name}</Card.Title>
+                                                            <Card.Title >{offer.name}</Card.Title >
                                                             <Card.Subtitle className="mb-2 text-muted">
                                                                 {offer.description}
                                                             </Card.Subtitle>

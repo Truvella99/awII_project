@@ -67,7 +67,7 @@ function App() {
   };
 
   return (
-      <BrowserRouter>
+      <BrowserRouter >
       <TokenContext.Provider value={ me?.xsrfToken }>
         <MessageContext.Provider value={ handleErrors }>
           <Container style={{ display: 'flex', justifyContent: 'center' }}>

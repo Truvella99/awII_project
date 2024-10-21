@@ -33,7 +33,7 @@ spring:
             predicates:
               - Path=/ui/**
             filters:
-              - StripPrefix=1
+#              - StripPrefix=1
           - id: home
             uri: http://localhost:8080
             predicates:
