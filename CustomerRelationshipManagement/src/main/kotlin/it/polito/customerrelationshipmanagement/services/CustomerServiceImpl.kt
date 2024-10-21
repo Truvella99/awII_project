@@ -11,6 +11,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import kotlin.math.log
+import it.polito.customerrelationshipmanagement.dtos.UserDTO
+import it.polito.customerrelationshipmanagement.Credentials
+import org.keycloak.representations.idm.UserRepresentation
+import org.keycloak.admin.client.Keycloak
 
 @Service
 @Transactional
@@ -25,8 +29,21 @@ class CustomerServiceImpl(
 ) : CustomerService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(CustomerController::class.java)
-    
-    
+
+    fun addUser(userDTO: UserDTO) {
+        val credential = Credentials.createPasswordCredentials(userDTO.password)
+        val user = UserRepresentation().apply {
+            username = userDTO.userName
+            firstName = userDTO.firstname
+            lastName = userDTO.lastName
+            email = userDTO.emailId
+            credentials = listOf(credential)
+            isEnabled = true
+        }
+
+        val instance = KeycloakConfig.getInstance()
+        instance.realm("CRMRealm").users().create(user)
+    }
     // ----- Create a new customer -----
     override fun createCustomer(
         customer: CreateUpdateCustomerDTO
@@ -76,6 +93,14 @@ class CustomerServiceImpl(
         customer.notes?.forEach { note ->
             addCustomerNote(c.id, CreateUpdateNoteDTO(note = note))
         }
+        addUser(UserDTO(
+            userName = customer.name!!,
+            emailId = customer.email!!,
+            password = "password",
+            firstname = customer.name!!,
+            lastName = customer.surname!!,
+            role = "customer"
+        ))
 
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()

@@ -4,6 +4,7 @@ import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.Customer
 
 interface CustomerService {
+
     // gaetano
     fun createCustomer(customer: CreateUpdateCustomerDTO): CustomerDTO
     fun findCustomerById(customerId: Long): CustomerDTO
