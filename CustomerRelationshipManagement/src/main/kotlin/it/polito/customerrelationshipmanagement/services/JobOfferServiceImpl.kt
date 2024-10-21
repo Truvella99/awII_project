@@ -119,9 +119,9 @@ class JobOfferServiceImpl(
         val jobOffer = jobOfferRepository.findById(jobOfferId).orElseThrow{
             throw JobOfferNotFoundException("Job Offer with JobOfferId:${jobOfferId} not found.")
         }
-        val customer = customerRepository.findById(jobOfferDTO.customerId).orElseThrow {
+        /*val customer = customerRepository.findById(jobOfferDTO.customerId).orElseThrow {
             throw CustomerNotFoundException("Customer with CustomerId:${jobOfferDTO.customerId} not found.")
-        }
+        }*/
         // update the job offer
         jobOffer.name = jobOfferDTO.name
         jobOffer.description = jobOfferDTO.description
@@ -129,7 +129,7 @@ class JobOfferServiceImpl(
         jobOffer.duration = jobOfferDTO.duration
         jobOffer.profitMargin = jobOfferDTO.profitMargin
         //jobOffer.customer = customer
-        customer.addJobOffer(jobOffer)
+        //customer.addJobOffer(jobOffer)
         
         // delete all previous skills (mark as deleted)
         /*for (skill in jobOffer.skills) {
@@ -475,11 +475,17 @@ class JobOfferServiceImpl(
         val jobOffer = jobOfferRepository.findById(jobOfferId).orElseThrow{
             throw JobOfferNotFoundException("JobOffer with JobOfferId:$jobOfferId not found.")
         }
-        if (jobOffer.completedProfessional == null) {
+        if (jobOffer.completedProfessional == null && jobOffer.consolidatedProfessional == null) {
             throw JobOfferStatusException("JobOffer with JobOfferId:$jobOfferId is not bound to a professional.")
         }
-
-        return (jobOffer.duration.toDouble() * jobOffer.completedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
+        var jobOfferValue: Number = 0;
+        if (jobOffer.completedProfessional != null) {
+            jobOfferValue = (jobOffer.duration.toDouble() * jobOffer.completedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
+        } else {
+            // consolidatedProfessional
+            jobOfferValue = (jobOffer.duration.toDouble() * jobOffer.consolidatedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
+        }
+        return jobOfferValue
     }
 
     // ----- Get all the job offers -----

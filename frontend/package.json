@@ -28,7 +28,6 @@
     "react-phone-number-input": "^3.4.8",
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^6.11.0",
-    "react-search-autocomplete": "^8.5.2",
     "react-select": "^5.8.1",
     "validator": "^13.12.0"
   },

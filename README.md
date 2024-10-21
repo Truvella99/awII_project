@@ -1,7 +1,11 @@
 # Keycloak Roles and Credentials
-## guest
-- Username: guest1
-- Password: guest1
+## customer
+- Username: customer1
+- Password: customer1
+
+## professional
+- Username: professional1
+- Password: professional1
 
 ## operator
 - Username: operator1
