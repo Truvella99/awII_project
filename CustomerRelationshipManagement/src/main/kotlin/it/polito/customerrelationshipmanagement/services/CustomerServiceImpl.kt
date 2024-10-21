@@ -14,7 +14,11 @@ import kotlin.math.log
 import it.polito.customerrelationshipmanagement.dtos.UserDTO
 import it.polito.customerrelationshipmanagement.Credentials
 import org.keycloak.representations.idm.UserRepresentation
+import org.glassfish.jersey.client.JerseyClientBuilder
+import org.keycloak.OAuth2Constants
 import org.keycloak.admin.client.Keycloak
+import org.keycloak.admin.client.KeycloakBuilder
+import javax.ws.rs.client.Client
 
 @Service
 @Transactional
@@ -29,20 +33,55 @@ class CustomerServiceImpl(
 ) : CustomerService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(CustomerController::class.java)
+    companion object {
+        private var keycloak: Keycloak? = null
+        private const val serverUrl = "http://localhost:9090"
+        private const val realm = "CRMRealm"
+        private const val clientId = "crmclient"
+        private const val clientSecret = "UAGMutFg200hRp3pfFomluDh7GAQ8epl"
+        private const val userName = "manager1"
+        private const val password = "manager1"
 
+        // Crea il client HTTP usando JerseyClientBuilder
+        private fun createJerseyHttpClient(): Client {
+            return JerseyClientBuilder.newClient()
+        }
+
+        fun getInstance(): Keycloak {
+            if (keycloak == null) {
+                val httpClient = createJerseyHttpClient()
+
+                keycloak = KeycloakBuilder.builder()
+                    .serverUrl(serverUrl)
+                    .realm(realm)
+                    .grantType(OAuth2Constants.PASSWORD)
+                    .username(userName)
+                    .password(password)
+                    .clientId(clientId)
+                    .clientSecret(clientSecret)
+                    .resteasyClient(httpClient) // Usa il client HTTP di Jersey
+                    .build()
+
+                println("Keycloak instance initialized successfully")
+            }
+            return keycloak!!
+        }
+    }
     fun addUser(userDTO: UserDTO) {
         val credential = Credentials.createPasswordCredentials(userDTO.password)
         val user = UserRepresentation().apply {
             username = userDTO.userName
             firstName = userDTO.firstname
             lastName = userDTO.lastName
-            email = userDTO.emailId
+            email = "gaetano@libero.it"
             credentials = listOf(credential)
             isEnabled = true
         }
 
-        val instance = KeycloakConfig.getInstance()
+        val instance = getInstance()
+        println("Creating user ${user.username}")
         instance.realm("CRMRealm").users().create(user)
+
     }
     // ----- Create a new customer -----
     override fun createCustomer(
@@ -93,15 +132,19 @@ class CustomerServiceImpl(
         customer.notes?.forEach { note ->
             addCustomerNote(c.id, CreateUpdateNoteDTO(note = note))
         }
+//        addUser(UserDTO(
+//            userName = customer.name!!,
+//            emailId = customer.email!!,
+//            password = "password",
+//            firstname = customer.name!!,
+//            lastName = customer.surname!!,
+//            role = "customer"
+//        ))
         addUser(UserDTO(
-            userName = customer.name!!,
-            emailId = customer.email!!,
+            userName = "Gaetano",
             password = "password",
-            firstname = customer.name!!,
-            lastName = customer.surname!!,
-            role = "customer"
-        ))
-
+            firstname = "Gaetano",
+            lastName = "Robee"))
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()
     }
