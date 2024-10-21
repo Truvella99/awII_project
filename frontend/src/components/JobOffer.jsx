@@ -381,7 +381,7 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
             <Row className="mb-3 justify-content-center align-items-center">
                 {(mode === 'add') ?
-                    <SearchContainer Subject={"Customers"} searchedContent={searchedCustomers} handleChange={handleOnSearchCustomers} handleItemSelection={handleOnSelectCustomers} />
+                    <SearchContainer Subject={"Customer"} searchedContent={searchedCustomers} handleChange={handleOnSearchCustomers} handleItemSelection={handleOnSelectCustomers} />
                     : ''}
                 <Form.Group key={customer.id} className="mb-3" as={Col} controlId="formGridCustomer">
                     <Form.Label>Customer Selected</Form.Label>
