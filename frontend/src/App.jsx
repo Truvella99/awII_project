@@ -25,6 +25,8 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   //const [user, setUser] = useState(null);
   //const [data, setData] = useState('');
+  const[role,setRole] = useState('');
+  const Roles = ["professional", "customer", "operator", "manager"];
   const [message, setMessage] = useState('');
 
   // function to handle the application errors, all displayed into the Alert under the NavHeader
@@ -45,14 +47,32 @@ function App() {
         const me = await res.json();
         //console.log(me);
         setMe(me);
-        if(me.principal !== null) {
+        if (me.principal !== null) {
           setLoggedIn(true);
         }
       } catch (error) {
         setMe(null);
       }
     };
+    const postData = async () => {
+      try {
+        const res = await fetch('crm/data', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': me?.xsrfToken,
+          }
+        });
+        const result = await res.json();
+        const roles = result["roles"];
+        const foundRole = roles.find(role => Roles.includes(role));
+        setRole(foundRole);
+      } catch (error) {
+        setRole('');
+      }
+    };
     fetchMe()
+    postData().then();
   }, []);
 
   const handleLogout = () => {
@@ -88,8 +108,8 @@ function App() {
               <Route path="/ui/customers/edit/:customerId" element={<EditCustomer xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/customers/addCustomer" element={<CreateCustomer xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
               <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn}/>} /> // Ale Costa
-              <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn}/>} /> // Minicucc
-              <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn}/>} />  // Minicucc view and edit
+              <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} /> // Minicucc
+              <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />  // Minicucc view and edit
               <Route path="/ui/Registration" element={<></>} /> // Giuseppe
               <Route path="/ui/Analytics" element={<></>} />
             </Routes>
