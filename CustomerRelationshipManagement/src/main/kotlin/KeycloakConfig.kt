@@ -10,12 +10,12 @@ class KeycloakConfig private constructor() {
 
     companion object {
         private var keycloak: Keycloak? = null
-        private const val serverUrl = "http://localhost:9090/"
+        private const val serverUrl = "http://localhost:9090"
         private const val realm = "CRMRealm"
         private const val clientId = "crmclient"
         private const val clientSecret = "UAGMutFg200hRp3pfFomluDh7GAQ8epl"
-        private const val userName = "admin"
-        private const val password = "password"
+        private const val userName = "manager1"
+        private const val password = "manager1"
 
         // Crea il client HTTP usando JerseyClientBuilder
         private fun createJerseyHttpClient(): Client {
