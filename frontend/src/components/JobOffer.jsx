@@ -12,7 +12,7 @@ import InputMask from "react-input-mask";
 import { FaEdit } from "react-icons/fa";
 import { convertDuration, SearchContainer } from "./Utils";
 
-function JobOfferContainer({ loggedIn }) {
+function JobOfferContainer({ loggedIn, role }) {
     const [mode, setMode] = useState('');
     const [jobOffer, setJobOffer] = useState({});
     const jobOfferId = useParams().jobOfferId;
@@ -26,6 +26,10 @@ function JobOfferContainer({ loggedIn }) {
             try {
                 if (loggedIn) {
                     // logged user
+                    if (role === "customer") {
+                        // customer cannot see jobOffers (operator,manager,professional can access)
+                        navigate("/ui/professionals");
+                    } 
                     if (jobOfferId) {
                         // get the jobOffer
                         let jobOffer = await API.getJobOfferById(jobOfferId, xsrfToken);
@@ -52,6 +56,10 @@ function JobOfferContainer({ loggedIn }) {
                         setJobOffer(Object.assign({}, jobOffer, { duration: convertDuration(jobOffer.duration,false), professionals: abortedProfessionals.concat(candidateProfessionals), professional: professional, customer: customer, value: jobOfferValue, history: history }));
                     } else {
                         // add jobOffer
+                        if (role === "professional") {
+                            // professional cannot create jobOffers (operator,manager can access)
+                            navigate("/ui/jobOffers");
+                        } 
                         setMode('add');
                     }
                 } else {
@@ -75,12 +83,12 @@ function JobOfferContainer({ loggedIn }) {
     return (
         <>
             <h1 style={{ textAlign: "center" }}>{capitalizeFirstLetter(mode)} JobOffer</h1>
-            <JobOfferForm mode={mode} setMode={setMode} jobOffer={jobOffer} />
+            <JobOfferForm mode={mode} setMode={setMode} jobOffer={jobOffer} role={role} />
         </>
     );
 }
 
-function JobOfferForm({ mode, setMode, jobOffer }) {
+function JobOfferForm({ mode, setMode, jobOffer, role }) {
     const handleErrors = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
     const navigate = useNavigate();
@@ -482,7 +490,10 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
 
 
             <Container className="d-flex justify-content-between">
-                {(mode === 'view') ?
+                { 
+                //edit button not accessible if professional (can only see open joboffers)
+                // no check of customer since blocked from the JobOfferContainer already
+                (mode === 'view' && role !== "professional") ?
 
                     <Button
                         variant="primary"
@@ -504,9 +515,10 @@ function JobOfferForm({ mode, setMode, jobOffer }) {
                     </Button>
                     
                     :
+                    (mode !== 'view') ?
                     <Button variant="danger" onClick={() => (mode === 'edit') ? setMode('view') : navigate("/ui/jobOffers")}>
                         Cancel
-                    </Button>}
+                    </Button> : ''}
 
                 {(mode !== 'view') ?
                     <Button variant="primary" type="submit">

@@ -100,19 +100,12 @@ class CustomerServiceImpl(
         customer.notes?.forEach { note ->
             addCustomerNote(c.id, CreateUpdateNoteDTO(note = note))
         }
-//        addUser(UserDTO(
-//            userName = customer.name!!,
-//            emailId = customer.email!!,
-//            password = "password",
-//            firstname = customer.name!!,
-//            lastName = customer.surname!!,
-//            role = "customer"
-//        ))
-        addUser(UserDTO(
+
+        /*addUser(UserDTO(
             userName = "Gaetano",
             password = "password",
             firstname = "Gaetano",
-            lastName = "Robee"))
+            lastName = "Robee"))*/
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()
     }
