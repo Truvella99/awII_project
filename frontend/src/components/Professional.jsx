@@ -1,8 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Container, Row, Col, Card, Button, Badge} from 'react-bootstrap';
 import API from "../API";
 import {Link, useNavigate, useParams} from "react-router-dom";
-import { FaEdit } from "react-icons/fa"; // Icona per il FAB
+import { FaEdit } from "react-icons/fa";
+import {convertDuration} from "./Utils.jsx";
+import {MessageContext} from "../messageCtx.js"; // Icona per il FAB
 
 // Function to map employmentState to badge color
 const getEmploymentBadgeVariant = (state) => {
@@ -32,7 +34,7 @@ const getStatusBadgeVariant = (status) => {
             return 'warning'; // giallo
     }
 };
-const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
+const ProfessionalProfile = ({xsrfToken}) => {
     const {professionalId} = useParams();
     console.log("Professional ID: ", professionalId);
 
@@ -41,8 +43,11 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const handleErrors = useContext(MessageContext);
+
     // Fetch professional data when the component mounts
     useEffect(() => {
+
         const fetchProfessional = async () => {
             try {
                 const fetchedProfessional = await API.getProfessionalById(professionalId, xsrfToken);
@@ -64,7 +69,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
 
     // If error, show an error message
     if (error) {
-        setError(error);
+        handleErrors(error);
     }
 
     // Destructure professional object
@@ -271,7 +276,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                                                     <strong>Note:</strong> {jobOffer.currentStateNote}
                                                                 </Card.Text>
                                                                 <Card.Text>
-                                                                    <strong>Duration:</strong> {jobOffer.duration} months
+                                                                    <strong>Duration:</strong> {convertDuration(jobOffer.duration,true)}
                                                                 </Card.Text>
                                                                 <Card.Text>
                                                                     <strong>Profit Margin:</strong> {jobOffer.profitMargin}%
@@ -315,7 +320,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                                                     <strong>Note:</strong> {offer.currentStateNote}
                                                                 </Card.Text>
                                                                 <Card.Text>
-                                                                    <strong>Duration:</strong> {offer.duration} months
+                                                                    <strong>Duration:</strong> {convertDuration(offer.duration,true)}
                                                                 </Card.Text>
                                                                 <Card.Text>
                                                                     <strong>Profit Margin:</strong> {offer.profitMargin}%
@@ -361,7 +366,7 @@ const ProfessionalProfile = ({xsrfToken, handleErrors}) => {
                                                         <strong>Note:</strong> {offer.currentStateNote}
                                                     </Card.Text>
                                                     <Card.Text>
-                                                        <strong>Duration:</strong> {offer.duration} months
+                                                        <strong>Duration:</strong> {convertDuration(offer.duration,true)}
                                                     </Card.Text>
                                                     <Card.Text>
                                                         <strong>Profit Margin:</strong> {offer.profitMargin}%

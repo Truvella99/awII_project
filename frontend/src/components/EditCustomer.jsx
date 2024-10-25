@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Container, Row, Col, Card, Button, Form, Alert, InputGroup} from 'react-bootstrap';
 import API from '../API'; // API to handle saving and fetching data
 import 'react-phone-number-input/style.css';
@@ -7,6 +7,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import InputMask from "react-input-mask";
 import axios from "axios";
 import {AddressSelector} from "./Utils.jsx";
+import {MessageContext} from "../messageCtx.js";
 
 const EditCustomer = ({ xsrfToken }) => {
     const [customer, setCustomer] = useState({
@@ -37,6 +38,7 @@ const EditCustomer = ({ xsrfToken }) => {
     const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
     const navigate = useNavigate()
     const [newNotes, setNewNotes] = useState([]);
+    const handleErrors = useContext(MessageContext);
 
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
@@ -277,7 +279,7 @@ const EditCustomer = ({ xsrfToken }) => {
     }
 
     if (error) {
-        return <Alert variant="danger">{error}</Alert>;
+        handleErrors(error)
     }
 
     return (

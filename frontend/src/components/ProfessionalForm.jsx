@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Container, Row, Col, Card, Button, Form, Alert, InputGroup} from 'react-bootstrap';
 import API from '../API'; // API per gestire il salvataggio e il recupero dei dati
 import 'react-phone-number-input/style.css';
@@ -8,8 +8,9 @@ import {AddressSelector} from "./Utils.jsx";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import InputMask from "react-input-mask";
+import {MessageContext} from "../messageCtx.js";
 
-const AddProfessional = ({xsrfToken, handleErrors}) => {
+const AddProfessional = ({xsrfToken}) => {
     const [professional, setProfessional] = useState({
         name: '',
         surname: '',
@@ -47,6 +48,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
     const EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
+    const handleErrors = useContext(MessageContext);
 
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
@@ -268,7 +270,7 @@ const AddProfessional = ({xsrfToken, handleErrors}) => {
         return <div>Loading...</div>;
     }
     if (error) {
-        return <Alert variant="danger">{error}</Alert>;
+       handleErrors(error);
     }
     return (
         <Container fluid className="py-5">

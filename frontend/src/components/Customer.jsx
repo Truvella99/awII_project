@@ -1,8 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import API from "../API";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {FaEdit} from "react-icons/fa";
+import {convertDuration} from "./Utils.jsx";
+import {MessageContext} from "../messageCtx.js";
 // Function to map jobOfferStatus to color
 const getStatusBadgeVariant = (status) => {
     switch (status) {
@@ -31,7 +33,8 @@ const jobOfferStatus = {
     done: 'done'
 };
 
-const CustomerProfile = ({ xsrfToken,handleErrors}) => {
+const CustomerProfile = ({ xsrfToken}) => {
+    const handleErrors = useContext(MessageContext);
     const {customerId} = useParams();
     console.log("Customer ID: ", customerId)
     // State for customer data and loading/error handling
@@ -63,7 +66,7 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
 
     // If error, show an error message
     if (error) {
-        setError(error);
+        handleErrors(error);
     }
     //TODO
 
@@ -183,7 +186,7 @@ const CustomerProfile = ({ xsrfToken,handleErrors}) => {
                                                                 <strong>Note:</strong> {offer.currentStateNote}
                                                             </Card.Text>
                                                             <Card.Text>
-                                                                <strong>Duration:</strong> {offer.duration} months
+                                                                <strong>Duration:</strong> {convertDuration(offer.duration,true)}
                                                             </Card.Text>
                                                             {offer.value && (
                                                                 <Card.Text>

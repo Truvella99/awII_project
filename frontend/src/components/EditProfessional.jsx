@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import API from "../API.jsx";
@@ -6,6 +6,7 @@ import {Alert, Button, Card, Col, Container, Form, InputGroup, Row} from "react-
 import InputMask from "react-input-mask";
 import PhoneInput from "react-phone-number-input";
 import {AddressSelector} from "./Utils.jsx";
+import {MessageContext} from "../messageCtx.js";
 
 const EditProfessional = ({ xsrfToken }) => {
     const [professional, setProfessional] = useState({
@@ -63,6 +64,7 @@ const EditProfessional = ({ xsrfToken }) => {
     const EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
+    const handleErrors = useContext(MessageContext);
 
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
@@ -331,13 +333,7 @@ const EditProfessional = ({ xsrfToken }) => {
             errors.contact = 'Please provide at least one valid contact method: email, telephone, or address.';
         }
         setFormErrors(errors);
-        console.log("formErrors", professional.emails.length , professional.telephones.length ,professional.addresses.length )
-        console.log("professional.email", professional.email)
-        console.log("professional.telephone", professional.telephone)
 
-        console.log("professional.address", professional.address)
-        console.log("professional", professional)
-        console.log("errors", errors);
         return Object.keys(errors).length === 0;
     };
 
@@ -372,7 +368,7 @@ const EditProfessional = ({ xsrfToken }) => {
     }
 
     if (error) {
-        return <Alert variant="danger">{error}</Alert>;
+        handleErrors(error);
     }
 
     return (

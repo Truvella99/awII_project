@@ -100,13 +100,13 @@ function App() {
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
               <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn}/>} /> // Ale Costa
-              <Route path="/ui/professionals/:professionalId" element={<ProfessionalProfile xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
-              <Route path="/ui/professionals/edit/:professionalId" element={<EditProfessional xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
-              <Route path="/ui/professionals/addProfessional" element={<ProfessionalForm xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
+              <Route path="/ui/professionals/:professionalId" element={loggedIn?( <ProfessionalProfile  xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
+              <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
+              <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/customers" element={<Customers loggedIn={loggedIn}/>} /> // Ale Costa
-              <Route path="/ui/customers/:customerId" element={<CustomerProfile xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
-              <Route path="/ui/customers/edit/:customerId" element={<EditCustomer xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
-              <Route path="/ui/customers/addCustomer" element={<CreateCustomer xsrfToken={me?.xsrfToken}/>} /> // Gaetano view and edit
+              <Route path="/ui/customers/:customerId" element={loggedIn?(<CustomerProfile xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
+              <Route path="/ui/customers/edit/:customerId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
+              <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn}/>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} /> // Minicucc
               <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />  // Minicucc view and edit
