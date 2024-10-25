@@ -20,8 +20,6 @@ repositories {
 }
 
 dependencies {
-	implementation ("org.glassfish.jersey.core:jersey-client:2.34")
-	implementation ("org.glassfish.jersey.connectors:jersey-apache-connector:2.34")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-security")
@@ -29,8 +27,6 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-	implementation ("org.apache.httpcomponents:httpclient:4.5.13")
-	implementation ("org.apache.httpcomponents:httpcore:4.4.14")
 	implementation ("org.keycloak:keycloak-admin-client:20.0.0")  // O la versione di Keycloak che stai usando
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	implementation("org.springframework.boot:spring-boot-starter-validation")

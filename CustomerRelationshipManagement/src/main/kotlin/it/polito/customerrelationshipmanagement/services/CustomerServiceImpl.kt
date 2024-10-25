@@ -1,6 +1,5 @@
 package it.polito.customerrelationshipmanagement.services
 
-import it.polito.customerrelationshipmanagement.controllers.ContactController
 import it.polito.customerrelationshipmanagement.controllers.CustomerController
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.*
@@ -8,18 +7,9 @@ import it.polito.customerrelationshipmanagement.exceptions.*
 import it.polito.customerrelationshipmanagement.repositories.*
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import kotlin.math.log
 import it.polito.customerrelationshipmanagement.dtos.UserDTO
-import it.polito.customerrelationshipmanagement.Credentials
 import it.polito.customerrelationshipmanagement.KeycloakConfig
-import org.keycloak.representations.idm.UserRepresentation
-import org.glassfish.jersey.client.JerseyClientBuilder
-import org.keycloak.OAuth2Constants
-import org.keycloak.admin.client.Keycloak
-import org.keycloak.admin.client.KeycloakBuilder
-import javax.ws.rs.client.Client
 
 @Service
 @Transactional
@@ -35,22 +25,6 @@ class CustomerServiceImpl(
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(CustomerController::class.java)
 
-    fun addUser(userDTO: UserDTO) {
-        val credential = Credentials.createPasswordCredentials(userDTO.password)
-        val user = UserRepresentation().apply {
-            username = userDTO.userName
-            firstName = userDTO.firstname
-            lastName = userDTO.lastName
-            email = "gaetano@libero.it"
-            credentials = listOf(credential)
-            isEnabled = true
-        }
-
-        val instance = KeycloakConfig.getInstance()
-        println("Creating user ${user.username}")
-        instance.realm("CRMRealm").users().create(user)
-
-    }
     // ----- Create a new customer -----
     override fun createCustomer(
         customer: CreateUpdateCustomerDTO
@@ -101,11 +75,15 @@ class CustomerServiceImpl(
             addCustomerNote(c.id, CreateUpdateNoteDTO(note = note))
         }
 
-        /*addUser(UserDTO(
-            userName = "Gaetano",
-            password = "password",
-            firstname = "Gaetano",
-            lastName = "Robee"))*/
+        val customer_uuid = KeycloakConfig.addUser(
+            UserDTO(
+                userName = customer.name!!,
+                email = customer.email!!,
+                password = customer.password!!,
+                firstname = customer.name,
+                lastName = customer.surname!!
+            )
+        )
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()
     }

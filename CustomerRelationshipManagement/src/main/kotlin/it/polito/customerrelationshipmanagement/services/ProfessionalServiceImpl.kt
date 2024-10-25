@@ -1,5 +1,6 @@
 package it.polito.customerrelationshipmanagement.services
 
+import it.polito.customerrelationshipmanagement.KeycloakConfig
 import it.polito.customerrelationshipmanagement.controllers.ProfessionalController
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.*
@@ -139,6 +140,15 @@ class ProfessionalServiceImpl(
             addProfessionalNote(p.id, CreateUpdateNoteDTO(note = noteDTO))
         }
 
+        val professional_uuid = KeycloakConfig.addUser(
+            UserDTO(
+                userName = professional.name!!,
+                email = professional.email!!,
+                password = professional.password!!,
+                firstname = professional.name,
+                lastName = professional.surname!!
+            )
+        )
         logger.info("Professional ${p.contact.name} created.")
         return p.toDTO()
     }

@@ -15,6 +15,8 @@ data class CreateUpdateProfessionalDTO(
     val category: category?,
     @field:Pattern(regexp = EMAIL)
     val email: String?,
+    @field:Pattern(regexp = NOT_EMPTY_IF_NOT_NULL)
+    val password: String?,
     @field:Pattern(regexp = TELEPHONE)
     val telephone: String?,
     @field:Pattern(regexp = ADDRESS)
