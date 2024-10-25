@@ -141,13 +141,14 @@ class ProfessionalServiceImpl(
         }
 
         val professional_uuid = KeycloakConfig.addUser(
-            UserDTO(
+            CreateUpdateUserDTO(
                 userName = professional.name!!,
-                email = professional.email!!,
+                email = professional.email,
                 password = professional.password!!,
                 firstname = professional.name,
                 lastName = professional.surname!!
-            )
+            ),
+            category.professional
         )
         logger.info("Professional ${p.contact.name} created.")
         return p.toDTO()
@@ -285,6 +286,16 @@ class ProfessionalServiceImpl(
         }
 
         professionalRepository.save(p)
+
+        /*KeycloakConfig.updateUser(
+            uuid = ,
+            userDTO = UserDTO(
+                email = professional.email,
+                password = professional.password!!,
+                firstname = professional.name,
+                lastName = professional.surname!!
+            )
+        )*/
         logger.info("Professional ${p.contact.name} updated.")
         return p.toDTO()
     }

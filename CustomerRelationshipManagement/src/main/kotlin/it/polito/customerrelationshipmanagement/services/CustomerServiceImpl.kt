@@ -8,7 +8,7 @@ import it.polito.customerrelationshipmanagement.repositories.*
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import it.polito.customerrelationshipmanagement.dtos.UserDTO
+import it.polito.customerrelationshipmanagement.dtos.CreateUpdateUserDTO
 import it.polito.customerrelationshipmanagement.KeycloakConfig
 
 @Service
@@ -76,13 +76,14 @@ class CustomerServiceImpl(
         }
 
         val customer_uuid = KeycloakConfig.addUser(
-            UserDTO(
+            CreateUpdateUserDTO(
                 userName = customer.name!!,
-                email = customer.email!!,
+                email = customer.email,
                 password = customer.password!!,
                 firstname = customer.name,
                 lastName = customer.surname!!
-            )
+            ),
+            category.customer
         )
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()
@@ -189,6 +190,15 @@ class CustomerServiceImpl(
             }
         }
 
+        /*KeycloakConfig.updateUser(
+            uuid = ,
+            userDTO = UserDTO(
+                email = customer.email,
+                password = customer.password!!,
+                firstname = customer.name,
+                lastName = customer.surname!!
+            )
+        )*/
         logger.info("Customer ${c.contact.name} updated.")
         return c.toDTO()
     }
