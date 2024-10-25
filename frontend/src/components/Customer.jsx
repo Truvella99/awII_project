@@ -33,7 +33,7 @@ const jobOfferStatus = {
     done: 'done'
 };
 
-const CustomerProfile = ({ xsrfToken}) => {
+const CustomerProfile = ({ xsrfToken,role}) => {
     const handleErrors = useContext(MessageContext);
     const {customerId} = useParams();
     console.log("Customer ID: ", customerId)
@@ -212,7 +212,7 @@ const CustomerProfile = ({ xsrfToken}) => {
                 </Col>
             </Row>
             {/* FAB for Editing Professional */}
-            {customerId &&
+            {customerId && role !== "customer" &&
                 <Link to={`/ui/customers/edit/${customerId}`}>
                     <Button
                         variant="primary"

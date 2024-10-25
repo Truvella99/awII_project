@@ -100,11 +100,11 @@ function App() {
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
               <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn}/>} /> // Ale Costa
-              <Route path="/ui/professionals/:professionalId" element={loggedIn?( <ProfessionalProfile  xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
+              <Route path="/ui/professionals/:professionalId" element={loggedIn  && (role !== "customer" )?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
               <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/customers" element={<Customers loggedIn={loggedIn}/>} /> // Ale Costa
-              <Route path="/ui/customers/:customerId" element={loggedIn?(<CustomerProfile xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
+              <Route path="/ui/customers/:customerId" element={loggedIn && role !== "professional"?(<CustomerProfile role={role} xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
               <Route path="/ui/customers/edit/:customerId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn}/>} /> // Ale Costa

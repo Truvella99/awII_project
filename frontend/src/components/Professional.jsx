@@ -34,7 +34,7 @@ const getStatusBadgeVariant = (status) => {
             return 'warning'; // giallo
     }
 };
-const ProfessionalProfile = ({xsrfToken}) => {
+const ProfessionalProfile = ({xsrfToken,role}) => {
     const {professionalId} = useParams();
     console.log("Professional ID: ", professionalId);
 
@@ -389,7 +389,7 @@ const ProfessionalProfile = ({xsrfToken}) => {
 
             </Row>
             {/* FAB for Editing Professional */}
-            {professionalId &&
+            {professionalId && role !== "professional" &&
             <Link to={`/ui/professionals/edit/${professionalId}`}>
                 <Button
                     variant="primary"
