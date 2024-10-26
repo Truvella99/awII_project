@@ -107,10 +107,10 @@ class KeycloakConfig {
                 // update main info
                 userResource.update(user)
                 // update password
-                userResource.resetPassword(createPasswordCredentials(createUpdateUserDTO.password))
+                userResource.resetPassword(credential)
                 logger.info("Keycloak User ${user.firstName} updated with UUID: $uuid")
             } catch (e: RuntimeException) {
-                throw ContactException("Unable to Register User ${createUpdateUserDTO.firstname}.")
+                throw ContactException("Unable to Update User ${createUpdateUserDTO.firstname}.")
             }
         }
     }
