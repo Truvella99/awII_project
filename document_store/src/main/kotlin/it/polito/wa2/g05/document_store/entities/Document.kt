@@ -2,8 +2,8 @@ package it.polito.wa2.g05.document_store.entities
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.OneToOne
 
 
 @Entity
@@ -11,5 +11,7 @@ import jakarta.persistence.Id
     @Id
     @GeneratedValue
     var id: Long = 0
-    lateinit var binary_data: ByteArray
+    lateinit var binaryData: ByteArray
+    @OneToOne(mappedBy = "document")
+    lateinit var metaData: Metadata
 }

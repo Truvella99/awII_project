@@ -13,8 +13,8 @@ class DocumentExceptionHandler: ResponseEntityExceptionHandler() {
     fun handleWrongParamsGetAll(e: IllegalPageNumberLimitException) =
         ProblemDetail.forStatusAndDetail( HttpStatus.BAD_REQUEST, e.message !! )
 
-    @ExceptionHandler(IllegalMetadataIdException :: class)
-    fun handleWrongParamsGetDocument(e: IllegalMetadataIdException) =
+    @ExceptionHandler(IllegalIdException :: class)
+    fun handleWrongParamsGetDocument(e: IllegalIdException) =
         ProblemDetail.forStatusAndDetail( HttpStatus.BAD_REQUEST, e.message !! )
 
     @ExceptionHandler(DocumentNotFoundException :: class)

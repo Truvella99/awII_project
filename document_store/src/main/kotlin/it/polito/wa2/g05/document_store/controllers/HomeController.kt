@@ -36,67 +36,67 @@ class HomeController(private val documentService: DocumentService){
     }
 
     /**
-     * GET /API/documents/{metadataId}/
+     * GET /API/documents/{userId}/
      *
-     * Details of document {documentId} or fail if it does not exist.
+     * Details of documents related to User with {userId} or fail if it does not exist.
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/API/documents/{metadataId}/")
+    @GetMapping("/API/documents/{userId}/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getDocument(@PathVariable("metadataId")metadataId: Long): MetadataDTO {
-        return documentService.findById(metadataId)
+    fun getDocument(@PathVariable("userId")userId: String): List<MetadataDTO> {
+        return documentService.findById(userId)
     }
 
     /**
-     * GET /API/documents/{metadataId}/data/
+     * GET /API/documents/{documentId}/data/
      *
-     * Byte content of document {metadataId} or fail if it does not exist.
+     * Byte content of document {documentId} or fail if it does not exist.
      */
-    @GetMapping("/API/documents/{metadataId}/data/")
+    @GetMapping("/API/documents/{documentId}/data/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getByteDocument(@PathVariable("metadataId")metadataId: Long): ResponseEntity<ByteArrayResource> {
-        val (metadata,document) = documentService.getBinaryById(metadataId)
+    fun getByteDocument(@PathVariable("documentId")documentId: Long): ResponseEntity<ByteArrayResource> {
+        val document = documentService.getBinaryById(documentId)
 
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${metadata.name}\"")
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.metaData.name}\"")
             .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream")
-            .body(ByteArrayResource(document.binary_data));
+            .body(ByteArrayResource(document.binaryData));
     }
 
     /**
      * POST /API/documents/
      *
-     * Convert the request param into a DocumentMetadataDTO and store it in the DB, provided that a file with that name doesn't already exist.
+     * Convert the request param into a DocumentMetadataDTO and store it in the DB, provided that a document related to that user doesn't already exist.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/documents/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun createDocument(@ModelAttribute d: DocumentMetadataDTO): MetadataDTO {
+    fun createDocument(@ModelAttribute d: CreateUpdateDocumentDTO): MetadataDTO {
         return documentService.createDocument(d)
     }
 
     /**
-     * PUT /API/documents/{metadataId}/
+     * PUT /API/documents/
      *
-     * Convert the request param into a DocumentMetadataDTO and replace the corresponding entry in the DB.
-     * Fail if the document does not exist.
+     * Convert the request param into a DocumentMetadataDTO and store in the DB.
+     * Fail if not even one document related to the user exist.
      */
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/API/documents/{metadataId}/")
+    @PutMapping("/API/documents/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun updateDocument(@PathVariable("metadataId") metadataId: Long,@ModelAttribute d: DocumentMetadataDTO): MetadataDTO {
-        return documentService.updateDocument(metadataId,d)
+    fun updateDocument(@ModelAttribute d: CreateUpdateDocumentDTO): MetadataDTO {
+        return documentService.updateDocument(d)
     }
 
     /**
-     * DELETE /API/documents/{metadataId}/
+     * DELETE /API/documents/{userId}/{version}/
      *
-     * Remove document {documentId} or fail if it does not exist.
+     * Remove document related to userId and version or fail if it does not exist.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/API/documents/{metadataId}/")
+    @DeleteMapping("/API/documents/{userId}/{version}/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun deleteDocument(@PathVariable("metadataId")metadataId: Long) {
-        return documentService.deleteDocument(metadataId)
+    fun deleteDocument(@PathVariable("userId")userId: String,@PathVariable("version")version: Long) {
+        return documentService.deleteDocument(userId, version)
     }
 }

@@ -1,30 +1,27 @@
 package it.polito.wa2.g05.document_store.services
 
+import it.polito.wa2.g05.document_store.KeycloakConfig
 import it.polito.wa2.g05.document_store.controllers.HomeController
 import it.polito.wa2.g05.document_store.dtos.*
+import it.polito.wa2.g05.document_store.entities.CompositeKey
 import it.polito.wa2.g05.document_store.entities.Document
 import it.polito.wa2.g05.document_store.entities.Metadata
 import it.polito.wa2.g05.document_store.exceptions.*
 import it.polito.wa2.g05.document_store.repositories.DocumentRepository
 import it.polito.wa2.g05.document_store.repositories.MetadataRepository
-import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 
 @Service
+@Transactional
 class DocumentServiceImpl(private val documentRepository: DocumentRepository,
                           private val metadataRepository: MetadataRepository): DocumentService{
 
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(HomeController::class.java)
-    @PersistenceContext
-    private lateinit var entityManager: EntityManager
 
     override fun listAll(pageNumber: Int,limit:Int): List<MetadataDTO> {
 
@@ -43,119 +40,105 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         }
     }
 
-    override fun findById(metadataId: Long): MetadataDTO {
-        if (metadataId < 0) {
-            throw IllegalMetadataIdException("Invalid metadataId Parameter.")
-        }
+    override fun findById(userId:String): List<MetadataDTO> {
+        // check if valid keycloak id
+        KeycloakConfig.checkExistingUser(userId)
         try {
-            return metadataRepository.findById(metadataId).map{ it.toDTO() }.get()
+            return metadataRepository.findMetadataByUserId(userId).map{ it.toDTO() }
         } catch (e: RuntimeException) {
-            throw DocumentNotFoundException("Document Metadata with MetadataId:$metadataId not found.")
+            throw DocumentNotFoundException("Document Metadata related to User with userId:$userId not found.")
         }
     }
 
-    @Query
-    override fun findByName(name: String): MetadataDTO? {
-        try {
-            val query = entityManager.createQuery(
-                "SELECT m FROM Metadata m WHERE m.name = :name", Metadata::class.java
-            )
-            query.setParameter("name", name)
-            return query.singleResult.toDTO()
-        } catch (e: RuntimeException) {
-            throw DocumentNotFoundException("Document Metadata with Name:$name not found.")
-        }
-    }
-
-    override fun getBinaryById(metadataId: Long): Pair<MetadataDTO,DocumentDTO> {
-        if (metadataId < 0) {
-            throw IllegalMetadataIdException("Invalid metadataId Parameter.")
+    override fun getBinaryById(documentId: Long): DocumentDTO {
+        if (documentId < 0) {
+            throw IllegalIdException("Invalid documentId Parameter.")
         }
         try {
-            // get metadata from id
-            val metadata = metadataRepository.findById(metadataId).get()
+            // get document from id
+            val document = documentRepository.findById(documentId).get()
             // return the corresponding metadata document dto pair
-            return Pair(metadata.toDTO(),metadata.document.toDTO())
+            return document.toDTO()
         } catch (e: RuntimeException) {
-            throw DocumentNotFoundException("Document Binary Data with MetadataId:$metadataId not found.")
+            throw DocumentNotFoundException("Document Binary Data of Document with DocumentId:$documentId not found.")
         }
     }
 
-    @Transactional
-    override fun createDocument(data: DocumentMetadataDTO): MetadataDTO {
-        try {
-            // see if a file with the same name already exists
-            this.findByName(data.name)
-        } catch (e: RuntimeException) {
-            // document with this name does not exist, proceed
-            // create and insert the document
-            val d = Document();
-            d.binary_data = data.file.bytes;
-            documentRepository.save(d).toDTO();
-            // Log the changes made to the file at info level
-            logger.info("Document ${data.name} uploaded.")
-            // then create and insert the metadata
-            val m = Metadata();
-            m.document = d;
-            m.name = data.name;
-            m.size = data.file.size;
-            m.content_type = data.contentType;
-            m.creation_timestamp = data.creationTimestamp
-            // return the metadata
-            // Log the changes made to the metadata at info level
-            logger.info("${data.name} metadata saved.")
-            return metadataRepository.save(m).toDTO()
+    override fun createDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
+        // check if valid keycloak id
+        KeycloakConfig.checkExistingUser(data.userId)
+        if (findById(data.userId).isNotEmpty()) {
+            // query found documents related to this user, so throw the exception
+            throw DocumentAlreadyExistsException("Documents Related to User with userId:${data.userId} Already Exists.")
         }
-        // if exists (query succeed and did not throw any exception) throw the exception
-        throw DocumentAlreadyExistsException("Document Named ${data.name} Already Exists.")
+        // documents related to this user do not exist, proceed
+        // create and insert the document
+        val d = Document();
+        d.binaryData = data.file.bytes;
+        documentRepository.save(d)
+        // Log the changes made to the file at info level
+        logger.info("Document ${data.name} uploaded.")
+        // then create and insert the metadata
+        val m = Metadata();
+        m.key = CompositeKey(data.userId,1)
+        m.document = d;
+        m.name = data.name;
+        m.size = data.file.size;
+        m.contentType = data.contentType;
+        m.creationTimestamp = data.creationTimestamp
+        // return the metadata
+        // Log the changes made to the metadata at info level
+        logger.info("${data.name} metadata saved.")
+        return metadataRepository.save(m).toDTO()
     }
 
-    @Transactional
-    override fun updateDocument(metadataId: Long,data: DocumentMetadataDTO): MetadataDTO {
-        if (metadataId < 0) {
-            throw IllegalMetadataIdException("Invalid metadataId Parameter.")
+    override fun updateDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
+        // check if valid keycloak id
+        KeycloakConfig.checkExistingUser(data.userId)
+        val documents = findById(data.userId);
+        if (documents.isEmpty()) {
+            // query found no documents related to this user, so cannot update must create first, throw the exception
+            throw DocumentNotFoundException("No Documents Related to User with userId${data.userId} Found.")
         }
-        try {
-            // retrieve and update the metadata
-            val existingMetadata = metadataRepository.findById(metadataId).get()
-            existingMetadata.name = data.name;
-            existingMetadata.size = data.file.size;
-            existingMetadata.content_type = data.contentType;
-            existingMetadata.creation_timestamp = data.creationTimestamp;
-            val updatedMetadata = metadataRepository.save(existingMetadata).toDTO();
-            // Log the changes made to the metadata at info level
-            logger.info("${data.name} metadata updated.")
-            // retrieve and update the document
-            val existingDocument = existingMetadata.document;
-            existingDocument.binary_data = data.file.bytes;
-            documentRepository.save(existingDocument).toDTO();
-            // Log the changes made to the file at info level
-            logger.info("Document ${data.name} updated.")
-            // return the updated metadata
-            return updatedMetadata;
-        } catch (e: RuntimeException) {
-            throw DocumentNotFoundException("Document with MetadataId:$metadataId not found")
-        }
+        // find the current maxVersionNumber
+        val maxVersionNumber = documents.maxByOrNull { it.keyVersion }!!.keyVersion
+        // now repeat the creation process for this new document version
+        val d = Document();
+        d.binaryData = data.file.bytes;
+        documentRepository.save(d)
+        // Log the changes made to the file at info level
+        logger.info("Document ${data.name} uploaded.")
+        // then create and insert the metadata
+        val m = Metadata();
+        m.key = CompositeKey(data.userId,maxVersionNumber + 1)
+        m.document = d;
+        m.name = data.name;
+        m.size = data.file.size;
+        m.contentType = data.contentType;
+        m.creationTimestamp = data.creationTimestamp
+        // return the metadata
+        // Log the changes made to the metadata at info level
+        logger.info("${data.name} metadata saved.")
+        return metadataRepository.save(m).toDTO()
     }
 
-    @Transactional
-    override fun deleteDocument(metadataId: Long) {
-        if (metadataId < 0) {
-            throw IllegalMetadataIdException("Invalid metadataId Parameter.")
+    override fun deleteDocument(userId: String, metadataVersion: Long) {
+        // check if valid keycloak id
+        KeycloakConfig.checkExistingUser(userId)
+        if (metadataVersion < 0) {
+            throw IllegalIdException("Invalid version Parameter.")
         }
-        try {
-            // get the metadata entry
-            val metadata = metadataRepository.findById(metadataId).get()
-            // delete the corresponding document
-            documentRepository.deleteById(metadata.document.id);
-            // Log the changes made at info level
-            logger.info("Document ${metadata.name} deleted.")
-            // delete the metadata
-            metadataRepository.deleteById(metadataId)
-            // Log the changes made at info level
-            logger.info("${metadata.name} metadata deleted.")
-        } catch (e: RuntimeException) {
-            throw DocumentNotFoundException("Document with MetadataId:$metadataId not found")
+        // get the metadata entry
+        val metadata = metadataRepository.findById(CompositeKey(userId, metadataVersion)).orElseThrow {
+            throw DocumentNotFoundException("Document related to User with userId:$userId and version:$metadataVersion not found")
         }
+        // delete the metadata
+        metadataRepository.deleteById(metadata.key)
+        // Log the changes made at info level
+        logger.info("${metadata.name} metadata deleted.")
+        // delete the corresponding document
+        documentRepository.deleteById(metadata.document.id)
+        // Log the changes made at info level
+        logger.info("Document ${metadata.name} deleted.")
     }
 }

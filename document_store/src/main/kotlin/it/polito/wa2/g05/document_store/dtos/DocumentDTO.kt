@@ -5,8 +5,9 @@ import it.polito.wa2.g05.document_store.entities.Metadata
 
 class DocumentDTO (
     val id: Long ,
-    val binary_data: ByteArray
+    val binaryData: ByteArray,
+    val metaData: Metadata
 )
 
 fun Document.toDTO(): DocumentDTO =
-    DocumentDTO(this.id,this.binary_data)
+    DocumentDTO(this.id,this.binaryData, this.metaData)
