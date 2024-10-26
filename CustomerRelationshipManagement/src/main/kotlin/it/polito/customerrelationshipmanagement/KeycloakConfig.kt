@@ -13,6 +13,8 @@ import org.keycloak.representations.idm.CredentialRepresentation
 import org.keycloak.representations.idm.UserRepresentation
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.jwt.Jwt
 
 
 @Configuration
@@ -125,4 +127,10 @@ class KeycloakConfig {
             }
         }
     }
+}
+
+fun getUserKeycloakId(authentication: Authentication): String {
+    val principal = authentication.principal as Jwt
+    val keycloakId = principal.getClaim<String>("sub") // Extract the Keycloak ID (subject claim)
+    return keycloakId
 }
