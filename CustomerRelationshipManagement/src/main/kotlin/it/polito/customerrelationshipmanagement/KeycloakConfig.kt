@@ -3,6 +3,7 @@ import it.polito.customerrelationshipmanagement.controllers.CustomerController
 import it.polito.customerrelationshipmanagement.dtos.CreateUpdateUserDTO
 import it.polito.customerrelationshipmanagement.entities.category
 import it.polito.customerrelationshipmanagement.exceptions.ContactException
+import it.polito.customerrelationshipmanagement.exceptions.ContactNotFoundException
 import it.polito.customerrelationshipmanagement.exceptions.CustomerException
 import it.polito.customerrelationshipmanagement.exceptions.ProfessionalException
 import org.keycloak.OAuth2Constants
@@ -111,6 +112,16 @@ class KeycloakConfig {
                 logger.info("Keycloak User ${user.firstName} updated with UUID: $uuid")
             } catch (e: RuntimeException) {
                 throw ContactException("Unable to Update User ${createUpdateUserDTO.firstname}.")
+            }
+        }
+
+        fun checkExistingUser(uuid: String) {
+            val keycloak = getInstance()
+            try {
+                // try to get the user, if not found throws an exception
+                keycloak.realm(realm).users()[uuid].toRepresentation()
+            } catch (e: RuntimeException) {
+                throw ContactNotFoundException("Unable to Find Registered User with id:$uuid")
             }
         }
     }
