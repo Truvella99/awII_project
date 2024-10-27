@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import it.polito.customerrelationshipmanagement.dtos.CreateUpdateUserDTO
 import it.polito.customerrelationshipmanagement.KeycloakConfig
+import it.polito.customerrelationshipmanagement.getUserKeycloakIdRole
+import org.springframework.security.core.Authentication
 
 @Service
 @Transactional
@@ -92,8 +94,11 @@ class CustomerServiceImpl(
 
     // ----- Get a customer by its ID -----
     override fun findCustomerById(
-        customerId: Long
+        customerId: Long,
+        authentication: Authentication
     ): CustomerDTO {
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
+        println("---------------IDROLE--------------${keycloakId}----${keycloakRole}")
         if (customerId < 0) {
             throw IllegalIdException("Invalid customerId Parameter.")
         }

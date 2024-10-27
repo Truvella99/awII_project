@@ -129,8 +129,17 @@ class KeycloakConfig {
     }
 }
 
-fun getUserKeycloakId(authentication: Authentication): String {
+fun getUserKeycloakIdRole(authentication: Authentication): Pair<String,String> {
     val principal = authentication.principal as Jwt
     val keycloakId = principal.getClaim<String>("sub") // Extract the Keycloak ID (subject claim)
-    return keycloakId
+    var keycloakRole: String = "";
+    // Extract the realm roles from the JWT token
+    val keycloakRoles = listOf("customer","professional","operator","manager")
+    val roles = principal.getClaim<Map<String, List<String>>>("realm_access")?.get("roles") ?: emptyList()
+    roles.forEach { role ->
+        if (keycloakRoles.contains(role)) {
+            keycloakRole = role;
+        }
+    }
+    return keycloakId to keycloakRole
 }

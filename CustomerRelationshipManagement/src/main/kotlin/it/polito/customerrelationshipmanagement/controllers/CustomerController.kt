@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -45,8 +46,8 @@ class CustomerController(private val customerService: CustomerService){
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/customers/{customerId}")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager')  || (hasRole('customer') ) )")
-    fun getCustomer(@PathVariable("customerId") customerId: Long): CustomerDTO {
-        return customerService.findCustomerById(customerId)
+    fun getCustomer(@PathVariable("customerId") customerId: Long, authentication: Authentication): CustomerDTO {
+        return customerService.findCustomerById(customerId,authentication)
     }
 
     /**
