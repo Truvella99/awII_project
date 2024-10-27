@@ -69,8 +69,10 @@ const ProfessionalProfile = ({xsrfToken,role}) => {
 
     // If error, show an error message
     if (error) {
-        handleErrors(error);
+        handleErrors({detail: error})
+        setError(null);
     }
+
 
     // Destructure professional object
     const {

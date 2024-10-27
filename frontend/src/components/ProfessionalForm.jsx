@@ -9,6 +9,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import InputMask from "react-input-mask";
 import {MessageContext} from "../messageCtx.js";
+import { Eye, EyeSlash } from 'react-bootstrap-icons';
 
 const AddProfessional = ({xsrfToken}) => {
     const [professional, setProfessional] = useState({
@@ -16,6 +17,7 @@ const AddProfessional = ({xsrfToken}) => {
         surname: '',
         ssncode: '',
         category: 'professional',
+        password: '',
         employmentState: 'available',
         geographicalLocation: {first: "0", second: "0"},
         dailyRate: 1,
@@ -49,7 +51,10 @@ const AddProfessional = ({xsrfToken}) => {
     const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
     const handleErrors = useContext(MessageContext);
-
+    const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevState => !prevState);
+    };
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
             // Create a Geocoder instance
@@ -170,7 +175,16 @@ const AddProfessional = ({xsrfToken}) => {
 
     const validateForm = async () => {
         const errors = {};
-
+        //Password
+        if (professional.password.length < 8) {
+            errors.password = "Passwprd must be at least 8 characters long";
+        }else if (!/[A-Z]/.test(professional.password)) {
+            errors.password = "Password must contain at least one uppercase letter.";
+        }else if (!/[a-z]/.test(professional.password)) {
+            errors.password = "Password must contain at least one lowercase letter.";
+        }else if (!/[0-9]/.test(professional.password)) {
+            errors.password = "Password must contain at least one digit.";
+        }
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.name)) {
             errors.name = "Name cannot be empty.";
         }
@@ -269,9 +283,12 @@ const AddProfessional = ({xsrfToken}) => {
     if (loading) {
         return <div>Loading...</div>;
     }
+    // If error, show an error message
     if (error) {
-       handleErrors(error);
+        handleErrors({detail: error})
+        setError(null);
     }
+
     return (
         <Container fluid className="py-5">
             <Row>
@@ -395,8 +412,31 @@ const AddProfessional = ({xsrfToken}) => {
                                         </Form.Group>
                                     </Col>
                                 </Row>
-                                {/* Email */}
                                 <Row>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3" controlId="psw">
+                                            <Form.Label>Password</Form.Label>
+                                            <InputGroup>
+                                                <Form.Control
+                                                    type={showPassword ? 'text' : 'password'} // Alterna testo/password
+                                                    name="password"
+                                                    placeholder="Enter password"
+                                                    value={professional.password}
+                                                    onChange={handleInputChange}
+                                                    isInvalid={!!formErrors.password} // Mostra errore se esiste
+                                                    required
+                                                />
+                                                {/* Aggiungi icona per mostrare/nascondere la password */}
+                                                <InputGroup.Text onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                                                    {showPassword ? <EyeSlash /> : <Eye />} {/* Icona cambia dinamicamente */}
+                                                </InputGroup.Text>
+                                                <Form.Control.Feedback type="invalid">
+                                                    {formErrors.password}
+                                                </Form.Control.Feedback>
+                                            </InputGroup>
+                                        </Form.Group>
+                                    </Col>
+                                {/* Email */}
                                     <Col>
                                         <Form.Group className="mb-3" controlId="email">
                                             <Form.Label>Email</Form.Label>
@@ -439,9 +479,7 @@ const AddProfessional = ({xsrfToken}) => {
                                             )}
                                         </Form.Group>
                                     </Col>
-                                </Row>
                                 {/* Address */}
-                                <Row>
                                     <Col>
                                         <Form.Group className="mb-3" controlId="address">
                                             <Form.Label>Address</Form.Label>

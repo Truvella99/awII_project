@@ -56,13 +56,11 @@ function Home({ me }) {
     let customer = {
         name: "Gennaro",
         surname: "Customer",
+        password: "Password1234",
         ssncode: "111-23-9025",
         category: "customer",
-        email: "john.doe@example.com",
-        telephone: "+391234567890",
-        address: "Via Roma 1",
-        notes: ['Has been a customer for 5 years', 'Very punctual with payments'],
-        jobOffers: []
+        email: "john.doe2@example.com",
+        notes: ['Has been a customer for 5 years', 'Very punctual with payments']
     };
     let createdCustomerId = 1;
     return (
@@ -74,8 +72,8 @@ function Home({ me }) {
                         <Button onClick={() => navigate("/ui/jobOffers/addJobOffer")}>add</Button>
                         <Button onClick={() => navigate("/ui/jobOffers/1")}>view</Button>
                         <Button onClick={()=>navigate("/ui/professionals/")}>professional</Button>
-                        <Button onClick={()=>navigate("/ui/customers/1")}>Go to customer</Button>
-                        <Button onClick={()=>navigate("/ui/professionals/1")}>Go to professional</Button>
+                        <Button onClick={()=>navigate("/ui/customers/2")}>Go to customer</Button>
+                        <Button onClick={()=>navigate("/ui/professionals/2")}>Go to professional</Button>
                         <Button variant={"success"} onClick={()=>navigate("/ui/professionals/addProfessional")}>Add Professional Page</Button>
                         <Button variant={"success"} onClick={()=>navigate("/ui/customers/addCustomer")}>Add Customer Page</Button>
                         <Button variant={"warning"} onClick={()=>navigate("/ui/professionals/edit/1")}>Edit Professional Page</Button>
@@ -92,6 +90,7 @@ function Home({ me }) {
                                 name: "Gennaro Updated afwsef",
                                 surname: "Prof sfd",
                                 ssncode: "111-23-9022",
+                                password: "password",
                                 email: "jj3@libero.it",
                                 telephone: "+391234567892",
                                 address: "Via Roma 23",
@@ -134,6 +133,7 @@ function Home({ me }) {
                                 surname: "Professional",
                                 ssncode: "111-23-9025",
                                 category: "professional",
+                                password: "password",
                                 email: null,
                                 telephone: "+391234567890",
                                 employmentState: "available",

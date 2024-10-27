@@ -7,6 +7,7 @@ import InputMask from "react-input-mask";
 import PhoneInput from "react-phone-number-input";
 import {AddressSelector} from "./Utils.jsx";
 import {MessageContext} from "../messageCtx.js";
+import {Eye, EyeSlash} from "react-bootstrap-icons";
 
 const EditProfessional = ({ xsrfToken }) => {
     const [professional, setProfessional] = useState({
@@ -20,6 +21,7 @@ const EditProfessional = ({ xsrfToken }) => {
         telephones: [],//telephones already present
         addresses: [],//addresses already present
         category: '',
+        password: '',
         employmentState: '',
         geographicalLocation: {first: "0", second: "0"},
         dailyRate: 1,
@@ -65,7 +67,10 @@ const EditProfessional = ({ xsrfToken }) => {
     const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
     const handleErrors = useContext(MessageContext);
-
+    const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevState => !prevState);
+    };
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
             // Create a Geocoder instance
@@ -253,7 +258,16 @@ const EditProfessional = ({ xsrfToken }) => {
     };
     const validateForm = async () => {
         const errors = {};
-
+        //Password
+        if (professional.password.length < 8) {
+            errors.password = "Passwprd must be at least 8 characters long";
+        }else if (!/[A-Z]/.test(professional.password)) {
+            errors.password = "Password must contain at least one uppercase letter.";
+        }else if (!/[a-z]/.test(professional.password)) {
+            errors.password = "Password must contain at least one lowercase letter.";
+        }else if (!/[0-9]/.test(professional.password)) {
+            errors.password = "Password must contain at least one digit.";
+        }
         if (!NOT_EMPTY_IF_NOT_NULL.test(professional.name)) {
             errors.name = "Name cannot be empty.";
         }
@@ -366,9 +380,10 @@ const EditProfessional = ({ xsrfToken }) => {
     if (loading) {
         return <div>Loading...</div>;
     }
-
+    // If error, show an error message
     if (error) {
-        handleErrors(error);
+        handleErrors({detail: error})
+        setError(null);
     }
 
     return (
@@ -435,16 +450,39 @@ const EditProfessional = ({ xsrfToken }) => {
                                             </Form.Control.Feedback>
                                         </Form.Group>
                                     </Col>
+                                    {/*<Col md={6}>*/}
+                                    {/*    <Form.Group className="mb-3" controlId="category">*/}
+                                    {/*        <Form.Label>Category</Form.Label>*/}
+                                    {/*        <Form.Control*/}
+                                    {/*            type="text"*/}
+                                    {/*            name="category"*/}
+                                    {/*            value={professional.category.toUpperCase()}*/}
+                                    {/*            disabled={true}*/}
+                                    {/*            required*/}
+                                    {/*        />*/}
+                                    {/*    </Form.Group>*/}
+                                    {/*</Col>*/}
                                     <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="category">
-                                            <Form.Label>Category</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="category"
-                                                value={professional.category.toUpperCase()}
-                                                disabled={true}
-                                                required
-                                            />
+                                        <Form.Group className="mb-3" controlId="psw">
+                                            <Form.Label>Password</Form.Label>
+                                            <InputGroup>
+                                                <Form.Control
+                                                    type={showPassword ? 'text' : 'password'} // Alterna testo/password
+                                                    name="password"
+                                                    placeholder="Enter password"
+                                                    value={professional.password}
+                                                    onChange={handleInputChange}
+                                                    isInvalid={!!formErrors.password} // Mostra errore se esiste
+                                                    required
+                                                />
+                                                {/* Aggiungi icona per mostrare/nascondere la password */}
+                                                <InputGroup.Text onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                                                    {showPassword ? <EyeSlash /> : <Eye />} {/* Icona cambia dinamicamente */}
+                                                </InputGroup.Text>
+                                                <Form.Control.Feedback type="invalid">
+                                                    {formErrors.password}
+                                                </Form.Control.Feedback>
+                                            </InputGroup>
                                         </Form.Group>
                                     </Col>
                                 </Row>

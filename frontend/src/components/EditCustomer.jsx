@@ -8,6 +8,7 @@ import InputMask from "react-input-mask";
 import axios from "axios";
 import {AddressSelector} from "./Utils.jsx";
 import {MessageContext} from "../messageCtx.js";
+import {Eye, EyeSlash} from "react-bootstrap-icons";
 
 const EditCustomer = ({ xsrfToken }) => {
     const [customer, setCustomer] = useState({
@@ -22,6 +23,7 @@ const EditCustomer = ({ xsrfToken }) => {
         telephones: [],//telephones already present
         addresses: [],//addresses already present
         emailsToDelete: [],
+        password: '',
         telephonesToDelete: [],
         addressesToDelete: [],
         notesToDelete: [],
@@ -39,7 +41,10 @@ const EditCustomer = ({ xsrfToken }) => {
     const navigate = useNavigate()
     const [newNotes, setNewNotes] = useState([]);
     const handleErrors = useContext(MessageContext);
-
+    const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevState => !prevState);
+    };
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
     const SSN_CODE = /^(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/;
@@ -188,7 +193,16 @@ const EditCustomer = ({ xsrfToken }) => {
 
     const validateForm = async () => {
         const errors = {};
-
+        //Password
+        if (customer.password.length < 8) {
+            errors.password = "Passwprd must be at least 8 characters long";
+        }else if (!/[A-Z]/.test(customer.password)) {
+            errors.password = "Password must contain at least one uppercase letter.";
+        }else if (!/[a-z]/.test(customer.password)) {
+            errors.password = "Password must contain at least one lowercase letter.";
+        }else if (!/[0-9]/.test(customer.password)) {
+            errors.password = "Password must contain at least one digit.";
+        }
         if (!NOT_EMPTY_IF_NOT_NULL.test(customer.name)) {
             errors.name = "Name cannot be empty.";
         }
@@ -277,10 +291,12 @@ const EditCustomer = ({ xsrfToken }) => {
     if (loading) {
         return <div>Loading...</div>;
     }
-
+    // If error, show an error message
     if (error) {
-        handleErrors(error)
+        handleErrors({detail: error})
+        setError(null);
     }
+
 
     return (
         <Container fluid className="py-5">
@@ -347,17 +363,40 @@ const EditCustomer = ({ xsrfToken }) => {
                                         </Form.Group>
                                     </Col>
                                     <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="category">
-                                            <Form.Label>Category</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="category"
-                                                value={customer.category.toUpperCase()}
-                                                disabled={true}
-                                                required
-                                            />
+                                        <Form.Group className="mb-3" controlId="psw">
+                                            <Form.Label>Password</Form.Label>
+                                            <InputGroup>
+                                                <Form.Control
+                                                    type={showPassword ? 'text' : 'password'} // Alterna testo/password
+                                                    name="password"
+                                                    placeholder="Enter password"
+                                                    value={customer.password}
+                                                    onChange={handleInputChange}
+                                                    isInvalid={!!formErrors.password} // Mostra errore se esiste
+                                                    required
+                                                />
+                                                {/* Aggiungi icona per mostrare/nascondere la password */}
+                                                <InputGroup.Text onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                                                    {showPassword ? <EyeSlash /> : <Eye />} {/* Icona cambia dinamicamente */}
+                                                </InputGroup.Text>
+                                                <Form.Control.Feedback type="invalid">
+                                                    {formErrors.password}
+                                                </Form.Control.Feedback>
+                                            </InputGroup>
                                         </Form.Group>
                                     </Col>
+                                    {/*<Col md={6}>*/}
+                                    {/*    <Form.Group className="mb-3" controlId="category">*/}
+                                    {/*        <Form.Label>Category</Form.Label>*/}
+                                    {/*        <Form.Control*/}
+                                    {/*            type="text"*/}
+                                    {/*            name="category"*/}
+                                    {/*            value={customer.category.toUpperCase()}*/}
+                                    {/*            disabled={true}*/}
+                                    {/*            required*/}
+                                    {/*        />*/}
+                                    {/*    </Form.Group>*/}
+                                    {/*</Col>*/}
                                 </Row>
 
                                 {/* Emails */}

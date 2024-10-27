@@ -66,9 +66,9 @@ const CustomerProfile = ({ xsrfToken,role}) => {
 
     // If error, show an error message
     if (error) {
-        handleErrors(error);
+        handleErrors({detail: error})
+        setError(null);
     }
-    //TODO
 
     const { name, surname, ssncode, category, emails, telephones, addresses, notes, jobOffers } = customer;
 

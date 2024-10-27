@@ -7,6 +7,7 @@ import PhoneInput from "react-phone-number-input";
 import {AddressSelector} from "./Utils.jsx";
 import InputMask from 'react-input-mask';
 import {MessageContext} from "../messageCtx.js";
+import { Eye, EyeSlash } from 'react-bootstrap-icons'; // Impor
 
 const CreateCustomer = ({xsrfToken}) => {
     const [customer, setCustomer] = useState({
@@ -17,6 +18,7 @@ const CreateCustomer = ({xsrfToken}) => {
         email: '',
         telephone: '',
         address: '',
+        password: '',
         notes: [],
     });
 
@@ -26,6 +28,7 @@ const CreateCustomer = ({xsrfToken}) => {
     const navigate = useNavigate()
     const [error, setError] = useState(null);
     const handleErrors = useContext(MessageContext);
+    const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
 
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
@@ -33,7 +36,10 @@ const CreateCustomer = ({xsrfToken}) => {
     const EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     const TELEPHONE = /^(\+?\d{1,3}[-\s.]?)?\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}$/;
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
-
+    // Funzione per alternare la visibilità della password
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevState => !prevState);
+    };
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
             // Create a Geocoder instance
@@ -112,6 +118,17 @@ const CreateCustomer = ({xsrfToken}) => {
     const validateForm = async () => {
         const errors = {};
 
+        //Password
+        if (customer.password.length < 8) {
+            errors.password = "Passwprd must be at least 8 characters long";
+        }else if (!/[A-Z]/.test(customer.password)) {
+            errors.password = "Password must contain at least one uppercase letter.";
+        }else if (!/[a-z]/.test(customer.password)) {
+            errors.password = "Password must contain at least one lowercase letter.";
+        }else if (!/[0-9]/.test(customer.password)) {
+            errors.password = "Password must contain at least one digit.";
+        }
+
         if (!NOT_EMPTY_IF_NOT_NULL.test(customer.name)) {
             errors.name = "Name cannot be empty.";
         }
@@ -123,6 +140,7 @@ const CreateCustomer = ({xsrfToken}) => {
         if (!SSN_CODE.test(customer.ssncode)) {
             errors.ssncode = "SSN Code must be valid in the format XXX-XX-XXXX.";
         }
+
 
         if (customer.email && !EMAIL.test(customer.email)) {
             errors.email = "Please enter a valid email address.";
@@ -191,8 +209,10 @@ const CreateCustomer = ({xsrfToken}) => {
     if (loading) {
         return <div>Loading...</div>;
     }
+    // If error, show an error message
     if (error) {
-        handleErrors(error);
+        handleErrors({detail: error})
+        setError(null);
     }
 
     return (
@@ -272,10 +292,32 @@ const CreateCustomer = ({xsrfToken}) => {
                                         </Form.Group>
                                     </Col>
                                 </Row>
-
+                                    <Row>
+                                        <Col md={6}>
+                                            <Form.Group className="mb-3" controlId="psw">
+                                                <Form.Label>Password</Form.Label>
+                                                <InputGroup>
+                                                    <Form.Control
+                                                        type={showPassword ? 'text' : 'password'} // Alterna testo/password
+                                                        name="password"
+                                                        placeholder="Enter password"
+                                                        value={customer.password}
+                                                        onChange={handleInputChange}
+                                                        isInvalid={!!formErrors.password} // Mostra errore se esiste
+                                                        required
+                                                    />
+                                                    {/* Aggiungi icona per mostrare/nascondere la password */}
+                                                    <InputGroup.Text onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                                                        {showPassword ? <EyeSlash /> : <Eye />} {/* Icona cambia dinamicamente */}
+                                                    </InputGroup.Text>
+                                                    <Form.Control.Feedback type="invalid">
+                                                        {formErrors.password}
+                                                    </Form.Control.Feedback>
+                                                </InputGroup>
+                                            </Form.Group>
+                                        </Col>
                                 {/* Email */}
-                                <Row>
-                                    <Col>
+                                    <Col md={6}>
                                         <Form.Group className="mb-3" controlId="email">
                                             <Form.Label>Email</Form.Label>
                                             <Form.Control
@@ -294,7 +336,7 @@ const CreateCustomer = ({xsrfToken}) => {
                                 </Row>
                                 {/* Telephone */}
                                 <Row>
-                                    <Col>
+                                    <Col md={6}>
                                         <Form.Group className="mb-3" controlId="telephone">
                                             <Form.Label >Telephone</Form.Label>
                                             <PhoneInput
@@ -316,10 +358,8 @@ const CreateCustomer = ({xsrfToken}) => {
                                             )}
                                         </Form.Group>
                                     </Col>
-                                </Row>
                                 {/* Address */}
-                                <Row>
-                                    <Col>
+                                    <Col md={6}>
                                         <Form.Group className="mb-3" controlId="address">
                                             <Form.Label>Address</Form.Label>
                                             <AddressSelector address={address} setAddress={setAddress}/>
