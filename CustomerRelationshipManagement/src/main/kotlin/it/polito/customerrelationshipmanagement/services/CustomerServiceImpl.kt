@@ -31,6 +31,18 @@ class CustomerServiceImpl(
     override fun createCustomer(
         customer: CreateUpdateCustomerDTO
     ): CustomerDTO {
+        // Register Customer on Keycloak
+        val customer_uuid = KeycloakConfig.addUser(
+            CreateUpdateUserDTO(
+                userName = customer.username!!,
+                email = customer.email,
+                password = customer.password!!,
+                firstname = customer.name!!,
+                lastName = customer.surname!!
+            ),
+            category.customer
+        )
+
         val c = Customer()
         val contactDTO = contactService.createContact(
             CreateContactDTO(
@@ -77,16 +89,6 @@ class CustomerServiceImpl(
             addCustomerNote(c.id, CreateUpdateNoteDTO(note = note))
         }
 
-        val customer_uuid = KeycloakConfig.addUser(
-            CreateUpdateUserDTO(
-                userName = customer.name!!,
-                email = customer.email,
-                password = customer.password!!,
-                firstname = customer.name,
-                lastName = customer.surname!!
-            ),
-            category.customer
-        )
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()
     }
@@ -200,7 +202,7 @@ class CustomerServiceImpl(
             userDTO = UserDTO(
                 email = customer.email,
                 password = customer.password!!,
-                firstname = customer.name,
+                firstname = customer.name!!,
                 lastName = customer.surname!!
             )
         )*/

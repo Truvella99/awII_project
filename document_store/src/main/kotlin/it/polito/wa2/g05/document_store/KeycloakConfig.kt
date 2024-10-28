@@ -28,7 +28,7 @@ class KeycloakConfig {
             return keycloak!!
         }
 
-        fun checkExistingUser(uuid: String) {
+        fun checkExistingUserById(uuid: String) {
             val keycloak = getInstance()
             try {
                 // try to get the user, if not found throws an exception

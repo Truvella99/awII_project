@@ -2,10 +2,7 @@ package it.polito.customerrelationshipmanagement
 import it.polito.customerrelationshipmanagement.controllers.CustomerController
 import it.polito.customerrelationshipmanagement.dtos.CreateUpdateUserDTO
 import it.polito.customerrelationshipmanagement.entities.category
-import it.polito.customerrelationshipmanagement.exceptions.ContactException
-import it.polito.customerrelationshipmanagement.exceptions.ContactNotFoundException
-import it.polito.customerrelationshipmanagement.exceptions.CustomerException
-import it.polito.customerrelationshipmanagement.exceptions.ProfessionalException
+import it.polito.customerrelationshipmanagement.exceptions.*
 import org.keycloak.OAuth2Constants
 import org.keycloak.admin.client.Keycloak
 import org.keycloak.admin.client.KeycloakBuilder
@@ -49,7 +46,24 @@ class KeycloakConfig {
             return passwordCredentials
         }
 
+        private fun checkExistingUserByUsername(userName: String) {
+            val keycloak = getInstance()
+            try {
+                // try to get the user, if not found throws an exception
+                val userRepresentations = keycloak.realm(realm).users().searchByUsername(userName,true)
+                if (userRepresentations.isNotEmpty()) {
+                    throw ContactAlreadyExistsException("Unable to Register The User: $userName is already used.")
+                }
+            } catch (e: RuntimeException) {
+                if (e is ContactAlreadyExistsException) {
+                    throw e
+                }
+                throw ContactException("Unable to Register User with username:$userName")
+            }
+        }
+
         fun addUser(createUpdateUserDTO: CreateUpdateUserDTO, Category: category): String {
+            checkExistingUserByUsername(createUpdateUserDTO.userName!!)
             try {
                 val role: String = when (Category) {
                     category.customer -> category.customer.toString()
@@ -100,6 +114,7 @@ class KeycloakConfig {
                 // get user
                 val userResource = keycloak.realm(realm).users()[uuid]
                 val credential = createPasswordCredentials(createUpdateUserDTO.password)
+                // No Username change check since I don't use it directly, so not possible to update username
                 val user = UserRepresentation().apply {
                     firstName = createUpdateUserDTO.firstname
                     lastName = createUpdateUserDTO.lastName
@@ -117,7 +132,7 @@ class KeycloakConfig {
             }
         }
 
-        fun checkExistingUser(uuid: String) {
+        fun checkExistingUserById(uuid: String) {
             val keycloak = getInstance()
             try {
                 // try to get the user, if not found throws an exception

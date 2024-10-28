@@ -120,7 +120,7 @@ const CreateCustomer = ({xsrfToken}) => {
 
         //Password
         if (customer.password.length < 8) {
-            errors.password = "Passwprd must be at least 8 characters long";
+            errors.password = "Password must be at least 8 characters long";
         }else if (!/[A-Z]/.test(customer.password)) {
             errors.password = "Password must contain at least one uppercase letter.";
         }else if (!/[a-z]/.test(customer.password)) {
@@ -202,7 +202,7 @@ const CreateCustomer = ({xsrfToken}) => {
             setLoading(false);
             navigate("/ui")
         } catch (err) {
-            setError(err.error || 'Error saving customer');
+            setError(err.detail || 'Error saving customer');
             setLoading(false);
         }
     };

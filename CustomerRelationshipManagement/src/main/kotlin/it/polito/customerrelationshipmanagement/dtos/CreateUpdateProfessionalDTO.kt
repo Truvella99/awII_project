@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Pattern
 
 data class CreateUpdateProfessionalDTO(
     @field:Pattern(regexp = NOT_EMPTY_IF_NOT_NULL)
+    val username: String?,
+    @field:Pattern(regexp = NOT_EMPTY_IF_NOT_NULL)
     val name: String?,
     @field:Pattern(regexp = NOT_EMPTY_IF_NOT_NULL)
     val surname: String?,

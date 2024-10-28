@@ -17,7 +17,7 @@ function JobOfferContainer({ loggedIn, role }) {
     const [jobOffer, setJobOffer] = useState({});
     const jobOfferId = useParams().jobOfferId;
     const navigate = useNavigate();
-    const handleError = useContext(MessageContext);
+    const handleErrors = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
 
     useEffect(() => {
@@ -69,7 +69,7 @@ function JobOfferContainer({ loggedIn, role }) {
             } catch (err) {
                 console.log(err);
                 // show error message
-                handleError(err);
+                handleErrors({detail: err.message});
             }
         };
 
@@ -321,7 +321,7 @@ function JobOfferForm({ mode, setMode, jobOffer, role }) {
         } catch (err) {
             console.log(err)
             // display error message
-            handleErrors(err);
+            handleErrors({detail: err.message});
         }
         setValidated(true);
     };

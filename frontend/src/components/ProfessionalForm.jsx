@@ -177,7 +177,7 @@ const AddProfessional = ({xsrfToken}) => {
         const errors = {};
         //Password
         if (professional.password.length < 8) {
-            errors.password = "Passwprd must be at least 8 characters long";
+            errors.password = "Password must be at least 8 characters long";
         }else if (!/[A-Z]/.test(professional.password)) {
             errors.password = "Password must contain at least one uppercase letter.";
         }else if (!/[a-z]/.test(professional.password)) {
@@ -276,7 +276,7 @@ const AddProfessional = ({xsrfToken}) => {
             setLoading(false);
             navigate("/ui")
         } catch (err) {
-            setError(err.error || 'Error saving professional');
+            setError(err.detail || 'Error saving professional');
             setLoading(false);
         }
     };

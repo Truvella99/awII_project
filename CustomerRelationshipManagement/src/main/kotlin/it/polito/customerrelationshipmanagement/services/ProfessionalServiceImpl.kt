@@ -104,6 +104,18 @@ class ProfessionalServiceImpl(
     override fun createProfessional(
         professional: CreateUpdateProfessionalDTO
     ): ProfessionalDTO {
+        // Register Professional on Keycloak
+        val professional_uuid = KeycloakConfig.addUser(
+            CreateUpdateUserDTO(
+                userName = professional.username!!,
+                email = professional.email,
+                password = professional.password!!,
+                firstname = professional.name!!,
+                lastName = professional.surname!!
+            ),
+            category.professional
+        )
+
         var p = Professional()
         val contactDTO = contactService.createContact(CreateContactDTO(
             name = professional.name,
@@ -140,16 +152,6 @@ class ProfessionalServiceImpl(
             addProfessionalNote(p.id, CreateUpdateNoteDTO(note = noteDTO))
         }
 
-        val professional_uuid = KeycloakConfig.addUser(
-            CreateUpdateUserDTO(
-                userName = professional.name!!,
-                email = professional.email,
-                password = professional.password!!,
-                firstname = professional.name,
-                lastName = professional.surname!!
-            ),
-            category.professional
-        )
         logger.info("Professional ${p.contact.name} created.")
         return p.toDTO()
     }
@@ -292,7 +294,7 @@ class ProfessionalServiceImpl(
             userDTO = UserDTO(
                 email = professional.email,
                 password = professional.password!!,
-                firstname = professional.name,
+                firstname = professional.name!!,
                 lastName = professional.surname!!
             )
         )*/
