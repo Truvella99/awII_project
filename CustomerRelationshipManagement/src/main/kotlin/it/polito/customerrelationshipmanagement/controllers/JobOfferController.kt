@@ -83,7 +83,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     fun getCustomerOpenJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
-        @PathVariable("customerId") customerId: Long
+        @PathVariable("customerId") customerId: String
     ): List<JobOfferDTO> {
         return jobOfferService.getCustomerOpenJobOffers(pageNumber, limit, customerId)
     }
@@ -103,7 +103,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     fun getProfessionalAcceptedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
-        @PathVariable("professionalId") professionalId: Long
+        @PathVariable("professionalId") professionalId: String
     ): List<JobOfferDTO> {
         return jobOfferService.getProfessionalAcceptedJobOffers(pageNumber, limit, professionalId)
     }
@@ -122,8 +122,8 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     fun getAbortedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
-        @RequestParam("customerId") customerId: Long?,
-        @RequestParam("professionalId") professionalId: Long?,
+        @RequestParam("customerId") customerId: String?,
+        @RequestParam("professionalId") professionalId: String?,
     ): List<JobOfferDTO> {
         return jobOfferService.getAbortedJobOffers(pageNumber, limit, customerId, professionalId)
     }

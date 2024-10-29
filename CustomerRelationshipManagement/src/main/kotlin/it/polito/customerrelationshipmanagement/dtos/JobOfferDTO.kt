@@ -13,11 +13,11 @@ data class JobOfferDTO(
     val duration: Number,
     val value: Number?,
     val profitMargin: Number,
-    val customerId: Long,
-    val consolidatedProfessionalId: Long?,
-    val completedProfessionalId: Long?,
-    val candidateProfessionalsId: List<Long>,
-    val abortedProfessionalsId: List<Long>,
+    val customerId: String,
+    val consolidatedProfessionalId: String?,
+    val completedProfessionalId: String?,
+    val candidateProfessionalsId: List<String>,
+    val abortedProfessionalsId: List<String>,
     val skills: List<SkillDTO>
 )
 

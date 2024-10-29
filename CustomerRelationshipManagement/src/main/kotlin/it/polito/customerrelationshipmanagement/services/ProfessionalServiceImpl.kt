@@ -105,7 +105,7 @@ class ProfessionalServiceImpl(
         professional: CreateUpdateProfessionalDTO
     ): ProfessionalDTO {
         // Register Professional on Keycloak
-        val professional_uuid = KeycloakConfig.addUser(
+        val professionalId = KeycloakConfig.addUser(
             CreateUpdateUserDTO(
                 userName = professional.username!!,
                 email = professional.email,
@@ -116,7 +116,9 @@ class ProfessionalServiceImpl(
             category.professional
         )
 
-        var p = Professional()
+        val p = Professional()
+        p.id = professionalId
+        professionalRepository.save(p)
         val contactDTO = contactService.createContact(CreateContactDTO(
             name = professional.name,
             surname = professional.surname,
@@ -129,7 +131,7 @@ class ProfessionalServiceImpl(
         val contact = contactRepository.findById(contactDTO.id).get()
         p.contact = contact
         contact.professional = p
-        contactRepository.save(contact)
+        //contactRepository.save(contact)
 
         if (professional.employmentState == null || professional.dailyRate == null ) {
             throw ProfessionalException("EmploymentState and dailyRate cannot be empty.")
@@ -157,8 +159,8 @@ class ProfessionalServiceImpl(
     }
 
     // ----- Get a professional by its ID -----
-    override fun findProfessionalById(professionalId: Long): ProfessionalDTO {
-        if (professionalId < 0) {
+    override fun findProfessionalById(professionalId: String): ProfessionalDTO {
+        if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         }
         val professional = professionalRepository.findById(professionalId).orElseThrow{
@@ -168,12 +170,24 @@ class ProfessionalServiceImpl(
     }
 
     // ----- Update a professional -----
-    override fun updateProfessional(professionalId: Long, professional: CreateUpdateProfessionalDTO): ProfessionalDTO {
+    override fun updateProfessional(professionalId: String, professional: CreateUpdateProfessionalDTO): ProfessionalDTO {
         var updateJobOffer = false
 
-        if (professionalId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         }
+
+        KeycloakConfig.updateUser(
+            professionalId,
+            CreateUpdateUserDTO(
+                userName = null,
+                email = professional.email,
+                password = professional.password!!,
+                firstname = professional.name!!,
+                lastName = professional.surname!!
+            )
+        )
+
         val p = professionalRepository.findById(professionalId).orElseThrow{
             throw ProfessionalNotFoundException("Professional with ProfessionalId:$professionalId not found.")
         }
@@ -289,15 +303,6 @@ class ProfessionalServiceImpl(
 
         professionalRepository.save(p)
 
-        /*KeycloakConfig.updateUser(
-            uuid = ,
-            userDTO = UserDTO(
-                email = professional.email,
-                password = professional.password!!,
-                firstname = professional.name!!,
-                lastName = professional.surname!!
-            )
-        )*/
         logger.info("Professional ${p.contact.name} updated.")
         return p.toDTO()
     }
@@ -305,10 +310,10 @@ class ProfessionalServiceImpl(
 
     // ----- Add a note for a professional -----
     override fun addProfessionalNote(
-        professionalId: Long,
+        professionalId: String,
         note: CreateUpdateNoteDTO
     ): NoteDTO {
-        if (professionalId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         }
         val professional = professionalRepository.findById(professionalId).orElseThrow{
@@ -326,10 +331,10 @@ class ProfessionalServiceImpl(
         return newNote.toDTO()
     }
 
-    override fun deleteProfessionalNote(professionalId: Long, noteId: Long): ProfessionalDTO {
-        if (professionalId < 0 && noteId < 0) {
+    override fun deleteProfessionalNote(professionalId: String, noteId: Long): ProfessionalDTO {
+        if ((!KeycloakConfig.checkExistingUserById(professionalId)) && noteId < 0) {
             throw IllegalIdException("Invalid professionalId and noteId Parameter.")
-        } else if (professionalId < 0) {
+        } else if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         } else if (noteId < 0) {
             throw IllegalIdException("Invalid noteId Parameter.")
@@ -355,10 +360,10 @@ class ProfessionalServiceImpl(
 
     }
 
-    override fun deleteProfessionalSkill(professionalId: Long, skillId: Long): ProfessionalDTO {
-        if (professionalId < 0 && skillId < 0) {
+    override fun deleteProfessionalSkill(professionalId: String, skillId: Long): ProfessionalDTO {
+        if ((!KeycloakConfig.checkExistingUserById(professionalId)) && skillId < 0) {
             throw IllegalIdException("Invalid professionalId and skillId Parameter.")
-        } else if (professionalId < 0) {
+        } else if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         } else if (skillId < 0) {
             throw IllegalIdException("Invalid skillId Parameter.")

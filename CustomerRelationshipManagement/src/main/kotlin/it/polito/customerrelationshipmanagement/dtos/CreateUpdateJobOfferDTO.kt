@@ -14,7 +14,7 @@ data class CreateUpdateJobOfferDTO(
     val currentStateNote: String?,
     val duration: Number,
     val profitMargin: Number,
-    val customerId: Long? = null,//null when create a customer with a JobOffer - not null when create a jobOffer
+    val customerId: String? = null,//null when create a customer with a JobOffer - not null when create a jobOffer
     val skills: List<CreateSkillDTO>,
     val skillsToDelete: List<Long>? = null
 )

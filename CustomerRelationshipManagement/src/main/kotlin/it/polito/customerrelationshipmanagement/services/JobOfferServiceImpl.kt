@@ -1,5 +1,6 @@
 package it.polito.customerrelationshipmanagement.services
 
+import it.polito.customerrelationshipmanagement.KeycloakConfig
 import it.polito.customerrelationshipmanagement.controllers.JobOfferController
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.*
@@ -176,9 +177,9 @@ class JobOfferServiceImpl(
     override fun getCustomerOpenJobOffers(
         pageNumber: Int?, 
         limit: Int?, 
-        customerId: Long
+        customerId: String
     ): List<JobOfferDTO> {
-        if (customerId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(customerId)) {
             throw IllegalIdException("Invalid customerId Parameter.")
         }
         if (pageNumber != null && limit != null) {
@@ -206,9 +207,9 @@ class JobOfferServiceImpl(
     override fun getProfessionalAcceptedJobOffers(
         pageNumber: Int?,
         limit: Int?,
-        professionalId: Long
+        professionalId: String
     ): List<JobOfferDTO> {
-        if (professionalId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         }
         if (pageNumber != null && limit != null) {
@@ -236,14 +237,14 @@ class JobOfferServiceImpl(
     override fun getAbortedJobOffers(
         pageNumber: Int?,
         limit: Int?,
-        customerId: Long?,
-        professionalId: Long?
+        customerId: String?,
+        professionalId: String?
     ): List<JobOfferDTO> {
-        if ((customerId != null && customerId < 0) && (professionalId != null && professionalId < 0)) {
+        if ((customerId != null && (!KeycloakConfig.checkExistingUserById(customerId))) && (professionalId != null && (!KeycloakConfig.checkExistingUserById(professionalId)))) {
             throw IllegalIdException("Invalid customerId and professionalId Parameter.")
-        } else if (customerId != null && customerId < 0) {
+        } else if (customerId != null && (!KeycloakConfig.checkExistingUserById(customerId))) {
             throw IllegalIdException("Invalid customerId Parameter.")
-        } else if (professionalId != null && professionalId < 0) {
+        } else if (professionalId != null && (!KeycloakConfig.checkExistingUserById(professionalId))) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         }
         

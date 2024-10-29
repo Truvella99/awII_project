@@ -32,7 +32,7 @@ class CustomerServiceImpl(
         customer: CreateUpdateCustomerDTO
     ): CustomerDTO {
         // Register Customer on Keycloak
-        val customer_uuid = KeycloakConfig.addUser(
+        val customerId = KeycloakConfig.addUser(
             CreateUpdateUserDTO(
                 userName = customer.username!!,
                 email = customer.email,
@@ -44,6 +44,7 @@ class CustomerServiceImpl(
         )
 
         val c = Customer()
+        c.id = customerId
         val contactDTO = contactService.createContact(
             CreateContactDTO(
                 name = customer.name,
@@ -57,9 +58,9 @@ class CustomerServiceImpl(
         )
         val contact = contactRepository.findById(contactDTO.id).get()
         c.contact = contact
-        customerRepository.save(c)
         contact.customer = c
-        contactRepository.save(contact)
+        customerRepository.save(c)
+        //contactRepository.save(contact)
 
         // Add jobOffer
         customer.jobOffers?.forEach { jobOffer ->
@@ -96,12 +97,12 @@ class CustomerServiceImpl(
 
     // ----- Get a customer by its ID -----
     override fun findCustomerById(
-        customerId: Long,
+        customerId: String,
         authentication: Authentication
     ): CustomerDTO {
         val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
         println("---------------IDROLE--------------${keycloakId}----${keycloakRole}")
-        if (customerId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(customerId)) {
             throw IllegalIdException("Invalid customerId Parameter.")
         }
 
@@ -115,12 +116,23 @@ class CustomerServiceImpl(
 
     // ----- Update data for a customer -----
     override fun updateCustomer(
-        customerId: Long,
+        customerId: String,
         customer: CreateUpdateCustomerDTO
     ): CustomerDTO {
-        if (customerId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(customerId)) {
             throw IllegalIdException("Invalid customerId Parameter.")
         }
+
+        KeycloakConfig.updateUser(
+            customerId,
+            CreateUpdateUserDTO(
+                userName = null,
+                email = customer.email,
+                password = customer.password!!,
+                firstname = customer.name!!,
+                lastName = customer.surname!!
+            )
+        )
 
         val c = customerRepository.findById(customerId).orElseThrow{
             throw CustomerNotFoundException("Customer with CustomerId:$customerId not found")
@@ -197,15 +209,6 @@ class CustomerServiceImpl(
             }
         }
 
-        /*KeycloakConfig.updateUser(
-            uuid = ,
-            userDTO = UserDTO(
-                email = customer.email,
-                password = customer.password!!,
-                firstname = customer.name!!,
-                lastName = customer.surname!!
-            )
-        )*/
         logger.info("Customer ${c.contact.name} updated.")
         return c.toDTO()
     }
@@ -213,10 +216,10 @@ class CustomerServiceImpl(
 
     // ----- Add a note for a customer -----
     override fun addCustomerNote(
-        customerId: Long,
+        customerId: String,
         note: CreateUpdateNoteDTO
     ): NoteDTO {
-        if (customerId < 0) {
+        if (!KeycloakConfig.checkExistingUserById(customerId)) {
             throw IllegalIdException("Invalid customerId Parameter.")
         }
 
@@ -235,10 +238,10 @@ class CustomerServiceImpl(
         return newNote.toDTO()
     }
 
-    override fun deleteCustomerNote(customerId: Long, noteId: Long): CustomerDTO {
-            if (customerId < 0 && noteId < 0) {
+    override fun deleteCustomerNote(customerId: String, noteId: Long): CustomerDTO {
+            if ((!KeycloakConfig.checkExistingUserById(customerId)) && noteId < 0) {
                 throw IllegalIdException("Invalid customerId and noteId Parameter.")
-            } else if (customerId < 0) {
+            } else if (!KeycloakConfig.checkExistingUserById(customerId)) {
                 throw IllegalIdException("Invalid customerId Parameter.")
             } else if (noteId < 0) {
                 throw IllegalIdException("Invalid noteId Parameter.")

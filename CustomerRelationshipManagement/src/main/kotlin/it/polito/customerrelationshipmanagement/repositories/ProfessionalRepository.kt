@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ProfessionalRepository: JpaRepository<Professional,Long> {
+interface ProfessionalRepository: JpaRepository<Professional,String> {
 
 
     @Query("SELECT p FROM Professional p " +

@@ -27,7 +27,6 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @PostMapping("/API/professionals")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun createProfessional(@RequestBody @Valid p: CreateUpdateProfessionalDTO): ProfessionalDTO {
-        println(p)
         return professionalService.createProfessional(p)
     }
     /**
@@ -38,7 +37,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/professionals/{professionalId}/note")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun addProfessionalNotes(@PathVariable("professionalId") professionalId: Long, @RequestBody note:CreateUpdateNoteDTO): NoteDTO {
+    fun addProfessionalNotes(@PathVariable("professionalId") professionalId: String, @RequestBody note:CreateUpdateNoteDTO): NoteDTO {
         return professionalService.addProfessionalNote(professionalId, note)
     }
     /**
@@ -86,7 +85,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/{professionalId}")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional')  )")
-    fun getProfessional(@PathVariable("professionalId") professionalId: Long): ProfessionalDTO {
+    fun getProfessional(@PathVariable("professionalId") professionalId: String): ProfessionalDTO {
         return professionalService.findProfessionalById(professionalId)
     }
 
@@ -111,7 +110,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @PutMapping("/API/professionals/{professionalId}")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateProfessional(
-        @PathVariable("professionalId") professionalId: Long,
+        @PathVariable("professionalId") professionalId: String,
         @RequestBody  @Valid professional: CreateUpdateProfessionalDTO
     ): ProfessionalDTO {
         return professionalService.updateProfessional(professionalId, professional)

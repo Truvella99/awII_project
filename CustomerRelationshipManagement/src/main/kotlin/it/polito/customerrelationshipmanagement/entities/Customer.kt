@@ -6,8 +6,7 @@ import jakarta.persistence.*
 @Entity
 class Customer{
     @Id
-    @GeneratedValue
-    var id: Long = 0
+    lateinit var id: String
     @OneToMany(mappedBy = "customer")
     val notes = mutableSetOf<Note>()
 
@@ -16,7 +15,7 @@ class Customer{
         notes.add(note)
     }
 
-    @OneToOne
+    @OneToOne(mappedBy = "customer",cascade = [CascadeType.ALL])
     lateinit var contact: Contact
 
     @OneToMany(mappedBy = "customer")

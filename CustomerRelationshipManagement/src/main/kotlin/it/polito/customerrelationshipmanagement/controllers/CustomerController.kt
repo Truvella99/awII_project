@@ -35,7 +35,7 @@ class CustomerController(private val customerService: CustomerService){
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/customers/{customerId}/note")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun addCustomerNotes(@PathVariable("customerId") customerId: Long, @RequestBody note:CreateUpdateNoteDTO): NoteDTO {
+    fun addCustomerNotes(@PathVariable("customerId") customerId: String, @RequestBody note:CreateUpdateNoteDTO): NoteDTO {
         return customerService.addCustomerNote(customerId, note)
     }
     /**
@@ -46,7 +46,7 @@ class CustomerController(private val customerService: CustomerService){
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/customers/{customerId}")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager')  || (hasRole('customer') ) )")
-    fun getCustomer(@PathVariable("customerId") customerId: Long, authentication: Authentication): CustomerDTO {
+    fun getCustomer(@PathVariable("customerId") customerId: String, authentication: Authentication): CustomerDTO {
         return customerService.findCustomerById(customerId,authentication)
     }
 
@@ -71,7 +71,7 @@ class CustomerController(private val customerService: CustomerService){
     @PutMapping("/API/customers/{customerId}")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun updateCustomer(
-        @PathVariable("customerId") customerId: Long,
+        @PathVariable("customerId") customerId: String,
         @RequestBody  @Valid customer: CreateUpdateCustomerDTO
     ): CustomerDTO {
         return customerService.updateCustomer(customerId, customer)

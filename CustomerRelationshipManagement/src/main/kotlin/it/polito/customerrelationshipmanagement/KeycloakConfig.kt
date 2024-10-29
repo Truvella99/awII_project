@@ -132,13 +132,14 @@ class KeycloakConfig {
             }
         }
 
-        fun checkExistingUserById(uuid: String) {
+        fun checkExistingUserById(uuid: String): Boolean {
             val keycloak = getInstance()
             try {
                 // try to get the user, if not found throws an exception
                 keycloak.realm(realm).users()[uuid].toRepresentation()
+                return true
             } catch (e: RuntimeException) {
-                throw ContactNotFoundException("Unable to Find Registered User with id:$uuid")
+                return false
             }
         }
     }

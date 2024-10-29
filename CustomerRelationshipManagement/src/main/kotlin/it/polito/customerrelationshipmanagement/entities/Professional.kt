@@ -6,14 +6,13 @@ import jakarta.persistence.*
 @Entity
 class Professional{
     @Id
-    @GeneratedValue
-    var id: Long = 0
+    lateinit var id: String
 
     lateinit var employmentState: employmentState
     var geographicalLocation: Pair<Double,Double>? = null
     lateinit var dailyRate: Number
 
-    @OneToOne
+    @OneToOne(mappedBy = "professional", cascade = [CascadeType.ALL])
     lateinit var contact: Contact
 
     // joboffer on which is currently working on

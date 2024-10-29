@@ -4,7 +4,7 @@ import it.polito.customerrelationshipmanagement.entities.*
 
 
 data class ProfessionalDTO(
-    val id: Long,
+    val id: String,
     val name: String?,
     val surname: String?,
     val ssncode: String?,

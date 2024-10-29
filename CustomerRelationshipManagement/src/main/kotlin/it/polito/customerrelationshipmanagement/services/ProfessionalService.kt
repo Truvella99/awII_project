@@ -5,9 +5,9 @@ import it.polito.customerrelationshipmanagement.entities.employmentState
 
 interface ProfessionalService {
     // gaetano
-    fun addProfessionalNote(professionalId: Long, note: CreateUpdateNoteDTO): NoteDTO
-    fun deleteProfessionalNote(professionalId: Long, noteId: Long): ProfessionalDTO
-    fun deleteProfessionalSkill(professionalId: Long, skillId: Long): ProfessionalDTO
+    fun addProfessionalNote(professionalId: String, note: CreateUpdateNoteDTO): NoteDTO
+    fun deleteProfessionalNote(professionalId: String, noteId: Long): ProfessionalDTO
+    fun deleteProfessionalSkill(professionalId: String, skillId: Long): ProfessionalDTO
 
     fun listAllProfessionals(
         pageNumber: Int?,
@@ -24,8 +24,8 @@ interface ProfessionalService {
         km: Double): List<ProfessionalDTO>
     fun createProfessional(professional: CreateUpdateProfessionalDTO): ProfessionalDTO
     // ale costa
-    fun findProfessionalById(professionalId: Long): ProfessionalDTO
-    fun updateProfessional(professionalId: Long,professional: CreateUpdateProfessionalDTO): ProfessionalDTO
+    fun findProfessionalById(professionalId: String): ProfessionalDTO
+    fun updateProfessional(professionalId: String,professional: CreateUpdateProfessionalDTO): ProfessionalDTO
 
     fun findProfessionals(filter: String): List<ProfessionalDTO>
 }

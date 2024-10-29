@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern
 
 
 data class CustomerDTO(
-    val id: Long,
+    val id: String,
     val name: String?,
     val surname: String?,
     val ssncode: String?,

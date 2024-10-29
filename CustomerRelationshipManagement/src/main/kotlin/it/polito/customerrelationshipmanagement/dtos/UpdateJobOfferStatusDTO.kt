@@ -5,6 +5,6 @@ import it.polito.customerrelationshipmanagement.entities.jobOfferStatus
 class UpdateJobOfferStatusDTO(
     val targetStatus: jobOfferStatus,
     val note: String?,
-    val professionalsId: List<Long>,
-    val consolidatedProfessionalId: Long?
+    val professionalsId: List<String>,
+    val consolidatedProfessionalId: String?
 )

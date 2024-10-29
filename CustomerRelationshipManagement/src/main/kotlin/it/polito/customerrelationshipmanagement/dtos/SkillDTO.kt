@@ -9,7 +9,7 @@ data class SkillDTO(
     val skill: String,
     val state: contactInfoState,
     val jobOfferId: Long?,
-    val professionalId: Long?
+    val professionalId: String?
 )
 
 fun Skill.toDTO(): SkillDTO =

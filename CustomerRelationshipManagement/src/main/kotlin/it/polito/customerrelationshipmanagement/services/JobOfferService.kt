@@ -13,18 +13,18 @@ interface JobOfferService {
     fun getCustomerOpenJobOffers(
         pageNumber: Int?,
         limit: Int?,
-        customerId: Long,
+        customerId: String,
     ): List<JobOfferDTO>
     fun getProfessionalAcceptedJobOffers(
         pageNumber: Int?,
         limit: Int?,
-        professionalId: Long,
+        professionalId: String,
     ): List<JobOfferDTO>
     fun getAbortedJobOffers(
         pageNumber: Int?,
         limit: Int?,
-        customerId: Long?,
-        professionalId: Long?,
+        customerId: String?,
+        professionalId: String?,
     ): List<JobOfferDTO>
     // ale costa
     fun updateJobOfferStatus(jobOfferId: Long, data: UpdateJobOfferStatusDTO): JobOfferDTO

@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Pattern
 data class NoteDTO(
     val id: Long,
     val note: String,
-    val customerId: Long?,
-    val professionalId: Long?,
+    val customerId: String?,
+    val professionalId: String?,
     val state : contactInfoState
 )
 
