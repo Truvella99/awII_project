@@ -42,7 +42,7 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
 
     override fun findById(userId:String): List<MetadataDTO> {
         // check if valid keycloak id
-        KeycloakConfig.checkExistingUser(userId)
+        KeycloakConfig.checkExistingUserById(userId)
         try {
             return metadataRepository.findMetadataByUserId(userId).map{ it.toDTO() }
         } catch (e: RuntimeException) {
@@ -66,7 +66,7 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
 
     override fun createDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
         // check if valid keycloak id
-        KeycloakConfig.checkExistingUser(data.userId)
+        KeycloakConfig.checkExistingUserById(data.userId)
         if (findById(data.userId).isNotEmpty()) {
             // query found documents related to this user, so throw the exception
             throw DocumentAlreadyExistsException("Documents Related to User with userId:${data.userId} Already Exists.")
@@ -94,7 +94,7 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
 
     override fun updateDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
         // check if valid keycloak id
-        KeycloakConfig.checkExistingUser(data.userId)
+        KeycloakConfig.checkExistingUserById(data.userId)
         val documents = findById(data.userId);
         if (documents.isEmpty()) {
             // query found no documents related to this user, so cannot update must create first, throw the exception
@@ -124,7 +124,7 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
 
     override fun deleteDocument(userId: String, metadataVersion: Long) {
         // check if valid keycloak id
-        KeycloakConfig.checkExistingUser(userId)
+        KeycloakConfig.checkExistingUserById(userId)
         if (metadataVersion < 0) {
             throw IllegalIdException("Invalid version Parameter.")
         }
