@@ -4,7 +4,10 @@ import it.polito.apigateway.dtos.CreateUpdateDocumentDTO
 import it.polito.apigateway.dtos.MetadataDTO
 import it.polito.apigateway.exceptions.DocStoreException
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.http.*
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ProblemDetail
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -16,8 +19,10 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 import java.security.Principal
 import java.time.LocalDateTime
+
 
 @RestController
 class HomeController(private val authorizedClientService: OAuth2AuthorizedClientService) {
@@ -100,12 +105,9 @@ class HomeController(private val authorizedClientService: OAuth2AuthorizedClient
             .onStatus(
                 {status -> status.is3xxRedirection || status.is4xxClientError || status.is5xxServerError},
                 {response ->
-                    // empty body case (403 and maybe 401) when spring security blocks
-                    //println("Received HTTP status: ${response.statusCode()}")
-                    if (response.headers().contentLength().orElse(0) == 0L) {
-                        throw DocStoreException(response.statusCode(),"")
-                    }
                     response.bodyToMono(ProblemDetail::class.java)
+                        // empty body case (403 and maybe 401) when spring security blocks
+                        .switchIfEmpty(Mono.error(DocStoreException(response.statusCode(),"")))
                         .handle { pd, sink ->
                             sink.error(DocStoreException(HttpStatus.valueOf(pd.status),pd.detail!!))
                         }
@@ -146,12 +148,9 @@ class HomeController(private val authorizedClientService: OAuth2AuthorizedClient
             .onStatus(
                 {status -> status.is3xxRedirection || status.is4xxClientError || status.is5xxServerError},
                 {response ->
-                    // empty body case (403 and maybe 401) when spring security blocks
-                    //println("Received HTTP status: ${response.statusCode()}")
-                    if (response.headers().contentLength().orElse(0) == 0L) {
-                        throw DocStoreException(response.statusCode(),"")
-                    }
                     response.bodyToMono(ProblemDetail::class.java)
+                        // empty body case (403 and maybe 401) when spring security blocks
+                        .switchIfEmpty(Mono.error(DocStoreException(response.statusCode(),"")))
                         .handle { pd, sink ->
                             sink.error(DocStoreException(HttpStatus.valueOf(pd.status),pd.detail!!))
                         }
