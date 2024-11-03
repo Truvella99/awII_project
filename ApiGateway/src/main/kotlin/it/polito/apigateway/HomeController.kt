@@ -100,6 +100,11 @@ class HomeController(private val authorizedClientService: OAuth2AuthorizedClient
             .onStatus(
                 {status -> status.is3xxRedirection || status.is4xxClientError || status.is5xxServerError},
                 {response ->
+                    // empty body case (403 and maybe 401) when spring security blocks
+                    //println("Received HTTP status: ${response.statusCode()}")
+                    if (response.headers().contentLength().orElse(0) == 0L) {
+                        throw DocStoreException(response.statusCode(),"")
+                    }
                     response.bodyToMono(ProblemDetail::class.java)
                         .handle { pd, sink ->
                             sink.error(DocStoreException(HttpStatus.valueOf(pd.status),pd.detail!!))
