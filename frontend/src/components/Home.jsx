@@ -54,13 +54,61 @@ function Home({ me }) {
         postData().then();
     }, []);
     let customer = {
-        name: "Gennaro",
+        name: "Giuseppe",
         surname: "Customer",
-        password: "Password1234",
+        username: "giuseppe5",
+        password: "Password12345",
         ssncode: "111-23-9025",
         category: "customer",
-        email: "john.doe2@example.com",
-        notes: ['Has been a customer for 5 years', 'Very punctual with payments']
+        email: "john.doe50@example.com",
+        notes: ['Has been a customer for 5 years', 'Very punctual with payments'],
+        jobOffers: [
+            {
+                first: null,
+                second: {
+                    name: 'Software Engineer',
+                    description: 'Develop and maintain web applications.',
+                    currentState: 'done',
+                    currentStateNote: 'Looking for suitable candidates',
+                    duration: 6,
+                    profitMargin: 10,
+                    skills: [
+                        { skill: "Skill 1" },
+                        { skill: "Skill 2" }
+                    ]
+                }
+            },
+            {
+                first: null,
+                second: {
+                    name: 'Data Scientist',
+                    description: 'Analyze complex data sets to assist decision-making.',
+                    currentState: 'aborted',
+                    currentStateNote: 'Position filled',
+                    duration: 12,
+                    profitMargin: 15,
+                    skills: [
+                        { skill: "Skill 3" },
+                        { skill: "Skill 4" }
+                    ]
+                }
+            },
+            {
+                first: null,
+                second: {
+                    name: 'Sniper',
+                    description: 'Analyze complex snipers.',
+                    currentState: 'candidate_proposal',
+                    currentStateNote: 'Position filled',
+                    duration: 12,
+                    profitMargin: 15,
+                    skills: [
+                        { skill: "Skill 5" },
+                        { skill: "Skill 6" }
+                    ]
+                }
+            }
+        ]
     };
     let createdCustomerId = 1;
     return (
@@ -68,7 +116,8 @@ function Home({ me }) {
             <Container>
                 <Row className="mb-3">
                     <Col>
-                    <Button onClick={() => navigate("/ui/Registration")}>Registration</Button>
+                        <Button onClick={() => navigate("/ui/messages/2")}>Message</Button>
+                        <Button onClick={() => navigate("/ui/Registration")}>Registration</Button>
                         <Button onClick={() => navigate("/ui/jobOffers/addJobOffer")}>add</Button>
                         <Button onClick={() => navigate("/ui/jobOffers/1")}>view</Button>
                         <Button onClick={()=>navigate("/ui/professionals/")}>professional</Button>
@@ -131,6 +180,7 @@ function Home({ me }) {
                             let professional = {
                                 name: "Giuseppe",
                                 surname: "Professional",
+                                username: "giuseppe6",
                                 ssncode: "111-23-9025",
                                 category: "professional",
                                 password: "password",
@@ -149,6 +199,19 @@ function Home({ me }) {
 
                             await API.createProfessional(professional,me.xsrfToken);
                         }}>add professional prefixed</Button>
+
+                        <Button onClick={async () => {
+                            let message = {
+                                channel: "email",
+                                priority: "high",
+                                email: "john.doe@example.com",
+                                telephone: null,
+                                address: null,
+                                subject: "Test message 2",
+                                body: "This is the second test message"
+                            };
+                            await API.createMessage(message, me.xsrfToken);
+                        }}>add message prefixed</Button>
                         <Button variant="primary" onClick={() => navigate("/ui/customers")}> Go to Home </Button>
                     </Col>
                 </Row>

@@ -156,12 +156,36 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     /**
      * GET /API/joboffers/
      *
-     * get all the jobOffers in the DB. Allow for filtering by skills.
+     * get all the jobOffers in the DB. Allow for filtering by skills and professionals.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getAllJobOffers( @RequestParam("skills") skills: List<String>? ): List<JobOfferDTO> {
-        return jobOfferService.getAllJobOffers(skills)
+    fun getAllJobOffers(
+        @RequestParam("skills") skills: List<String>?,
+        @RequestParam("candidateProfessionals") candidateProfessionals: List<String>?,
+        @RequestParam("abortedProfessionals") abortedProfessionals: List<String>?,
+        @RequestParam("consolidatedProfessionals") consolidatedProfessionals: List<String>?,
+        @RequestParam("completedProfessionals") completedProfessionals: List<String>?
+    ): List<JobOfferDTO> {
+        return jobOfferService.getAllJobOffers(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals)
+    }
+    /**
+     * GET /API/joboffers/open/
+     *
+     * get all the jobOffers in the DB with status different from
+     * aborted/consolidated/done. Allow for filtering by skills and professionals.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/joboffers/open/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional'))")
+    fun getOpenJobOffers(
+        @RequestParam("skills") skills: List<String>?,
+        @RequestParam("candidateProfessionals") candidateProfessionals: List<String>?,
+        @RequestParam("abortedProfessionals") abortedProfessionals: List<String>?,
+        @RequestParam("consolidatedProfessionals") consolidatedProfessionals: List<String>?,
+        @RequestParam("completedProfessionals") completedProfessionals: List<String>?
+    ): List<JobOfferDTO> {
+        return jobOfferService.getOpenJobOffers(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals)
     }
 }

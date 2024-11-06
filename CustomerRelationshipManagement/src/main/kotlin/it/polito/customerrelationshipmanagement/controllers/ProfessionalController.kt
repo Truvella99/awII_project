@@ -56,9 +56,13 @@ class ProfessionalController(private val professionalService: ProfessionalServic
         @RequestParam("skills") skills: List<String>?,
         @RequestParam("latitude") latitude: Double?,
         @RequestParam("longitude") longitude: Double?,
-        @RequestParam("employmentState") employmentState: employmentState?
+        @RequestParam("employmentState") employmentState: employmentState?,
+        @RequestParam("candidateJobOffers") candidateJobOffers: List<String>?,
+        @RequestParam("abortedJobOffers") abortedJobOffers: List<String>?,
+        @RequestParam("consolidatedJobOffers") consolidatedJobOffers: List<String>?,
+        @RequestParam("completedJobOffers") completedJobOffers: List<String>?
     ): List<ProfessionalDTO> {
-        return professionalService.listAllProfessionals(pageNumber, limit, skills, latitude,longitude, employmentState)
+        return professionalService.listAllProfessionals(pageNumber, limit, skills, latitude, longitude, employmentState, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers)
     }
     /**
      * GET /API/professionals/distance/
@@ -73,9 +77,13 @@ class ProfessionalController(private val professionalService: ProfessionalServic
         @RequestParam("skills") skills: List<String>?,
         @RequestParam("latitude") latitude: Double,
         @RequestParam("longitude") longitude: Double,
-        @RequestParam("km") km: Double
+        @RequestParam("km") km: Double,
+        @RequestParam("candidateJobOffers") candidateJobOffers: List<String>?,
+        @RequestParam("abortedJobOffers") abortedJobOffers: List<String>?,
+        @RequestParam("consolidatedJobOffers") consolidatedJobOffers: List<String>?,
+        @RequestParam("completedJobOffers") completedJobOffers: List<String>?
     ): List<ProfessionalDTO> {
-        return professionalService.listProfessionalsDistance(skills, latitude, longitude, km)
+        return professionalService.listProfessionalsDistance(skills, latitude, longitude, km, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers)
     }
     /**
      * GET /API/professionals/{professionalId}
@@ -84,9 +92,26 @@ class ProfessionalController(private val professionalService: ProfessionalServic
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/{professionalId}")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional')  )")
+    @PreAuthorize("isAuthenticated()")
     fun getProfessional(@PathVariable("professionalId") professionalId: String): ProfessionalDTO {
         return professionalService.findProfessionalById(professionalId)
+    }
+
+    /**
+     * GET /API/professionals/info/
+     *
+     * info(name and surname) of professionals required.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/API/professionals/info/")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional'))")
+    fun getProfessionalsInfo(
+        @RequestParam("candidateIds") candidateIds: List<String>?,
+        @RequestParam("abortedIds") abortedIds: List<String>?,
+        @RequestParam("consolidatedIds") consolidatedIds: List<String>?,
+        @RequestParam("completedIds") completedIds: List<String>?
+        ): Map<String, List<Pair<String?, String?>>> {
+        return professionalService.getProfessionalsInfo(candidateIds, abortedIds, consolidatedIds, completedIds)
     }
 
     /**

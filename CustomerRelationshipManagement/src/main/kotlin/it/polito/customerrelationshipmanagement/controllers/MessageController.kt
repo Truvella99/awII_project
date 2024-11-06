@@ -40,7 +40,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/messages/")
-    @PreAuthorize("isAuthenticated()")
+//    @PreAuthorize("isAuthenticated()")
     fun addMessage(@RequestBody @Valid data: CreateMessageDTO): MessageDTO {
         return messageService.addMessage(data)
     }

@@ -19,6 +19,7 @@
     "bootstrap-icons": "^1.10.4",
     "dayjs": "^1.11.7",
     "keycloak-js": "^24.0.4",
+    "postal-mime": "^2.3.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.2",
     "react-bootstrap-icons": "^1.11.4",

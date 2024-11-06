@@ -9,7 +9,7 @@ data class MessageDTO(
     val date: Date,
     val channel: channel,
     val priority: priority,
-    val currentState: state?,
+    val currentState: state,
     val subject: String?,
     val body: String?,
     val email: String?,
@@ -17,7 +17,7 @@ data class MessageDTO(
     val address: String?
 )
 
-fun Message.toDTO(): MessageDTO =
+fun Message.toDTO(includeBody: Boolean = true): MessageDTO =
     MessageDTO(
         this.id,
         this.date,
@@ -25,7 +25,7 @@ fun Message.toDTO(): MessageDTO =
         this.priority,
         this.currentState,
         this.subject,
-        this.body,
+        if (includeBody) this.body else null,
         this.email,
         this.telephone,
         this.address

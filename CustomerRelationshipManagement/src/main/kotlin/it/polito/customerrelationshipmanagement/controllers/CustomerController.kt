@@ -80,12 +80,14 @@ class CustomerController(private val customerService: CustomerService){
     /**
      * GET /API/customers/
      *
-     * get all the customers in the DB.
+     * get all the customers in the DB. Allow for filtering by jobOffers.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/customers/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getAllCustomers(): List<CustomerDTO> {
-        return customerService.getAllCustomers()
+    fun getAllCustomers(
+        @RequestParam("jobOffers") jobOffers: List<String>?
+    ): List<CustomerDTO> {
+        return customerService.getAllCustomers(jobOffers)
     }
 }

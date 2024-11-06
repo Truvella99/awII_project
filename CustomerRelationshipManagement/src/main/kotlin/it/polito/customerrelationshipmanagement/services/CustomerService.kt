@@ -14,5 +14,5 @@ interface CustomerService {
     fun deleteCustomerNote(customerId: String, noteId: Long): CustomerDTO
 
     fun findCustomers(filter: String): List<CustomerDTO>
-    fun getAllCustomers(): List<CustomerDTO>
+    fun getAllCustomers(jobOffers: List<String>?): List<CustomerDTO>
 }

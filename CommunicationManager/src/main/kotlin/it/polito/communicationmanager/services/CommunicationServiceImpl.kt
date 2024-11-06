@@ -58,7 +58,7 @@ class CommunicationServiceImpl() : CommunicationService {
                 address = null
             )
             val responseEntity = restTemplate.postForEntity(
-                "http://localhost:8080/API/messages/",
+                "http://localhost:8081/API/messages/",
                 createMessageDTO,
                 CreateMessageDTO::class.java
             )
@@ -144,7 +144,7 @@ class EMailRoute(private val producerTemplate: ProducerTemplate) :
 
                 // Send the message using HTTP POST with JSON body
                 producerTemplate.sendBodyAndHeader(
-                    "http://localhost:8080/API/messages/",
+                    "http://localhost:8081/API/messages/",
                     jsonMessage,
                     Exchange.CONTENT_TYPE,
                     "application/json"
@@ -170,7 +170,7 @@ class GmailConfig {
 
             // Set refresh token
             credential.refreshToken =
-                "1//04iDK_5REWmThCgYIARAAGAQSNwF-L9IrcRIEB7EL4-Gv1bBQRnIBBDoTaFwKSaOuqCvLtHxiSmk-b6CMyEPLj9gCTWjmCoLSnvY"
+                "1//04pfNhenSdvCvCgYIARAAGAQSNwF-L9IrxcRrnXNN9Fg0cw3sbH2UHRrzY0_bPduBsTic0HFrfzL5wUApp1FdA1adimgqfJqzht8"
             return Gmail.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName("WebAppOAuthClient")
                 .build()

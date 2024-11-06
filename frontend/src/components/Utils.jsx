@@ -1,12 +1,13 @@
 import React, { useContext, useRef, useState } from 'react';
 import {MessageContext} from "../messageCtx.js";
-import {Container, Form, Col} from "react-bootstrap";
+import {Container, Form, Col, Badge} from "react-bootstrap";
 import {LoadScript, StandaloneSearchBox} from "@react-google-maps/api";
 import {Menu, menuClasses, MenuItem, Sidebar} from "react-pro-sidebar";
 import {Link, useLocation} from "react-router-dom";
 import jobOffersImage from "../icons/jobOffers.png";
 import customersImage from "../icons/customers.png";
 import professionalsImage from "../icons/professionals.png";
+import messagesImage from "../icons/messages.png";
 import { FaInfoCircle } from "react-icons/fa";
 
 const API_KEY = 'AIzaSyCO5hFwnkcQjDkoivao8qpJbKvITf_vb1g';
@@ -79,7 +80,7 @@ function AddressSelector(props) {
                     hidden={hidden}
                     isInvalid={address.invalid}
                     type="text"
-                    placeholder="Enter Address"
+                    placeholder="Enter address..."
                     className="form-control-green-focus"
                     // HERE NOT TO AVOID CALL TOO MUCH THE API onChange={(event) => addressValidation({text: event.target.value, lat:address.lat, lng:address.lng, invalid: address.invalid},setAddress)}
                     onChange={(event) => { setAddress({ text: event.target.value, lat: address.lat, lng: address.lng, invalid: false }); }}
@@ -143,7 +144,7 @@ const hexToRgba = (hex, alpha) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-function SideBar() {
+function SideBar({role, unreadMessages}) {
     const path = useLocation().pathname;
 
     const menuItemStyles = {
@@ -183,23 +184,39 @@ function SideBar() {
     return(
         <Sidebar
             backgroundColor={hexToRgba(sidebarThemes["light"].sidebar.backgroundColor, 1)}
-            rootStyles={{
-                color: sidebarThemes["light"].sidebar.color,
-            }}
+            rootStyles={{color: sidebarThemes["light"].sidebar.color}}
         >
             <Menu menuItemStyles={menuItemStyles}>
-                <MenuItem icon={<img src={customersImage} height={28} width={28}/>} style={{
-                    backgroundColor: path === "/ui/customers" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
-                    color: path === "/ui/customers" ? sidebarThemes["light"].menu.active.color : ''
-                }} component={<Link to="/ui/customers" />}> Customers </MenuItem>
-                <MenuItem icon={<img src={professionalsImage} height={28} width={28}/>} style={{
-                    backgroundColor: path === "/ui/professionals" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
-                    color: path === "/ui/professionals" ? sidebarThemes["light"].menu.active.color : ''
-                }} component={<Link to="/ui/professionals" />}> Professionals </MenuItem>
-                <MenuItem icon={<img src={jobOffersImage} height={28} width={28}/>} style={{
-                    backgroundColor: path === "/ui/jobOffers" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
-                    color: path === "/ui/jobOffers" ? sidebarThemes["light"].menu.active.color : ''
-                }} component={<Link to="/ui/jobOffers" />}> Job Offers </MenuItem>
+                { (role === "manager" || role === "operator") ?
+                    <MenuItem icon={<img src={customersImage} height={28} width={28}/>} style={{
+                        backgroundColor: path === "/ui/customers" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/customers" ? sidebarThemes["light"].menu.active.color : ''
+                    }} component={<Link to="/ui/customers" />}> Customers </MenuItem> : ''
+                }
+                { (role === "manager" || role === "operator" || role === "customer") ?
+                    <MenuItem icon={<img src={professionalsImage} height={28} width={28}/>} style={{
+                        backgroundColor: path === "/ui/professionals" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/professionals" ? sidebarThemes["light"].menu.active.color : ''
+                    }} component={<Link to="/ui/professionals" />}> Professionals </MenuItem> : ''
+                }
+                { (role === "manager" || role === "operator") ?
+                    <MenuItem icon={<img src={jobOffersImage} height={28} width={28}/>} style={{
+                        backgroundColor: path === "/ui/jobOffers" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/jobOffers" ? sidebarThemes["light"].menu.active.color : ''
+                    }} component={<Link to="/ui/jobOffers" />}> Job Offers </MenuItem> : ''
+                }
+                { (role === "manager" || role === "operator") ?
+                    <MenuItem icon={<img src={messagesImage} height={28} width={28}/>} style={{
+                        backgroundColor: path === "/ui/messages" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/messages" ? sidebarThemes["light"].menu.active.color : ''
+                    }} suffix={(unreadMessages > 0) ? <Badge pill bg="danger"> {unreadMessages} </Badge> : ''} component={<Link to="/ui/messages" />}> Messages </MenuItem> : ''
+                }
+                { (role === "professional") ?
+                    <MenuItem icon={<img src={jobOffersImage} height={28} width={28}/>} style={{
+                        backgroundColor: path === "/ui/jobOffers" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/jobOffers" ? sidebarThemes["light"].menu.active.color : ''
+                    }} component={<Link to="/ui/jobOffers" />}> Open Job Offers </MenuItem> : ''
+                }
             </Menu>
         </Sidebar>
     );
@@ -266,4 +283,25 @@ function SearchContainer({ searchedContent, handleChange, handleItemSelection, S
     );
 }
 
-export {convertDuration, SearchContainer, address_string_to_object, address_object_to_string, AddressSelector , API_KEY, SideBar};
+function CustomLoadingOverlay() {
+    return (
+        <div className="ag-overlay-loading-center" role="presentation">
+            <div
+                role="presentation"
+                className="custom-loading-overlay"
+                style={{
+                    height: 100,
+                    width: 100,
+                    background:
+                        'url(https://www.ag-grid.com/images/ag-grid-loading-spinner.svg) center / contain no-repeat',
+                    margin: '0 auto',
+                }}
+            ></div>
+            <div aria-live="polite" aria-atomic="true" style={{fontSize: "large"}}>
+                Loading...
+            </div>
+        </div>
+    );
+}
+
+export {convertDuration, SearchContainer, address_string_to_object, address_object_to_string, AddressSelector , API_KEY, SideBar, CustomLoadingOverlay};

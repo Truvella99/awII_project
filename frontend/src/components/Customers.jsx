@@ -1,6 +1,6 @@
 import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {Button, Col, Row} from "react-bootstrap";
-import {SideBar} from "./Utils.jsx";
+import {CustomLoadingOverlay, SideBar} from "./Utils.jsx";
 import { AgGridReact } from 'ag-grid-react';
 import { ModuleRegistry } from '@ag-grid-community/core';
 import { InfiniteRowModelModule } from '@ag-grid-community/infinite-row-model';
@@ -10,15 +10,22 @@ import {MessageContext, TokenContext} from "../messageCtx.js";
 import API from "../API.jsx";
 import {useNavigate} from "react-router-dom";
 import {Container} from "react-bootstrap/";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
 
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
-function Customers({loggedIn}) {
+
+function Customers({loggedIn, role, unreadMessages}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
     const [customers, setCustomers] = useState();
+    const [optionJobOffers, setOptionJobOffers] = useState();
+    const [selectedJobOffers, setSelectedJobOffers] = useState([]);
     const [nothing, setNothing] = useState(false);
+    const [tableReady, setTableReady] = useState(false);
+    const animatedComponents = makeAnimated();
     const gridRef = useRef();
 
     // Sort and filter in the table
@@ -183,35 +190,58 @@ function Customers({loggedIn}) {
     }, []);
 
     // Table data functions
-    const changeDb = async () => {
+    const filterJobOffers = async (jobOffers) => {
+        setTableReady(false);
         try {
             if (loggedIn) {
-                //TODO cambiare le api in base ai filtri esterni
-                const customers = await API.getAllCustomers(xsrfToken);
-                        const dataSource = {
-                            rowCount: undefined,
-                            getRows: (params) => {
-                                console.log('asking for ' + params.startRow + ' to ' + params.endRow);
-                                // Call the server
-                                setTimeout(function () {
-                                    // take a slice of the total rows
-                                    const dataAfterSortingAndFiltering = sortAndFilter(
-                                        customers,
-                                        params.sortModel,
-                                        params.filterModel
-                                    );
-                                    const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                                    // if on or after the last page, work out the last row.
-                                    let lastRow = -1;
-                                    if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                        lastRow = dataAfterSortingAndFiltering.length;
-                                    }
-                                    // call the success callback
-                                    params.successCallback(rowsThisPage, lastRow);
-                                }, 500);
-                            },
-                        };
-                        gridRef.current?.api.setGridOption('datasource', dataSource);
+                const customers = await API.getCustomersJobOffers(jobOffers, xsrfToken);
+
+                const modifiedCustomers = customers.map(customer => {
+                    return {
+                        ...customer,
+                        jobs: customer.jobOffers.length,
+                        email: customer.emails && customer.emails.length > 0
+                            ? customer.emails[0].email
+                            : null,
+                        telephone: customer.telephones && customer.telephones.length > 0
+                            ? customer.telephones[0].telephone
+                            : null,
+                        address: customer.addresses && customer.addresses.length > 0
+                            ? customer.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedCustomers.forEach(customer => {
+                    delete customer.emails;
+                    delete customer.telephones;
+                    delete customer.addresses;
+                });
+                setCustomers(modifiedCustomers);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedCustomers,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
 
             } else {
                 navigate("/ui")
@@ -228,7 +258,10 @@ function Customers({loggedIn}) {
                 if (loggedIn) {
                     const customers = await API.getAllCustomers(xsrfToken);
                     console.log(customers);
-
+                    //
+                    const jobOffers = [...new Map(customers.flatMap(customer => customer.jobOffers.map(j => [j.id, j.name]))).entries()].map(([id, name]) => ({ value: id, label: name }));
+                    setOptionJobOffers(jobOffers);
+                    //
                     const modifiedCustomers = customers.map(customer => {
                         return {
                             ...customer,
@@ -248,7 +281,6 @@ function Customers({loggedIn}) {
                         delete customer.emails;
                         delete customer.telephones;
                         delete customer.addresses;
-                        delete customer.jobOffers;
                     });
                     setCustomers(modifiedCustomers);
 
@@ -258,27 +290,27 @@ function Customers({loggedIn}) {
                         getRows: (params) => {
                             console.log('asking for ' + params.startRow + ' to ' + params.endRow);
                             // Call the server
-                            setTimeout(function () {
-                                // take a slice of the total rows
-                                const dataAfterSortingAndFiltering = sortAndFilter(
-                                    modifiedCustomers,
-                                    params.sortModel,
-                                    params.filterModel
-                                );
-                                const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                                // if on or after the last page, work out the last row.
-                                let lastRow = -1;
-                                if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                    lastRow = dataAfterSortingAndFiltering.length;
-                                }
-                                // call the success callback
-                                params.successCallback(rowsThisPage, lastRow);
+                            // take a slice of the total rows
+                            const dataAfterSortingAndFiltering = sortAndFilter(
+                                modifiedCustomers,
+                                params.sortModel,
+                                params.filterModel
+                            );
+                            const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                            // if on or after the last page, work out the last row.
+                            let lastRow = -1;
+                            if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                                lastRow = dataAfterSortingAndFiltering.length;
+                            }
+                            // call the success callback
+                            params.successCallback(rowsThisPage, lastRow);
 
-                                // If there are no customers, display the message
-                                if (customers.length === 0) {
-                                    setNothing(true);
-                                }
-                            }, 500);
+                            // If there are no customers, display the message
+                            if (customers.length === 0) {
+                                setNothing(true);
+                            }
+                            //
+                            setTableReady(true);
                         },
                     };
                     params.api.setGridOption('datasource', dataSource);
@@ -301,16 +333,50 @@ function Customers({loggedIn}) {
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
-                        <SideBar/>
+                        <SideBar role={role} unreadMessages={unreadMessages}/>
                     </div>
                     <Row style={{marginBottom: '100px'}}>
-                        <Col className="d-flex justify-content-center">
-                            <Button variant="info" onClick={() => navigate('/ui/customers/addCustomer')}> <i className="bi bi-plus-lg"></i> Add customer </Button>
-                        </Col>
+                        {(role === "operator" || role === "manager") ?
+                            <Col className="d-flex justify-content-center">
+                                <Button variant="info" onClick={() => navigate('/ui/customers/addCustomer')}> <i
+                                    className="bi bi-plus-lg"></i> Add customer </Button>
+                            </Col>
+                            : <></>
+                        }
                     </Row>
+                    <h6> Filter by job offers: </h6>
+                    <Select
+                        options={optionJobOffers}
+                        value={selectedJobOffers}
+                        onChange={ev => {
+                            setSelectedJobOffers(ev);
+                            filterJobOffers(ev.map(job => job.value));
+                        }}
+                        isMulti
+                        closeMenuOnSelect={false}
+                        isSearchable={true}
+                        isClearable={true}
+                        placeholder="Choose or search jobs"
+                        components={animatedComponents}
+                        styles={{
+                            container: base => ({
+                                ...base,
+                                width: '250px'
+                            })
+                        }}
+                        maxMenuHeight={145}
+                        // theme={(theme) => ({
+                        //     ...theme,
+                        //     colors: {
+                        //         ...theme.colors,
+                        //         primary25: '#D1E7DD',
+                        //         primary: '#34ce57',
+                        //     },
+                        // })}
+                    />
                 </Col>
                 <Col>
-                    { nothing &&
+                    {nothing &&
                         <div style={{position: "fixed", zIndex: 1, paddingLeft: "500px", paddingTop: "250px"}}>
                             <h4> No Customers yet! </h4>
                         </div>
@@ -318,11 +384,13 @@ function Customers({loggedIn}) {
                     <div style={containerStyle}>
                         <div style={gridStyle} className={"ag-theme-quartz"}>
                             <AgGridReact
+                                loading={!tableReady}
+                                loadingOverlayComponent={CustomLoadingOverlay}
                                 ref={gridRef}
                                 columnDefs={columnDefs}
                                 defaultColDef={defaultColDef}
                                 gridOptions={gridOptions}
-                                rowStyle = {{cursor:'pointer'}}
+                                rowStyle={{cursor: 'pointer'}}
                                 rowModelType={'infinite'}
                                 cacheBlockSize={100}
                                 cacheOverflowSize={2}

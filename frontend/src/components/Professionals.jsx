@@ -1,6 +1,6 @@
 import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {Button, Col, Container, Row, Form} from "react-bootstrap";
-import {SideBar} from "./Utils.jsx";
+import {CustomLoadingOverlay, SideBar} from "./Utils.jsx";
 import {useNavigate} from "react-router-dom";
 import {MessageContext, TokenContext} from "../messageCtx.js";
 import API from "../API.jsx";
@@ -10,20 +10,35 @@ import makeAnimated from "react-select/animated";
 import 'bootstrap/dist/css/bootstrap.css';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from "react-bootstrap-range-slider";
+import {ModuleRegistry} from "@ag-grid-community/core";
+import {InfiniteRowModelModule} from "@ag-grid-community/infinite-row-model";
+
+ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function Professionals({loggedIn}) {
+function Professionals({loggedIn, role, unreadMessages}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
     const [professionals, setProfessionals] = useState();
     const [optionSkills, setOptionSkills] = useState();
     const [selectedSkills, setSelectedSkills] = useState([]);
+    const [optionCandidates, setOptionCandidates] = useState();
+    const [selectedCandidates, setSelectedCandidates] = useState([]);
+    const [optionAborted, setOptionAborted] = useState();
+    const [selectedAborted, setSelectedAborted] = useState([]);
+    const [optionConsolidated, setOptionConsolidated] = useState();
+    const [selectedConsolidated, setSelectedConsolidated] = useState([]);
+    const [optionCompleted, setOptionCompleted] = useState();
+    const [selectedCompleted, setSelectedCompleted] = useState([]);
     const [latitude, setLatitude] = useState();
     const [longitude, setLongitude] = useState();
     const [km, setKm] = useState(0);
     const [nothing, setNothing] = useState(false);
+    const [tableReady, setTableReady] = useState(false);
     const animatedComponents = makeAnimated();
+    const filtersRef = useRef([]);
+    const containerRef = useRef(null);
     const gridRef = useRef();
 
     // Sort and filter in the table
@@ -209,30 +224,58 @@ function Professionals({loggedIn}) {
 
     // Table data functions
     const filterSkills = async (skills) => {
+        setTableReady(false);
         try {
             if (loggedIn) {
-                const professionals = await API.getProfessionalSkills(skills, xsrfToken);
+                const candidateJobOffers = selectedCandidates.map(jobOffer => jobOffer.value);
+                const abortedJobOffers = selectedAborted.map(jobOffer => jobOffer.value);
+                const consolidatedJobOffers = selectedConsolidated.map(jobOffer => jobOffer.value);
+                const completedJobOffers = selectedCompleted.map(jobOffer => jobOffer.value);
+                //
+                const professionals = await API.getProfessionalSkillsJobOffers(skills, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers, xsrfToken);
+
+                const modifiedProfessionals = professionals.map(professional => {
+                    return {
+                        ...professional,
+                        email: professional.emails && professional.emails.length > 0
+                            ? professional.emails[0].email
+                            : null,
+                        telephone: professional.telephones && professional.telephones.length > 0
+                            ? professional.telephones[0].telephone
+                            : null,
+                        address: professional.addresses && professional.addresses.length > 0
+                            ? professional.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedProfessionals.forEach(professional => {
+                    delete professional.emails;
+                    delete professional.telephones;
+                    delete professional.addresses;
+                });
+                setProfessionals(modifiedProfessionals);
+
                 const dataSource = {
                     rowCount: undefined,
                     getRows: (params) => {
                         console.log('asking for ' + params.startRow + ' to ' + params.endRow);
                         // Call the server
-                        setTimeout(function () {
-                            // take a slice of the total rows
-                            const dataAfterSortingAndFiltering = sortAndFilter(
-                                professionals,
-                                params.sortModel,
-                                params.filterModel
-                            );
-                            const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                            // if on or after the last page, work out the last row.
-                            let lastRow = -1;
-                            if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                lastRow = dataAfterSortingAndFiltering.length;
-                            }
-                            // call the success callback
-                            params.successCallback(rowsThisPage, lastRow);
-                        }, 500);
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedProfessionals,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                            //
+                        setTableReady(true);
                     },
                 };
                 gridRef.current?.api.setGridOption('datasource', dataSource);
@@ -245,34 +288,320 @@ function Professionals({loggedIn}) {
             handleError(error);
         }
     };
-
-    const filterDistance = async () => {
+    const filterCandidates = async (candidates) => {
+        setTableReady(false);
         try {
             if (loggedIn) {
                 const skills = selectedSkills.map(skill => skill.value);
-                // console.log(latitude, longitude);
-                const professionals = await API.getProfessionalsDistance(skills, latitude, longitude, km, xsrfToken);
+                const abortedJobOffers = selectedAborted.map(jobOffer => jobOffer.value);
+                const consolidatedJobOffers = selectedConsolidated.map(jobOffer => jobOffer.value);
+                const completedJobOffers = selectedCompleted.map(jobOffer => jobOffer.value);
+                //
+                const professionals = await API.getProfessionalSkillsJobOffers(skills, candidates, abortedJobOffers, consolidatedJobOffers, completedJobOffers, xsrfToken);
+
+                const modifiedProfessionals = professionals.map(professional => {
+                    return {
+                        ...professional,
+                        email: professional.emails && professional.emails.length > 0
+                            ? professional.emails[0].email
+                            : null,
+                        telephone: professional.telephones && professional.telephones.length > 0
+                            ? professional.telephones[0].telephone
+                            : null,
+                        address: professional.addresses && professional.addresses.length > 0
+                            ? professional.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedProfessionals.forEach(professional => {
+                    delete professional.emails;
+                    delete professional.telephones;
+                    delete professional.addresses;
+                });
+                setProfessionals(modifiedProfessionals);
+
                 const dataSource = {
                     rowCount: undefined,
                     getRows: (params) => {
                         console.log('asking for ' + params.startRow + ' to ' + params.endRow);
                         // Call the server
-                        setTimeout(function () {
-                            // take a slice of the total rows
-                            const dataAfterSortingAndFiltering = sortAndFilter(
-                                professionals,
-                                params.sortModel,
-                                params.filterModel
-                            );
-                            const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                            // if on or after the last page, work out the last row.
-                            let lastRow = -1;
-                            if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                lastRow = dataAfterSortingAndFiltering.length;
-                            }
-                            // call the success callback
-                            params.successCallback(rowsThisPage, lastRow);
-                        }, 500);
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedProfessionals,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterAborteds = async (aborteds) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateJobOffers = selectedCandidates.map(jobOffer => jobOffer.value);
+                const consolidatedJobOffers = selectedConsolidated.map(jobOffer => jobOffer.value);
+                const completedJobOffers = selectedCompleted.map(jobOffer => jobOffer.value);
+                //
+                const professionals = await API.getProfessionalSkillsJobOffers(skills, candidateJobOffers, aborteds, consolidatedJobOffers, completedJobOffers, xsrfToken);
+
+                const modifiedProfessionals = professionals.map(professional => {
+                    return {
+                        ...professional,
+                        email: professional.emails && professional.emails.length > 0
+                            ? professional.emails[0].email
+                            : null,
+                        telephone: professional.telephones && professional.telephones.length > 0
+                            ? professional.telephones[0].telephone
+                            : null,
+                        address: professional.addresses && professional.addresses.length > 0
+                            ? professional.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedProfessionals.forEach(professional => {
+                    delete professional.emails;
+                    delete professional.telephones;
+                    delete professional.addresses;
+                });
+                setProfessionals(modifiedProfessionals);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedProfessionals,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterConsolidated = async (consolidated) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateJobOffers = selectedCandidates.map(jobOffer => jobOffer.value);
+                const abortedJobOffers = selectedAborted.map(jobOffer => jobOffer.value);
+                const completedJobOffers = selectedCompleted.map(jobOffer => jobOffer.value);
+                //
+                const professionals = await API.getProfessionalSkillsJobOffers(skills, candidateJobOffers, abortedJobOffers, consolidated, completedJobOffers, xsrfToken);
+
+                const modifiedProfessionals = professionals.map(professional => {
+                    return {
+                        ...professional,
+                        email: professional.emails && professional.emails.length > 0
+                            ? professional.emails[0].email
+                            : null,
+                        telephone: professional.telephones && professional.telephones.length > 0
+                            ? professional.telephones[0].telephone
+                            : null,
+                        address: professional.addresses && professional.addresses.length > 0
+                            ? professional.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedProfessionals.forEach(professional => {
+                    delete professional.emails;
+                    delete professional.telephones;
+                    delete professional.addresses;
+                });
+                setProfessionals(modifiedProfessionals);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedProfessionals,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterCompleted = async (completed) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateJobOffers = selectedCandidates.map(jobOffer => jobOffer.value);
+                const abortedJobOffers = selectedAborted.map(jobOffer => jobOffer.value);
+                const consolidatedJobOffers = selectedConsolidated.map(jobOffer => jobOffer.value);
+                //
+                const professionals = await API.getProfessionalSkillsJobOffers(skills, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completed, xsrfToken);
+
+                const modifiedProfessionals = professionals.map(professional => {
+                    return {
+                        ...professional,
+                        email: professional.emails && professional.emails.length > 0
+                            ? professional.emails[0].email
+                            : null,
+                        telephone: professional.telephones && professional.telephones.length > 0
+                            ? professional.telephones[0].telephone
+                            : null,
+                        address: professional.addresses && professional.addresses.length > 0
+                            ? professional.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedProfessionals.forEach(professional => {
+                    delete professional.emails;
+                    delete professional.telephones;
+                    delete professional.addresses;
+                });
+                setProfessionals(modifiedProfessionals);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedProfessionals,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterDistance = async () => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateJobOffers = selectedCandidates.map(jobOffer => jobOffer.value);
+                const abortedJobOffers = selectedAborted.map(jobOffer => jobOffer.value);
+                const consolidatedJobOffers = selectedConsolidated.map(jobOffer => jobOffer.value);
+                const completedJobOffers = selectedCompleted.map(jobOffer => jobOffer.value);
+                //
+                const professionals = await API.getProfessionalsDistance(skills, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers, latitude, longitude, km, xsrfToken);
+
+                const modifiedProfessionals = professionals.map(professional => {
+                    return {
+                        ...professional,
+                        email: professional.emails && professional.emails.length > 0
+                            ? professional.emails[0].email
+                            : null,
+                        telephone: professional.telephones && professional.telephones.length > 0
+                            ? professional.telephones[0].telephone
+                            : null,
+                        address: professional.addresses && professional.addresses.length > 0
+                            ? professional.addresses[0].address
+                            : null
+                    };
+                });
+                modifiedProfessionals.forEach(professional => {
+                    delete professional.emails;
+                    delete professional.telephones;
+                    delete professional.addresses;
+                });
+                setProfessionals(modifiedProfessionals);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedProfessionals,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
                     },
                 };
                 gridRef.current?.api.setGridOption('datasource', dataSource);
@@ -291,11 +620,15 @@ function Professionals({loggedIn}) {
             try {
                 if (loggedIn) {
                     const professionals = await API.getAllProfessionals(xsrfToken);
-                    // console.log(professionals);
+                    console.log(professionals);
                     const uniqueSkills = [...new Set(professionals.map(professional => professional.skills.map(s => s.skill)).flat())].map(skill => ({value: skill, label: skill}));
                     // console.log(uniqueSkills);
                     setOptionSkills(uniqueSkills);
-
+                    setOptionCandidates(professionals.flatMap(professional => professional.candidateJobOffers.map(job => ({value: job.id, label: job.name}))));
+                    setOptionAborted(professionals.flatMap(professional => professional.abortedJobOffers.map(job => ({value: job.id, label: job.name}))));
+                    setOptionConsolidated(professionals.flatMap(professional => professional.jobOffer ? [{ value: professional.jobOffer.id, label: professional.jobOffer.name }] : []));
+                    setOptionCompleted(professionals.flatMap(professional => professional.jobOffers.map(job => ({value: job.id, label: job.name}))));
+                    //
                     const modifiedProfessionals = professionals.map(professional => {
                         return {
                             ...professional,
@@ -323,27 +656,27 @@ function Professionals({loggedIn}) {
                         getRows: (params) => {
                             console.log('asking for ' + params.startRow + ' to ' + params.endRow);
                             // Call the server
-                            setTimeout(function () {
-                                // take a slice of the total rows
-                                const dataAfterSortingAndFiltering = sortAndFilter(
-                                    modifiedProfessionals,
-                                    params.sortModel,
-                                    params.filterModel
-                                );
-                                const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                                // if on or after the last page, work out the last row.
-                                let lastRow = -1;
-                                if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                    lastRow = dataAfterSortingAndFiltering.length;
-                                }
-                                // call the success callback
-                                params.successCallback(rowsThisPage, lastRow);
+                            // take a slice of the total rows
+                            const dataAfterSortingAndFiltering = sortAndFilter(
+                                modifiedProfessionals,
+                                params.sortModel,
+                                params.filterModel
+                            );
+                            const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                            // if on or after the last page, work out the last row.
+                            let lastRow = -1;
+                            if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                                lastRow = dataAfterSortingAndFiltering.length;
+                            }
+                            // call the success callback
+                            params.successCallback(rowsThisPage, lastRow);
 
-                                // If there are no professionals, display the message
-                                if (professionals.length === 0) {
-                                    setNothing(true);
-                                }
-                            }, 500);
+                            // If there are no professionals, display the message
+                            if (professionals.length === 0) {
+                                setNothing(true);
+                            }
+                            //
+                            setTableReady(true);
                         },
                     };
                     params.api.setGridOption('datasource', dataSource);
@@ -372,57 +705,228 @@ function Professionals({loggedIn}) {
         <Container fluid>
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
-                    <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
-                        <SideBar/>
+                    <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px', maxWidth: '250px'}}>
+                        <SideBar role={role} unreadMessages={unreadMessages}/>
                     </div>
-                    <Row style={{marginBottom: '100px'}}>
-                        <Col className="d-flex justify-content-center">
-                            <Button variant="info" onClick={() => navigate('/ui/professionals/addProfessional')}> <i className="bi bi-plus-lg"></i> Add professional </Button>
-                        </Col>
-                    </Row>
-                    <h6> Filter by skills: </h6>
-                    <Select
-                        options={optionSkills}
-                        value={selectedSkills}
-                        onChange={ev => {
-                            setSelectedSkills(ev);
-                            filterSkills(ev.map(skill => skill.value));
-                        }}
-                        isMulti
-                        closeMenuOnSelect={true}
-                        isSearchable={true}
-                        isClearable={true}
-                        placeholder="Choose or search skills"
-                        components={animatedComponents}
-                        // theme={(theme) => ({
-                        //     ...theme,
-                        //     colors: {
-                        //         ...theme.colors,
-                        //         primary25: '#D1E7DD',
-                        //         primary: '#34ce57',
-                        //     },
-                        // })}
-                    />
-                    <div style={{paddingTop: '50px'}}>
-                        <h6> Filter near me: </h6>
-                    </div>
-                    <div>
-                        <RangeSlider tooltip={"auto"} tooltipPlacement={"top"} value={km} min={0} max={50} onChange={(event) => setKm(event.target.value)}/>
-                    </div>
-                    <Row>
-                        <div className="d-flex justify-content-between">
-                            <span> 0 km </span>
-                            <span> 50 km </span>
-                        </div>
+                    <Row style={{marginBottom: '50px'}}>
+                        { (role === "operator" || role === "manager") ?
+                            <Col className="d-flex justify-content-center">
+                                <Button style={{marginRight: '15px'}} variant="info" onClick={() => navigate('/ui/professionals/addProfessional')}> <i className="bi bi-plus-lg"></i> Add professional </Button>
+                            </Col>
+                            : <></>
+                        }
                     </Row>
                     <Row>
-                        <Col className="d-flex justify-content-center">
-                            <Button variant="primary" size={"sm"} onClick={filterDistance} disabled={nothing}> Search </Button>
+                        <h5> Filter by </h5>
+                    </Row>
+                    <Row>
+                        <Col ref={containerRef} style={role === "customer" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '33.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
+                            <h6 key={0} ref={(f) => filtersRef.current[0] = f}>
+                                Skills:
+                            </h6>
+                            <Select
+                                options={optionSkills}
+                                value={selectedSkills}
+                                onChange={ev => {
+                                    setSelectedSkills(ev);
+                                    filterSkills(ev.map(skill => skill.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[0].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }}
+                                placeholder="Choose or search skills"
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                                // theme={(theme) => ({
+                                //     ...theme,
+                                //     colors: {
+                                //         ...theme.colors,
+                                //         primary25: '#D1E7DD',
+                                //         primary: '#34ce57',
+                                //     },
+                                // })}
+                            />
+                            <h6 key={1} ref={(f) => filtersRef.current[1] = f}>
+                                Candidate job offers:
+                            </h6>
+                            <Select
+                                options={optionCandidates}
+                                value={selectedCandidates}
+                                onChange={ev => {
+                                    setSelectedCandidates(ev);
+                                    filterCandidates(ev.map(jobOffer => jobOffer.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[1].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }}
+                                placeholder="Choose or search jobs"
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <h6 key={2} ref={(f) => filtersRef.current[2] = f}>
+                                Current consolidated job:
+                            </h6>
+                            <Select
+                                options={optionConsolidated}
+                                value={selectedConsolidated}
+                                onChange={ev => {
+                                    setSelectedConsolidated(ev);
+                                    filterConsolidated(ev.map(jobOffer => jobOffer.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[2].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }}
+                                placeholder="Choose or search jobs"
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <h6 key={3} ref={(f) => filtersRef.current[3] = f}>
+                                Completed jobs:
+                            </h6>
+                            <Select
+                                options={optionCompleted}
+                                value={selectedCompleted}
+                                onChange={ev => {
+                                    setSelectedCompleted(ev);
+                                    filterCompleted(ev.map(jobOffer => jobOffer.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    setTimeout(() => {
+                                        const container = containerRef.current;
+                                        if (container) {
+                                            container.scrollTo({
+                                                top: filtersRef.current[3].offsetTop - container.offsetTop,
+                                                behavior: "smooth",
+                                            });
+                                        }
+                                    }, 0)
+                                }}
+                                placeholder="Choose or search jobs"
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <h6 key={4} ref={(f) => filtersRef.current[4] = f}>
+                                Aborted jobs:
+                            </h6>
+                            <Select
+                                options={optionAborted}
+                                value={selectedAborted}
+                                onChange={ev => {
+                                    setSelectedAborted(ev);
+                                    filterAborteds(ev.map(jobOffer => jobOffer.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    setTimeout(() => {
+                                        const container = containerRef.current;
+                                        if (container) {
+                                            container.scrollTo({
+                                                top: filtersRef.current[4].offsetTop - container.offsetTop,
+                                                behavior: "smooth",
+                                            });
+                                        }
+                                    }, 0)
+                                }}
+                                placeholder="Choose or search jobs"
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <div>
+                                <h6> Near me: </h6>
+                            </div>
+                            <div>
+                                <RangeSlider tooltip={"auto"} tooltipPlacement={"top"} value={km} min={0} max={50}
+                                             onChange={(event) => setKm(event.target.value)}/>
+                            </div>
+                            <Row>
+                                <div className="d-flex justify-content-between">
+                                    <span> 0 km </span>
+                                    <span> 50 km </span>
+                                </div>
+                            </Row>
+                            <Row>
+                                <Col className="d-flex justify-content-center">
+                                    <Button style={{marginBottom: '30px'}} variant="primary" size={"sm"} onClick={filterDistance} disabled={nothing}>
+                                        <i className="bi bi-geo-alt-fill"></i> Search </Button>
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
                 </Col>
                 <Col>
-                { nothing &&
+                    {nothing &&
                         <div style={{position: "fixed", zIndex: 1, paddingLeft: "500px", paddingTop: "250px"}}>
                             <h4> No Professionals yet! </h4>
                         </div>
@@ -430,11 +934,13 @@ function Professionals({loggedIn}) {
                     <div style={containerStyle}>
                         <div style={gridStyle} className={"ag-theme-quartz"}>
                             <AgGridReact
+                                loading={!tableReady}
+                                loadingOverlayComponent={CustomLoadingOverlay}
                                 ref={gridRef}
                                 columnDefs={columnDefs}
                                 defaultColDef={defaultColDef}
                                 gridOptions={gridOptions}
-                                rowStyle = {{cursor:'pointer'}}
+                                rowStyle={{cursor: 'pointer'}}
                                 rowModelType={'infinite'}
                                 cacheBlockSize={100}
                                 cacheOverflowSize={2}

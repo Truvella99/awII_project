@@ -1,23 +1,38 @@
 import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {Button, Col, Container, Row} from "react-bootstrap";
-import {SideBar} from "./Utils.jsx";
+import {CustomLoadingOverlay, SideBar} from "./Utils.jsx";
 import {useNavigate} from "react-router-dom";
 import {MessageContext, TokenContext} from "../messageCtx.js";
 import API from "../API.jsx";
 import {AgGridReact} from "ag-grid-react";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
+import {ModuleRegistry} from "@ag-grid-community/core";
+import {InfiniteRowModelModule} from "@ag-grid-community/infinite-row-model";
+
+ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function JobOffers({loggedIn}) {
+function JobOffers({loggedIn, role, unreadMessages}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
     const [jobOffers, setJobOffers] = useState();
     const [optionSkills, setOptionSkills] = useState();
     const [selectedSkills, setSelectedSkills] = useState([]);
+    const [optionCandidates, setOptionCandidates] = useState();
+    const [selectedCandidates, setSelectedCandidates] = useState([]);
+    const [optionAborted, setOptionAborted] = useState();
+    const [selectedAborted, setSelectedAborted] = useState([]);
+    const [optionConsolidated, setOptionConsolidated] = useState();
+    const [selectedConsolidated, setSelectedConsolidated] = useState([]);
+    const [optionCompleted, setOptionCompleted] = useState();
+    const [selectedCompleted, setSelectedCompleted] = useState([]);
     const [nothing, setNothing] = useState(false);
+    const [tableReady, setTableReady] = useState(false);
     const animatedComponents = makeAnimated();
+    const filtersRef = useRef([]);
+    const containerRef = useRef(null);
     const gridRef = useRef();
 
     // Sort and filter in the table
@@ -166,6 +181,14 @@ function JobOffers({loggedIn}) {
         else
             return "";
     };
+    const durationFormatter = (params) => {
+        if (params.value) {
+            let days = Math.floor(params.value / 24);
+            let hours = params.value % 24;
+            return `${days.toString()}d ${hours.toString()}h`;
+        } else
+            return ""
+    };
     const [columnDefs, setColumnDefs] = useState([
         { field: "name", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, headerName: "Job", suppressHeaderMenuButton: true,
             cellRenderer: (props) => {
@@ -181,7 +204,7 @@ function JobOffers({loggedIn}) {
                 }
             },
         },
-        { field: "duration", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true },
+        { field: "duration", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true, valueFormatter: durationFormatter },
         { field: "profitMargin", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "Profit Margin", suppressHeaderMenuButton: true },
         { field: "nCandidates", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "N. Candidates", suppressHeaderMenuButton: true },
         { field: "currentState", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, headerName: "Current State", suppressHeaderMenuButton: true, valueFormatter: stateFormatter }
@@ -203,30 +226,273 @@ function JobOffers({loggedIn}) {
 
     // Table data functions
     const filterSkills = async (skills) => {
+        setTableReady(false);
         try {
             if (loggedIn) {
-                const jobOffers = await API.getJobOfferSkills(skills, xsrfToken);
+                let jobOffers;
+                const candidateProfessionals = selectedCandidates.map(professional => professional.value);
+                const abortedProfessionals = selectedAborted.map(professional => professional.value);
+                const consolidatedProfessionals = selectedConsolidated.map(professional => professional.value);
+                const completedProfessionals = selectedCompleted.map(professional => professional.value);
+                // Role check
+                if (role === "manager" || role === "operator")
+                    jobOffers = await API.getJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken);
+                else if (role === "professional")
+                    jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken);
+
+                const modifiedJobOffers = jobOffers.map(jobOffer => {
+                    return {
+                        ...jobOffer,
+                        nCandidates: jobOffer.candidateProfessionalsId.length
+                    };
+                });
+                setJobOffers(modifiedJobOffers);
+
                 const dataSource = {
                     rowCount: undefined,
                     getRows: (params) => {
                         console.log('asking for ' + params.startRow + ' to ' + params.endRow);
                         // Call the server
-                        setTimeout(function () {
-                            // take a slice of the total rows
-                            const dataAfterSortingAndFiltering = sortAndFilter(
-                                jobOffers,
-                                params.sortModel,
-                                params.filterModel
-                            );
-                            const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                            // if on or after the last page, work out the last row.
-                            let lastRow = -1;
-                            if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                lastRow = dataAfterSortingAndFiltering.length;
-                            }
-                            // call the success callback
-                            params.successCallback(rowsThisPage, lastRow);
-                        }, 500);
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedJobOffers,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterCandidates = async (candidates) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                let jobOffers;
+                const skills = selectedSkills.map(skill => skill.value);
+                const abortedProfessionals = selectedAborted.map(professional => professional.value);
+                const consolidatedProfessionals = selectedConsolidated.map(professional => professional.value);
+                const completedProfessionals = selectedCompleted.map(professional => professional.value);
+                // Role check
+                if (role === "manager" || role === "operator")
+                    jobOffers = await API.getJobOfferSkillsProfessionals(skills, candidates, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken);
+                else if (role === "professional")
+                    jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidates, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken);
+
+                const modifiedJobOffers = jobOffers.map(jobOffer => {
+                    return {
+                        ...jobOffer,
+                        nCandidates: jobOffer.candidateProfessionalsId.length
+                    };
+                });
+                setJobOffers(modifiedJobOffers);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedJobOffers,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterAborteds = async (aborteds) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                let jobOffers;
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateProfessionals = selectedCandidates.map(professional => professional.value);
+                const consolidatedProfessionals = selectedConsolidated.map(professional => professional.value);
+                const completedProfessionals = selectedCompleted.map(professional => professional.value);
+                // Role check
+                if (role === "manager" || role === "operator")
+                    jobOffers = await API.getJobOfferSkillsProfessionals(skills, candidateProfessionals, aborteds, consolidatedProfessionals, completedProfessionals, xsrfToken);
+                else if (role === "professional")
+                    jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, aborteds, consolidatedProfessionals, completedProfessionals, xsrfToken);
+
+                const modifiedJobOffers = jobOffers.map(jobOffer => {
+                    return {
+                        ...jobOffer,
+                        nCandidates: jobOffer.candidateProfessionalsId.length
+                    };
+                });
+                setJobOffers(modifiedJobOffers);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedJobOffers,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterConsolidated = async (consolidated) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                let jobOffers;
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateProfessionals = selectedCandidates.map(professional => professional.value);
+                const abortedProfessionals = selectedAborted.map(professional => professional.value);
+                const completedProfessionals = selectedCompleted.map(professional => professional.value);
+                // Role check
+                if (role === "manager" || role === "operator")
+                    jobOffers = await API.getJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidated, completedProfessionals, xsrfToken);
+                else if (role === "professional")
+                    jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidated, completedProfessionals, xsrfToken);
+
+                const modifiedJobOffers = jobOffers.map(jobOffer => {
+                    return {
+                        ...jobOffer,
+                        nCandidates: jobOffer.candidateProfessionalsId.length
+                    };
+                });
+                setJobOffers(modifiedJobOffers);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedJobOffers,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
+                    },
+                };
+                gridRef.current?.api.setGridOption('datasource', dataSource);
+
+            } else {
+                navigate("/ui")
+            }
+        } catch (error) {
+            console.log(error);
+            handleError(error);
+        }
+    };
+    const filterCompleted = async (completed) => {
+        setTableReady(false);
+        try {
+            if (loggedIn) {
+                let jobOffers;
+                const skills = selectedSkills.map(skill => skill.value);
+                const candidateProfessionals = selectedCandidates.map(professional => professional.value);
+                const abortedProfessionals = selectedAborted.map(professional => professional.value);
+                const consolidatedProfessionals = selectedConsolidated.map(professional => professional.value);
+                // Role check
+                if (role === "manager" || role === "operator")
+                    jobOffers = await API.getJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completed, xsrfToken);
+                else if (role === "professional")
+                    jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completed, xsrfToken);
+
+                const modifiedJobOffers = jobOffers.map(jobOffer => {
+                    return {
+                        ...jobOffer,
+                        nCandidates: jobOffer.candidateProfessionalsId.length
+                    };
+                });
+                setJobOffers(modifiedJobOffers);
+
+                const dataSource = {
+                    rowCount: undefined,
+                    getRows: (params) => {
+                        console.log('asking for ' + params.startRow + ' to ' + params.endRow);
+                        // Call the server
+                        // take a slice of the total rows
+                        const dataAfterSortingAndFiltering = sortAndFilter(
+                            modifiedJobOffers,
+                            params.sortModel,
+                            params.filterModel
+                        );
+                        const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                        // if on or after the last page, work out the last row.
+                        let lastRow = -1;
+                        if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                            lastRow = dataAfterSortingAndFiltering.length;
+                        }
+                        // call the success callback
+                        params.successCallback(rowsThisPage, lastRow);
+                        //
+                        setTableReady(true);
                     },
                 };
                 gridRef.current?.api.setGridOption('datasource', dataSource);
@@ -244,8 +510,30 @@ function JobOffers({loggedIn}) {
         const fetchJobOffers = async (params) => {
             try {
                 if (loggedIn) {
-                    const jobOffers = await API.getAllJobOffers(xsrfToken);
-                    // console.log(jobOffers);
+                    let jobOffers;
+                    let candidateIds;
+                    let abortedIds;
+                    let consolidatedIds;
+                    let completedIds;
+                    // Role check
+                    if (role === "manager" || role === "operator")
+                        jobOffers = await API.getAllJobOffers(xsrfToken);
+                    else if (role === "professional")
+                        jobOffers = await API.getOpenJobOffers(xsrfToken);
+                    console.log(jobOffers);
+                    // Professionals for filtering
+                    candidateIds = [...new Set(jobOffers.flatMap(jobOffer => jobOffer.candidateProfessionalsId || []))];
+                    abortedIds = [...new Set(jobOffers.flatMap(jobOffer => jobOffer.abortedProfessionalsId || []))];
+                    consolidatedIds = [...new Set(jobOffers.map(jobOffer => jobOffer.consolidatedProfessionalId).filter(id => id != null))];
+                    completedIds = [...new Set(jobOffers.map(jobOffer => jobOffer.completedProfessionalId).filter(id => id != null))];
+                    const professionals = await API.getProfessionalsInfo(candidateIds, abortedIds, consolidatedIds, completedIds, xsrfToken);
+                    // console.log(professionals);
+                    setOptionCandidates(professionals.candidate.map(professional => ({value: professional.first, label: professional.second})));
+                    setOptionAborted(professionals.aborted.map(professional => ({value: professional.first, label: professional.second})));
+                    setOptionConsolidated(professionals.consolidated.map(professional => ({value: professional.first, label: professional.second})));
+                    setOptionCompleted(professionals.completed.map(professional => ({value: professional.first, label: professional.second})));
+
+                    // Skills for filtering
                     const uniqueSkills = [...new Set(jobOffers.map(jobOffer => jobOffer.skills.map(s => s.skill)).flat())].map(skill => ({value: skill, label: skill}));
                     // console.log(uniqueSkills);
                     setOptionSkills(uniqueSkills);
@@ -264,27 +552,27 @@ function JobOffers({loggedIn}) {
                         getRows: (params) => {
                             console.log('asking for ' + params.startRow + ' to ' + params.endRow);
                             // Call the server
-                            setTimeout(function () {
-                                // take a slice of the total rows
-                                const dataAfterSortingAndFiltering = sortAndFilter(
-                                    modifiedJobOffers,
-                                    params.sortModel,
-                                    params.filterModel
-                                );
-                                const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
-                                // if on or after the last page, work out the last row.
-                                let lastRow = -1;
-                                if (dataAfterSortingAndFiltering.length <= params.endRow) {
-                                    lastRow = dataAfterSortingAndFiltering.length;
-                                }
-                                // call the success callback
-                                params.successCallback(rowsThisPage, lastRow);
+                            // take a slice of the total rows
+                            const dataAfterSortingAndFiltering = sortAndFilter(
+                                modifiedJobOffers,
+                                params.sortModel,
+                                params.filterModel
+                            );
+                            const rowsThisPage = dataAfterSortingAndFiltering.slice(params.startRow, params.endRow);
+                            // if on or after the last page, work out the last row.
+                            let lastRow = -1;
+                            if (dataAfterSortingAndFiltering.length <= params.endRow) {
+                                lastRow = dataAfterSortingAndFiltering.length;
+                            }
+                            // call the success callback
+                            params.successCallback(rowsThisPage, lastRow);
 
-                                // If there are no job offers, display the message
-                                if (jobOffers.length === 0) {
-                                    setNothing(true);
-                                }
-                            }, 500);
+                            // If there are no job offers, display the message
+                            if (jobOffers.length === 0) {
+                                setNothing(true);
+                            }
+                            //
+                            setTableReady(true);
                         },
                     };
                     params.api.setGridOption('datasource', dataSource);
@@ -306,40 +594,207 @@ function JobOffers({loggedIn}) {
         <Container fluid>
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
-                    <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
-                        <SideBar/>
+                    <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px', maxWidth: '250px'}}>
+                        <SideBar role={role} unreadMessages={unreadMessages}/>
                     </div>
-                    <Row style={{marginBottom: '100px'}}>
-                        <Col className="d-flex justify-content-center">
-                            <Button variant="info" onClick={() => navigate('/ui/jobOffers/addJobOffer')}> <i className="bi bi-plus-lg"></i> Add job offer </Button>
+                    <Row style={{marginBottom: '50px'}}>
+                        { (role === "operator" || role === "manager") ?
+                            <Col className="d-flex justify-content-center">
+                                <Button style={{marginRight: '15px'}} variant="info" onClick={() => navigate('/ui/jobOffers/addJobOffer')}> <i className="bi bi-plus-lg"></i> Add job offer </Button>
+                            </Col>
+                            : <></>
+                        }
+                    </Row>
+                    <Row>
+                        <h5> Filter by </h5>
+                    </Row>
+                    <Row>
+                        <Col ref={containerRef} style={role === "professional" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '33.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
+                            <h6 key={0} ref={(f) => filtersRef.current[0] = f} >
+                                Skills:
+                            </h6>
+                            <Select
+                                options={optionSkills}
+                                value={selectedSkills}
+                                onChange={ev => {
+                                    setSelectedSkills(ev);
+                                    filterSkills(ev.map(skill => skill.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[0].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }}
+                                placeholder="Choose or search skills"
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                                // theme={(theme) => ({
+                                //     ...theme,
+                                //     colors: {
+                                //         ...theme.colors,
+                                //         primary25: '#D1E7DD',
+                                //         primary: '#34ce57',
+                                //     },
+                                // })}
+                            />
+                            <h6 key={1} ref={(f) => filtersRef.current[1] = f}>
+                                Candidate professionals:
+                            </h6>
+                            <Select
+                                options={optionCandidates}
+                                value={selectedCandidates}
+                                onChange={ev => {
+                                    setSelectedCandidates(ev);
+                                    filterCandidates(ev.map(professional => professional.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[1].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }}
+                                placeholder="Choose or search profe..."
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <h6 key={2} ref={(f) => filtersRef.current[2] = f}>
+                                Consolidated professionals:
+                            </h6>
+                            <Select
+                                options={optionConsolidated}
+                                value={selectedConsolidated}
+                                onChange={ev => {
+                                    setSelectedConsolidated(ev);
+                                    filterConsolidated(ev.map(professional => professional.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[2].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }}
+                                placeholder="Choose or search profe..."
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <h6 style={{maxWidth: '250px'}} key={3} ref={(f) => filtersRef.current[3] = f}>
+                                Professionals who have completed a job:
+                            </h6>
+                            <Select
+                                options={optionCompleted}
+                                value={selectedCompleted}
+                                onChange={ev => {
+                                    setSelectedCompleted(ev);
+                                    filterCompleted(ev.map(professional => professional.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => { setTimeout(() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[3].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }, 0)
+                                }}
+                                placeholder="Choose or search profe..."
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
+                            <h6 key={4} ref={(f) => filtersRef.current[4] = f}>
+                                Aborted professionals:
+                            </h6>
+                            <Select
+                                options={optionAborted}
+                                value={selectedAborted}
+                                onChange={ev => {
+                                    setSelectedAborted(ev);
+                                    filterAborteds(ev.map(professional => professional.value));
+                                }}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                isSearchable={true}
+                                isClearable={true}
+                                onMenuOpen={() => { setTimeout(() => {
+                                    const container = containerRef.current;
+                                    if (container) {
+                                        container.scrollTo({
+                                            top: filtersRef.current[4].offsetTop - container.offsetTop,
+                                            behavior: "smooth",
+                                        });
+                                    }
+                                }, 0)
+                                }}
+                                placeholder="Choose or search profe..."
+                                components={animatedComponents}
+                                styles={{
+                                    container: base => ({
+                                        ...base,
+                                        width: '250px',
+                                        marginBottom: '30px'
+                                    })
+                                }}
+                                maxMenuHeight={145}
+                            />
                         </Col>
                     </Row>
-                    <h6> Filter by skills: </h6>
-                    <Select
-                        options={optionSkills}
-                        value={selectedSkills}
-                        onChange={ev => {
-                            setSelectedSkills(ev);
-                            filterSkills(ev.map(skill => skill.value));
-                        }}
-                        isMulti
-                        closeMenuOnSelect={true}
-                        isSearchable={true}
-                        isClearable={true}
-                        placeholder="Choose or search skills"
-                        components={animatedComponents}
-                        // theme={(theme) => ({
-                        //     ...theme,
-                        //     colors: {
-                        //         ...theme.colors,
-                        //         primary25: '#D1E7DD',
-                        //         primary: '#34ce57',
-                        //     },
-                        // })}
-                    />
                 </Col>
                 <Col>
-                    { nothing &&
+                    {nothing &&
                         <div style={{position: "fixed", zIndex: 1, paddingLeft: "500px", paddingTop: "250px"}}>
                             <h4> No Job Offers yet! </h4>
                         </div>
@@ -347,6 +802,8 @@ function JobOffers({loggedIn}) {
                     <div style={containerStyle}>
                         <div style={gridStyle} className={"ag-theme-quartz"}>
                             <AgGridReact
+                                loading={!tableReady}
+                                loadingOverlayComponent={CustomLoadingOverlay}
                                 ref={gridRef}
                                 columnDefs={columnDefs}
                                 defaultColDef={defaultColDef}
@@ -362,7 +819,9 @@ function JobOffers({loggedIn}) {
                                 paginationAutoPageSize={true}
                                 getRowId={getRowId}
                                 onGridReady={onGridReady}
-                                onRowClicked={useCallback((event) => {navigate(`/ui/jobOffers/${event.node.data.id}`)}, [])}
+                                onRowClicked={useCallback((event) => {
+                                    navigate(`/ui/jobOffers/${event.node.data.id}`)
+                                }, [])}
                             />
                         </div>
                     </div>

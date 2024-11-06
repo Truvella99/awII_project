@@ -18,6 +18,10 @@ import { RegistrationForm } from './components/Registration';
 import {Customers} from "./components/Customers.jsx";
 import {Professionals} from "./components/Professionals.jsx";
 import {JobOffers} from "./components/JobOffers.jsx";
+import {Messages} from "./components/Messages.jsx";
+import API from "./API.jsx";
+import {ViewMessage} from "./components/ViewMessage.jsx";
+import {MessageForm} from "./components/MessageForm.jsx";
 
 
 function App() {
@@ -25,8 +29,9 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   //const [user, setUser] = useState(null);
   //const [data, setData] = useState('');
-  const[role,setRole] = useState('');
+  const [role, setRole] = useState('');
   const Roles = ["professional", "customer", "operator", "manager"];
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [message, setMessage] = useState('');
 
   // function to handle the application errors, all displayed into the Alert under the NavHeader
@@ -67,12 +72,25 @@ function App() {
         const roles = result["roles"];
         const foundRole = roles.find(role => Roles.includes(role));
         setRole(foundRole);
+        // Get the unread messages
+        await getUnreadMessages(foundRole);
       } catch (error) {
         setRole('');
       }
     };
-    fetchMe()
-    postData().then();
+    //
+    const getUnreadMessages = async (foundRole) => {
+      try {
+        if (foundRole === "manager" || foundRole === "operator") {
+          const messages = await API.getMessagesReceived(me?.xsrfToken);
+          setUnreadMessages(messages.length);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchMe().then(() => postData());
   }, []);
 
   const handleLogout = () => {
@@ -99,17 +117,20 @@ function App() {
           <Container fluid /*className="mt-5"*/>
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />
-              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn}/>} /> // Ale Costa
+              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn} role={role} unreadMessages={unreadMessages}/>} /> // Ale Costa
               <Route path="/ui/professionals/:professionalId" element={loggedIn  && (role !== "customer" )?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
               <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
-              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn}/>} /> // Ale Costa
+              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages}/>} /> // Ale Costa
               <Route path="/ui/customers/:customerId" element={loggedIn && role !== "professional"?(<CustomerProfile role={role} xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
               <Route path="/ui/customers/edit/:customerId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
               <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
-              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn}/>} /> // Ale Costa
+              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages}/>} /> // Ale Costa
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} /> // Minicucc
               <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />  // Minicucc view and edit
+              <Route path="/ui/messages" element={<Messages loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages}/>} />
+              <Route path="/ui/messages/:messageId" element={<ViewMessage loggedIn={loggedIn} role={role} unreadMessages={unreadMessages}/>} />
+              <Route path="/ui/messages/addMessage" element={loggedIn && (role === "operator" || role === "manager" )?(<MessageForm role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages}/>) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/Registration" element={<></>} /> // Giuseppe
               <Route path="/ui/Analytics" element={<></>} />
             </Routes>

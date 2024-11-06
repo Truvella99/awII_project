@@ -52,7 +52,11 @@ class ProfessionalServiceImpl(
         skills: List<String>?,
         latitude: Double?,
         longitude: Double?,
-        employmentState: employmentState?
+        employmentState: employmentState?,
+        candidateJobOffers: List<String>?,
+        abortedJobOffers: List<String>?,
+        consolidatedJobOffers: List<String>?,
+        completedJobOffers: List<String>?
     ): List<ProfessionalDTO> {
         if (latitude != null && longitude == null) {
             throw IllegalGeographicalLocationException("Longitude must be provided if Latitude is provided.")
@@ -64,7 +68,7 @@ class ProfessionalServiceImpl(
         if (pageNumber != null && limit != null) {
             if (pageNumber >= 0 && limit > 0) {
                 val p = PageRequest.of(pageNumber, limit)
-               return professionalRepository.findBySkillsOrLocationOrEmploymentState(skills, geographicalLocation, employmentState, p).map { it.toDTO() }
+               return professionalRepository.filterHome(skills, geographicalLocation, employmentState, p, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers).map { it.toDTO() }
             } else {
                 if (pageNumber < 0 && limit <= 0) {
                     throw IllegalPageNumberLimitException("Invalid pageNumber and limit Parameter.")
@@ -75,7 +79,7 @@ class ProfessionalServiceImpl(
                 }
             }
         } else if (pageNumber == null && limit == null) {
-            return professionalRepository.findBySkillsOrLocationOrEmploymentState(skills, geographicalLocation, employmentState, null).map { it.toDTO() }
+            return professionalRepository.filterHome(skills, geographicalLocation, employmentState, null, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers).map { it.toDTO() }
         } else {
             throw IllegalPageNumberLimitException("PageNumber and limit must be both provided or both not provided.")
         }
@@ -86,13 +90,17 @@ class ProfessionalServiceImpl(
         skills: List<String>?,
         latitude: Double,
         longitude: Double,
-        km: Double
+        km: Double,
+        candidateJobOffers: List<String>?,
+        abortedJobOffers: List<String>?,
+        consolidatedJobOffers: List<String>?,
+        completedJobOffers: List<String>?
     ): List<ProfessionalDTO> {
         if (latitude == null || longitude == null || km == null) {
             throw IllegalGeographicalLocationException("Latitude, longitude and km distance must be provided.")
         }
 
-        val professionals = professionalRepository.findBySkills(skills)
+        val professionals = professionalRepository.filterHome(skills, null, null, null, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers)
         return professionals.filter { professional ->
             val professionalLocation = professional.geographicalLocation ?: return@filter false
             val calculatedDistance = haversine(latitude, longitude, professionalLocation.first, professionalLocation.second)
@@ -167,6 +175,40 @@ class ProfessionalServiceImpl(
             throw ProfessionalNotFoundException("Professional with ProfessionalId:$professionalId not found")
         }
         return professional.toDTO()
+    }
+
+    // ----- Get professionals info -----
+    override fun getProfessionalsInfo(
+        candidateIds: List<String>?,
+        abortedIds: List<String>?,
+        consolidatedIds: List<String>?,
+        completedIds: List<String>?
+    ): Map<String, List<Pair<String?, String?>>> {
+        val allIds = candidateIds.orEmpty() + abortedIds.orEmpty() + consolidatedIds.orEmpty() + completedIds.orEmpty()
+        val professionals = professionalRepository.findAllById(allIds.map { it }).map { it.toDTO() }
+        //
+        val candidateProfessionalsInfo = professionals
+            .filter { it.id.toString() in (candidateIds ?: emptyList()) }
+            .map { it.id.toString() to (it.name + ' ' + it.surname) }
+
+        val abortedProfessionalsInfo = professionals
+            .filter { it.id.toString() in (abortedIds ?: emptyList()) }
+            .map { it.id.toString() to (it.name + ' ' + it.surname) }
+
+        val consolidatedProfessionalsInfo = professionals
+            .filter { it.id.toString() in (consolidatedIds ?: emptyList()) }
+            .map { it.id.toString() to (it.name + ' ' + it.surname) }
+
+        val completedProfessionalsInfo = professionals
+            .filter { it.id.toString() in (completedIds ?: emptyList()) }
+            .map { it.id.toString() to (it.name + ' ' + it.surname) }
+
+        return mapOf(
+            "candidate" to candidateProfessionalsInfo,
+            "aborted" to abortedProfessionalsInfo,
+            "consolidated" to consolidatedProfessionalsInfo,
+            "completed" to completedProfessionalsInfo
+        )
     }
 
     // ----- Update a professional -----

@@ -9,6 +9,7 @@ import it.polito.customerrelationshipmanagement.repositories.*
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -490,7 +491,27 @@ class JobOfferServiceImpl(
     }
 
     // ----- Get all the job offers -----
-    override fun getAllJobOffers(skills: List<String>?): List<JobOfferDTO> {
-        return jobOfferRepository.findBySkills(skills).map { it.toDTO() }
+    override fun getAllJobOffers(
+        skills: List<String>?,
+        candidateProfessionals: List<String>?,
+        abortedProfessionals: List<String>?,
+        consolidatedProfessionals: List<String>?,
+        completedProfessionals: List<String>?
+    ): List<JobOfferDTO> {
+        return jobOfferRepository.filterHome(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals).map { it.toDTO() }
+    }
+
+    // ----- Get all open job offers -----
+    override fun getOpenJobOffers(
+        skills: List<String>?,
+        candidateProfessionals: List<String>?,
+        abortedProfessionals: List<String>?,
+        consolidatedProfessionals: List<String>?,
+        completedProfessionals: List<String>?
+    ): List<JobOfferDTO> {
+        val excludedStates = listOf(jobOfferStatus.aborted, jobOfferStatus.consolidated, jobOfferStatus.done)
+
+        val jobOffers = jobOfferRepository.filterHome(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals)
+        return jobOffers.filter{ it.currentState !in excludedStates }.map { it.toDTO() }
     }
 }

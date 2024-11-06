@@ -55,9 +55,9 @@ class MessageServiceImpl(
                     p = PageRequest.of(pageNumber, limit)
 
                 if (state != null)
-                    return messageRepository.findByCurrentState(state, p).map{ it.toDTO() }
+                    return messageRepository.findByCurrentState(state, p).map{ it.toDTO(false) }
                 else
-                    return messageRepository.findAll(p).content.map{ it.toDTO() }
+                    return messageRepository.findAll(p).content.map{ it.toDTO(false) }
             } else {
                 // handle error
                 if (pageNumber < 0 && limit <= 0) {
@@ -84,15 +84,15 @@ class MessageServiceImpl(
                     }
                 }
                 if (state != null)
-                    return messageRepository.findByCurrentState(state, s).map{ it.toDTO() }
+                    return messageRepository.findByCurrentState(state, s).map{ it.toDTO(false) }
                 else
-                    return messageRepository.findAll(s).map{ it.toDTO() }
+                    return messageRepository.findAll(s).map{ it.toDTO(false) }
 
             } else {
                 if (state != null)
-                    return messageRepository.findByCurrentState(state).map{ it.toDTO() }
+                    return messageRepository.findByCurrentState(state).map{ it.toDTO(false) }
                 else
-                    return messageRepository.findAll().map{ it.toDTO() }
+                    return messageRepository.findAll().map{ it.toDTO(false) }
             }
         } else {
             throw IllegalPageNumberLimitException("PageNumber and limit must be both provided or both not provided.")
@@ -111,6 +111,7 @@ class MessageServiceImpl(
         message.priority = data.priority
         message.subject = data.subject ?: ""
         message.body = data.body ?: ""
+        message.currentState = state.received
 
         //No sender provided error
         if (data.email == null && data.telephone == null && data.address == null)
@@ -192,9 +193,6 @@ class MessageServiceImpl(
         }
         // Check if the target state is a valid transition from the current state
         when (message.currentState) {
-            null -> if (data.targetState != state.received) {
-                throw IllegalStateTransitionException("Invalid state transition")
-            }
             state.received -> if (data.targetState != state.read) {
                 throw IllegalStateTransitionException("Invalid state transition")
             }

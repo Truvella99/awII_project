@@ -12,7 +12,7 @@ class Message {
     lateinit var date: Date
     lateinit var channel: channel
     lateinit var priority: priority
-    var currentState: state? = null
+    lateinit var currentState: state
 
     var subject: String? = null
 
