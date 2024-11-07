@@ -21,20 +21,18 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.apache.camel.springboot:camel-spring-boot-starter:4.5.0")
-    implementation("org.apache.camel.springboot:camel-google-mail-starter:4.5.0")
-    implementation("org.apache.camel:camel-google-mail:4.5.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation ("org.apache.camel:camel-jackson:3.20.2")
-    implementation ("org.apache.camel:camel-http:3.20.2")
-    //implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    //implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation ("org.keycloak:keycloak-admin-client:20.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.springframework.security:spring-security-test")
+    runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
-    //runtimeOnly("org.postgresql:postgresql")
-    //runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<KotlinCompile> {

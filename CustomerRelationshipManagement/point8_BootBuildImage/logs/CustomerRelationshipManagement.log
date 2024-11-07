@@ -1,0 +1,213 @@
+2024-11-07 11:04:13,810 INFO [main] i.p.c.CustomerRelationshipManagementApplicationKt [StartupInfoLogger.java:50] Starting CustomerRelationshipManagementApplicationKt v0.0.1-SNAPSHOT using Java 17.0.10 with PID 1 (/workspace/BOOT-INF/classes started by cnb in /workspace)
+2024-11-07 11:04:13,816 INFO [main] i.p.c.CustomerRelationshipManagementApplicationKt [SpringApplication.java:654] No active profile set, falling back to 1 default profile: "default"
+2024-11-07 11:04:14,904 INFO [main] o.s.d.r.c.RepositoryConfigurationDelegate [RepositoryConfigurationDelegate.java:139] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-11-07 11:04:15,009 INFO [main] o.s.d.r.c.RepositoryConfigurationDelegate [RepositoryConfigurationDelegate.java:208] Finished Spring Data repository scanning in 94 ms. Found 12 JPA repository interfaces.
+2024-11-07 11:04:15,693 INFO [main] o.s.b.w.e.t.TomcatWebServer [TomcatWebServer.java:109] Tomcat initialized with port 8080 (http)
+2024-11-07 11:04:15,710 INFO [main] o.a.c.c.StandardService [DirectJDKLog.java:173] Starting service [Tomcat]
+2024-11-07 11:04:15,712 INFO [main] o.a.c.c.StandardEngine [DirectJDKLog.java:173] Starting Servlet engine: [Apache Tomcat/10.1.19]
+2024-11-07 11:04:15,766 INFO [main] o.a.c.c.C.[.[.[/] [DirectJDKLog.java:173] Initializing Spring embedded WebApplicationContext
+2024-11-07 11:04:15,769 INFO [main] o.s.b.w.s.c.ServletWebServerApplicationContext [ServletWebServerApplicationContext.java:296] Root WebApplicationContext: initialization completed in 1846 ms
+2024-11-07 11:04:15,895 INFO [main] c.z.h.HikariDataSource [HikariDataSource.java:110] HikariPool-1 - Starting...
+2024-11-07 11:04:16,102 INFO [main] c.z.h.p.HikariPool [HikariPool.java:565] HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@420a8042
+2024-11-07 11:04:16,104 INFO [main] c.z.h.HikariDataSource [HikariDataSource.java:123] HikariPool-1 - Start completed.
+2024-11-07 11:04:16,212 INFO [main] o.h.j.i.u.LogHelper [LogHelper.java:31] HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-11-07 11:04:16,307 INFO [main] o.h.Version [Version.java:44] HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-11-07 11:04:16,346 INFO [main] o.h.c.i.RegionFactoryInitiator [RegionFactoryInitiator.java:50] HHH000026: Second-level cache disabled
+2024-11-07 11:04:16,571 INFO [main] o.s.o.j.p.SpringPersistenceUnitInfo [SpringPersistenceUnitInfo.java:87] No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-11-07 11:04:17,553 INFO [main] o.h.e.t.j.p.i.JtaPlatformInitiator [JtaPlatformInitiator.java:58] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-11-07 11:04:17,570 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,572 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "address" does not exist, skipping
+2024-11-07 11:04:17,574 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,575 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "contact" does not exist, skipping
+2024-11-07 11:04:17,575 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,576 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "contact" does not exist, skipping
+2024-11-07 11:04:17,578 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,578 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "customer" does not exist, skipping
+2024-11-07 11:04:17,580 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,580 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "email" does not exist, skipping
+2024-11-07 11:04:17,585 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,586 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "history" does not exist, skipping
+2024-11-07 11:04:17,588 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,593 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "job_offer" does not exist, skipping
+2024-11-07 11:04:17,594 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,599 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "job_offer" does not exist, skipping
+2024-11-07 11:04:17,600 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,601 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "job_offers_history" does not exist, skipping
+2024-11-07 11:04:17,603 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,604 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "note" does not exist, skipping
+2024-11-07 11:04:17,605 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,606 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "note" does not exist, skipping
+2024-11-07 11:04:17,606 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,607 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "professional" does not exist, skipping
+2024-11-07 11:04:17,608 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,609 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "professional" does not exist, skipping
+2024-11-07 11:04:17,610 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,611 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "skill" does not exist, skipping
+2024-11-07 11:04:17,612 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,614 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "skill" does not exist, skipping
+2024-11-07 11:04:17,616 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,617 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "telephone" does not exist, skipping
+2024-11-07 11:04:17,620 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,621 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "address" does not exist, skipping
+2024-11-07 11:04:17,622 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,622 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "contact" does not exist, skipping
+2024-11-07 11:04:17,623 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,624 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "customer" does not exist, skipping
+2024-11-07 11:04:17,625 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,625 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "email" does not exist, skipping
+2024-11-07 11:04:17,626 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,627 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "history" does not exist, skipping
+2024-11-07 11:04:17,628 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,629 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "job_offer" does not exist, skipping
+2024-11-07 11:04:17,630 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,631 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "job_offers_history" does not exist, skipping
+2024-11-07 11:04:17,631 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,632 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "message" does not exist, skipping
+2024-11-07 11:04:17,633 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,634 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "note" does not exist, skipping
+2024-11-07 11:04:17,636 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,637 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "professional" does not exist, skipping
+2024-11-07 11:04:17,638 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,639 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "skill" does not exist, skipping
+2024-11-07 11:04:17,640 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,640 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "telephone" does not exist, skipping
+2024-11-07 11:04:17,641 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,641 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "address_seq" does not exist, skipping
+2024-11-07 11:04:17,642 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,643 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "contact_seq" does not exist, skipping
+2024-11-07 11:04:17,644 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,644 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "customer_seq" does not exist, skipping
+2024-11-07 11:04:17,645 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,646 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "email_seq" does not exist, skipping
+2024-11-07 11:04:17,646 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,647 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "history_seq" does not exist, skipping
+2024-11-07 11:04:17,648 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,648 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "job_offer_seq" does not exist, skipping
+2024-11-07 11:04:17,649 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,650 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "job_offers_history_seq" does not exist, skipping
+2024-11-07 11:04:17,653 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,654 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "message_seq" does not exist, skipping
+2024-11-07 11:04:17,655 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,656 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "note_seq" does not exist, skipping
+2024-11-07 11:04:17,657 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,658 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "professional_seq" does not exist, skipping
+2024-11-07 11:04:17,660 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,661 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "skill_seq" does not exist, skipping
+2024-11-07 11:04:17,663 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 11:04:17,664 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "telephone_seq" does not exist, skipping
+2024-11-07 11:04:17,814 INFO [main] o.s.o.j.LocalContainerEntityManagerFactoryBean [AbstractEntityManagerFactoryBean.java:437] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-11-07 11:04:18,430 INFO [main] o.s.d.j.r.q.QueryEnhancerFactory [QueryEnhancerFactory.java:49] Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-11-07 11:04:19,437 WARN [main] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration [JpaBaseConfiguration.java:232] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-11-07 11:04:19,867 INFO [main] o.s.b.w.e.t.TomcatWebServer [TomcatWebServer.java:241] Tomcat started on port 8080 (http) with context path ''
+2024-11-07 11:04:19,877 INFO [main] i.p.c.CustomerRelationshipManagementApplicationKt [StartupInfoLogger.java:56] Started CustomerRelationshipManagementApplicationKt in 6.595 seconds (process running for 7.504)
+2024-11-07 11:04:35,109 INFO [SpringApplicationShutdownHook] o.s.o.j.LocalContainerEntityManagerFactoryBean [AbstractEntityManagerFactoryBean.java:650] Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-11-07 11:04:35,112 INFO [SpringApplicationShutdownHook] c.z.h.HikariDataSource [HikariDataSource.java:350] HikariPool-1 - Shutdown initiated...
+2024-11-07 11:04:35,116 INFO [SpringApplicationShutdownHook] c.z.h.HikariDataSource [HikariDataSource.java:352] HikariPool-1 - Shutdown completed.
+2024-11-07 14:30:11,739 INFO [main] i.p.c.CustomerRelationshipManagementApplicationKt [StartupInfoLogger.java:50] Starting CustomerRelationshipManagementApplicationKt v0.0.1-SNAPSHOT using Java 17.0.10 with PID 1 (/workspace/BOOT-INF/classes started by cnb in /workspace)
+2024-11-07 14:30:11,751 INFO [main] i.p.c.CustomerRelationshipManagementApplicationKt [SpringApplication.java:654] No active profile set, falling back to 1 default profile: "default"
+2024-11-07 14:30:13,912 INFO [main] o.s.d.r.c.RepositoryConfigurationDelegate [RepositoryConfigurationDelegate.java:139] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-11-07 14:30:14,122 INFO [main] o.s.d.r.c.RepositoryConfigurationDelegate [RepositoryConfigurationDelegate.java:208] Finished Spring Data repository scanning in 188 ms. Found 12 JPA repository interfaces.
+2024-11-07 14:30:15,439 INFO [main] o.s.b.w.e.t.TomcatWebServer [TomcatWebServer.java:109] Tomcat initialized with port 8080 (http)
+2024-11-07 14:30:15,489 INFO [main] o.a.c.c.StandardService [DirectJDKLog.java:173] Starting service [Tomcat]
+2024-11-07 14:30:15,491 INFO [main] o.a.c.c.StandardEngine [DirectJDKLog.java:173] Starting Servlet engine: [Apache Tomcat/10.1.19]
+2024-11-07 14:30:15,610 INFO [main] o.a.c.c.C.[.[.[/] [DirectJDKLog.java:173] Initializing Spring embedded WebApplicationContext
+2024-11-07 14:30:15,618 INFO [main] o.s.b.w.s.c.ServletWebServerApplicationContext [ServletWebServerApplicationContext.java:296] Root WebApplicationContext: initialization completed in 3681 ms
+2024-11-07 14:30:15,829 INFO [main] c.z.h.HikariDataSource [HikariDataSource.java:110] HikariPool-1 - Starting...
+2024-11-07 14:30:16,329 INFO [main] c.z.h.p.HikariPool [HikariPool.java:565] HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3292d91a
+2024-11-07 14:30:16,335 INFO [main] c.z.h.HikariDataSource [HikariDataSource.java:123] HikariPool-1 - Start completed.
+2024-11-07 14:30:16,566 INFO [main] o.h.j.i.u.LogHelper [LogHelper.java:31] HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-11-07 14:30:16,763 INFO [main] o.h.Version [Version.java:44] HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-11-07 14:30:16,847 INFO [main] o.h.c.i.RegionFactoryInitiator [RegionFactoryInitiator.java:50] HHH000026: Second-level cache disabled
+2024-11-07 14:30:17,384 INFO [main] o.s.o.j.p.SpringPersistenceUnitInfo [SpringPersistenceUnitInfo.java:87] No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-11-07 14:30:19,162 INFO [main] o.h.e.t.j.p.i.JtaPlatformInitiator [JtaPlatformInitiator.java:58] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-11-07 14:30:19,184 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,185 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "address" does not exist, skipping
+2024-11-07 14:30:19,187 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,187 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "contact" does not exist, skipping
+2024-11-07 14:30:19,188 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,189 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "contact" does not exist, skipping
+2024-11-07 14:30:19,191 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,191 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "customer" does not exist, skipping
+2024-11-07 14:30:19,193 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,194 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "email" does not exist, skipping
+2024-11-07 14:30:19,195 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,196 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "history" does not exist, skipping
+2024-11-07 14:30:19,198 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,199 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "job_offer" does not exist, skipping
+2024-11-07 14:30:19,201 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,202 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "job_offer" does not exist, skipping
+2024-11-07 14:30:19,203 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,204 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "job_offers_history" does not exist, skipping
+2024-11-07 14:30:19,206 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,206 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "note" does not exist, skipping
+2024-11-07 14:30:19,207 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,208 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "note" does not exist, skipping
+2024-11-07 14:30:19,209 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,210 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "professional" does not exist, skipping
+2024-11-07 14:30:19,211 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,212 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "professional" does not exist, skipping
+2024-11-07 14:30:19,214 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,214 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "skill" does not exist, skipping
+2024-11-07 14:30:19,216 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,217 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "skill" does not exist, skipping
+2024-11-07 14:30:19,218 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,219 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] relation "telephone" does not exist, skipping
+2024-11-07 14:30:19,220 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,221 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "address" does not exist, skipping
+2024-11-07 14:30:19,222 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,223 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "contact" does not exist, skipping
+2024-11-07 14:30:19,224 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,225 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "customer" does not exist, skipping
+2024-11-07 14:30:19,226 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,226 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "email" does not exist, skipping
+2024-11-07 14:30:19,227 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,228 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "history" does not exist, skipping
+2024-11-07 14:30:19,229 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,230 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "job_offer" does not exist, skipping
+2024-11-07 14:30:19,232 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,233 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "job_offers_history" does not exist, skipping
+2024-11-07 14:30:19,234 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,236 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "message" does not exist, skipping
+2024-11-07 14:30:19,237 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,238 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "note" does not exist, skipping
+2024-11-07 14:30:19,240 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,241 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "professional" does not exist, skipping
+2024-11-07 14:30:19,243 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,244 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "skill" does not exist, skipping
+2024-11-07 14:30:19,245 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,246 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] table "telephone" does not exist, skipping
+2024-11-07 14:30:19,247 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,248 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "address_seq" does not exist, skipping
+2024-11-07 14:30:19,249 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,250 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "contact_seq" does not exist, skipping
+2024-11-07 14:30:19,251 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,252 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "customer_seq" does not exist, skipping
+2024-11-07 14:30:19,253 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,254 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "email_seq" does not exist, skipping
+2024-11-07 14:30:19,255 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,255 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "history_seq" does not exist, skipping
+2024-11-07 14:30:19,256 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,257 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "job_offer_seq" does not exist, skipping
+2024-11-07 14:30:19,258 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,259 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "job_offers_history_seq" does not exist, skipping
+2024-11-07 14:30:19,260 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,261 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "message_seq" does not exist, skipping
+2024-11-07 14:30:19,263 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,263 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "note_seq" does not exist, skipping
+2024-11-07 14:30:19,265 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,265 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "professional_seq" does not exist, skipping
+2024-11-07 14:30:19,266 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,267 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "skill_seq" does not exist, skipping
+2024-11-07 14:30:19,268 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:238] SQL Warning Code: 0, SQLState: 00000
+2024-11-07 14:30:19,269 WARN [main] o.h.e.j.s.SqlExceptionHelper [SqlExceptionHelper.java:239] sequence "telephone_seq" does not exist, skipping
+2024-11-07 14:30:19,786 INFO [main] o.s.o.j.LocalContainerEntityManagerFactoryBean [AbstractEntityManagerFactoryBean.java:437] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-11-07 14:30:20,613 INFO [main] o.s.d.j.r.q.QueryEnhancerFactory [QueryEnhancerFactory.java:49] Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-11-07 14:30:21,707 WARN [main] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration [JpaBaseConfiguration.java:232] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-11-07 14:30:22,198 INFO [main] o.s.b.w.e.t.TomcatWebServer [TomcatWebServer.java:241] Tomcat started on port 8080 (http) with context path ''
+2024-11-07 14:30:22,208 INFO [main] i.p.c.CustomerRelationshipManagementApplicationKt [StartupInfoLogger.java:56] Started CustomerRelationshipManagementApplicationKt in 11.448 seconds (process running for 13.044)
+2024-11-07 14:40:09,917 INFO [http-nio-8080-exec-1] o.a.c.c.C.[.[.[/] [DirectJDKLog.java:173] Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-11-07 14:40:09,918 INFO [http-nio-8080-exec-1] o.s.w.s.DispatcherServlet [FrameworkServlet.java:532] Initializing Servlet 'dispatcherServlet'
+2024-11-07 14:40:09,921 INFO [http-nio-8080-exec-1] o.s.w.s.DispatcherServlet [FrameworkServlet.java:554] Completed initialization in 2 ms
+2024-11-07 14:41:45,678 INFO [SpringApplicationShutdownHook] o.s.o.j.LocalContainerEntityManagerFactoryBean [AbstractEntityManagerFactoryBean.java:650] Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-11-07 14:41:45,684 INFO [SpringApplicationShutdownHook] c.z.h.HikariDataSource [HikariDataSource.java:350] HikariPool-1 - Shutdown initiated...
+2024-11-07 14:41:45,689 INFO [SpringApplicationShutdownHook] c.z.h.HikariDataSource [HikariDataSource.java:352] HikariPool-1 - Shutdown completed.

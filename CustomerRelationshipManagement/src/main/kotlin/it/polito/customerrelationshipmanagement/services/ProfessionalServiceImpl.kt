@@ -230,7 +230,7 @@ class ProfessionalServiceImpl(
             CreateUpdateUserDTO(
                 userName = null,
                 email = professional.email,
-                password = professional.password!!,
+                password = professional.password,
                 firstname = professional.name!!,
                 lastName = professional.surname!!
             )

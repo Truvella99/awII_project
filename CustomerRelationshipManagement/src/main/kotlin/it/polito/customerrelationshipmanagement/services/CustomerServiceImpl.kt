@@ -130,7 +130,7 @@ class CustomerServiceImpl(
             CreateUpdateUserDTO(
                 userName = null,
                 email = customer.email,
-                password = customer.password!!,
+                password = customer.password,
                 firstname = customer.name!!,
                 lastName = customer.surname!!
             )

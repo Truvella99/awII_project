@@ -71,7 +71,7 @@ class KeycloakConfig {
                     else -> throw ContactException("Invalid Category.")
                 }
 
-                val credential = createPasswordCredentials(createUpdateUserDTO.password)
+                val credential = createPasswordCredentials(createUpdateUserDTO.password!!)
                 val user = UserRepresentation().apply {
                     username = createUpdateUserDTO.userName
                     firstName = createUpdateUserDTO.firstname
@@ -113,19 +113,21 @@ class KeycloakConfig {
                 val keycloak = getInstance()
                 // get user
                 val userResource = keycloak.realm(realm).users()[uuid]
-                val credential = createPasswordCredentials(createUpdateUserDTO.password)
                 // No Username change check since I don't use it directly, so not possible to update username
                 val user = UserRepresentation().apply {
                     firstName = createUpdateUserDTO.firstname
                     lastName = createUpdateUserDTO.lastName
                     email = createUpdateUserDTO.email
-                    credentials = listOf(credential)
+                    //credentials = listOf(credential)
                     isEnabled = true
                 }
                 // update main info
                 userResource.update(user)
-                // update password
-                userResource.resetPassword(credential)
+                // update password if present
+                if (createUpdateUserDTO.password != null) {
+                    val credential = createPasswordCredentials(createUpdateUserDTO.password)
+                    userResource.resetPassword(credential)
+                }
                 logger.info("Keycloak User ${user.firstName} updated with UUID: $uuid")
             } catch (e: RuntimeException) {
                 throw ContactException("Unable to Update User ${createUpdateUserDTO.firstname}.")
