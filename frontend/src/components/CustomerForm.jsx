@@ -13,6 +13,7 @@ const CreateCustomer = ({xsrfToken}) => {
     const [customer, setCustomer] = useState({
         name: '',
         surname: '',
+        username: '',
         ssncode: '',
         category: 'customer',
         email: '',
@@ -135,6 +136,9 @@ const CreateCustomer = ({xsrfToken}) => {
 
         if (!NOT_EMPTY_IF_NOT_NULL.test(customer.surname)) {
             errors.surname = "Surname cannot be empty.";
+        }
+        if (!NOT_EMPTY_IF_NOT_NULL.test(customer.username)) {
+            errors.username = "Username cannot be empty.";
         }
 
         if (!SSN_CODE.test(customer.ssncode)) {
@@ -280,17 +284,34 @@ const CreateCustomer = ({xsrfToken}) => {
                                         </Form.Group>
                                     </Col>
                                     <Col md={6}>
-                                        <Form.Group className="mb-3" controlId="category">
-                                            <Form.Label>Category</Form.Label>
+                                        <Form.Group className="mb-3" controlId="username">
+                                            <Form.Label>Username</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                name="category"
-                                                value={customer.category}
-                                                disabled={true}
+                                                name="username"
+                                                placeholder="Enter username"
+                                                value={customer.username}
+                                                onChange={handleInputChange}
+                                                isInvalid={!!formErrors.username}
                                                 required
                                             />
+                                            <Form.Control.Feedback type="invalid">
+                                                {formErrors.username}
+                                            </Form.Control.Feedback>
                                         </Form.Group>
                                     </Col>
+                                    {/*<Col md={6}>*/}
+                                    {/*    <Form.Group className="mb-3" controlId="category">*/}
+                                    {/*        <Form.Label>Category</Form.Label>*/}
+                                    {/*        <Form.Control*/}
+                                    {/*            type="text"*/}
+                                    {/*            name="category"*/}
+                                    {/*            value={customer.category}*/}
+                                    {/*            disabled={true}*/}
+                                    {/*            required*/}
+                                    {/*        />*/}
+                                    {/*    </Form.Group>*/}
+                                    {/*</Col>*/}
                                 </Row>
                                     <Row>
                                         <Col md={6}>

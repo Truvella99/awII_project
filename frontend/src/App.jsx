@@ -113,7 +113,7 @@ function App() {
               <Toast.Body>{message}</Toast.Body>
             </Toast>
           </Container>
-          <Navigation  me={me} logout={handleLogout} loggedIn={loggedIn} />
+          <Navigation  me={me} role={role} logout={handleLogout} loggedIn={loggedIn} />
           <Container fluid /*className="mt-5"*/>
             <Routes>
               <Route path="/ui" element={<Home me={me}/>} />

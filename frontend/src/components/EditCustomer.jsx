@@ -193,7 +193,11 @@ const EditCustomer = ({ xsrfToken }) => {
 
     const validateForm = async () => {
         const errors = {};
+        console.log("customer", customer.password);
         //Password
+        if(!customer.password){
+            delete customer.password;
+        }else
         if (customer.password.length < 8) {
             errors.password = "Passwprd must be at least 8 characters long";
         }else if (!/[A-Z]/.test(customer.password)) {
@@ -270,6 +274,7 @@ const EditCustomer = ({ xsrfToken }) => {
 
         const isValid = await validateForm();
         console.log("isValid", isValid);
+        console.log("customer", customer);
         if (!isValid) return;
 
         setLoading(true);
@@ -364,7 +369,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3" controlId="psw">
-                                            <Form.Label>Password</Form.Label>
+                                            <Form.Label>Password (Optional)</Form.Label>
                                             <InputGroup>
                                                 <Form.Control
                                                     type={showPassword ? 'text' : 'password'} // Alterna testo/password

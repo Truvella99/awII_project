@@ -128,6 +128,7 @@ function Home({ me }) {
                         <Button variant={"warning"} onClick={()=>navigate("/ui/professionals/edit/1")}>Edit Professional Page</Button>
                         <Button variant={"warning"} onClick={()=>navigate("/ui/customers/edit/1")}>Edit Customer Page</Button>
                         <Button onClick={async () => {
+                            console.log(me?.principal?.subject);
 
                             console.log(JSON.stringify(customer, null, 2));
 
@@ -142,11 +143,7 @@ function Home({ me }) {
                                 password: "password",
                                 email: "jj3@libero.it",
                                 telephone: "+391234567892",
-                                address: "Via Roma 23",
-                                emailsToDelete: [1],
-                                telephonesToDelete: [1],
-                                addressesToDelete: [1],
-                                notesToDelete: [1],
+                                address: "Via Roma 23"
                             };
 
                             // Mostra i dati aggiornati del cliente nel log

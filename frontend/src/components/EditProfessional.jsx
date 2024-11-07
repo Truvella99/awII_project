@@ -259,6 +259,9 @@ const EditProfessional = ({ xsrfToken }) => {
     const validateForm = async () => {
         const errors = {};
         //Password
+        if(!professional.password){
+            delete professional.password;
+        }else
         if (professional.password.length < 8) {
             errors.password = "Passwprd must be at least 8 characters long";
         }else if (!/[A-Z]/.test(professional.password)) {
@@ -464,7 +467,7 @@ const EditProfessional = ({ xsrfToken }) => {
                                     {/*</Col>*/}
                                     <Col md={6}>
                                         <Form.Group className="mb-3" controlId="psw">
-                                            <Form.Label>Password</Form.Label>
+                                            <Form.Label>Password (Optional)</Form.Label>
                                             <InputGroup>
                                                 <Form.Control
                                                     type={showPassword ? 'text' : 'password'} // Alterna testo/password
