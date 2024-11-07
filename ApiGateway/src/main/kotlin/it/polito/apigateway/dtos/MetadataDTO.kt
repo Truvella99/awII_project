@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 class MetadataDTO (
     val keyId:String,
     val keyVersion: Long,
+    val fileName: String,
     val documentId: Long,
-    val name: String,
     val size: Number,
     val contentType: String,
     val creationTimestamp: LocalDateTime
