@@ -2,6 +2,7 @@ package it.polito.customerrelationshipmanagement.services
 
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.employmentState
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.RequestParam
 
 interface ProfessionalService {
@@ -34,7 +35,7 @@ interface ProfessionalService {
     ): List<ProfessionalDTO>
     fun createProfessional(professional: CreateUpdateProfessionalDTO): ProfessionalDTO
     // ale costa
-    fun findProfessionalById(professionalId: String): ProfessionalDTO
+    fun findProfessionalById(professionalId: String, authentication: Authentication): ProfessionalDTO
     fun getProfessionalsInfo(
         candidateIds: List<String>?,
         abortedIds: List<String>?,

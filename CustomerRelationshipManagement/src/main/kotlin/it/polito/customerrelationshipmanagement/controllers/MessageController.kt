@@ -22,7 +22,7 @@ class MessageController(private val messageService: MessageService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/messages/")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun listAllMessages(@RequestParam("pageNumber")pageNumber: Int?,
                         @RequestParam("limit")limit: Int?,
                         @RequestParam("state")state: state?,

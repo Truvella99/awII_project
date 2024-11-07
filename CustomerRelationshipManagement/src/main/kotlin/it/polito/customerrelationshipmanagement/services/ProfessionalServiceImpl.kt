@@ -5,10 +5,12 @@ import it.polito.customerrelationshipmanagement.controllers.ProfessionalControll
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.*
 import it.polito.customerrelationshipmanagement.exceptions.*
+import it.polito.customerrelationshipmanagement.getUserKeycloakIdRole
 import it.polito.customerrelationshipmanagement.repositories.*
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
 @Service
@@ -167,9 +169,13 @@ class ProfessionalServiceImpl(
     }
 
     // ----- Get a professional by its ID -----
-    override fun findProfessionalById(professionalId: String): ProfessionalDTO {
+    override fun findProfessionalById(professionalId: String, authentication: Authentication): ProfessionalDTO {
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
         if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
+        }
+        if (keycloakRole == "professional" && keycloakId != professionalId) {
+            throw CustomerException("Professional With Id:$keycloakId cannot see other professional.")
         }
         val professional = professionalRepository.findById(professionalId).orElseThrow{
             throw ProfessionalNotFoundException("Professional with ProfessionalId:$professionalId not found")

@@ -32,7 +32,7 @@ class ContactController(private val contactService: ContactService) {
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/contacts/")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun listAllContacts(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,

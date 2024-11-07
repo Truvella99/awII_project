@@ -7,12 +7,14 @@ import it.polito.wa2.g05.document_store.entities.CompositeKey
 import it.polito.wa2.g05.document_store.entities.Document
 import it.polito.wa2.g05.document_store.entities.Metadata
 import it.polito.wa2.g05.document_store.exceptions.*
+import it.polito.wa2.g05.document_store.getUserKeycloakIdRole
 import it.polito.wa2.g05.document_store.repositories.DocumentRepository
 import it.polito.wa2.g05.document_store.repositories.MetadataRepository
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
 @Service
@@ -40,9 +42,13 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         }
     }
 
-    override fun findById(userId:String): List<MetadataDTO> {
+    override fun findById(userId:String, authentication: Authentication): List<MetadataDTO> {
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(userId)
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
+        if (keycloakRole == "customer" || keycloakRole == "professional" && userId != keycloakId) {
+            throw IllegalIdException("No permission to read details of Document of the User with Id $userId")
+        }
         try {
             return metadataRepository.findMetadataByUserId(userId).map{ it.toDTO() }
         } catch (e: RuntimeException) {
@@ -50,24 +56,28 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         }
     }
 
-    override fun getBinaryById(documentId: Long): DocumentDTO {
+    override fun getBinaryById(documentId: Long, authentication: Authentication): DocumentDTO {
         if (documentId < 0) {
             throw IllegalIdException("Invalid documentId Parameter.")
         }
-        try {
-            // get document from id
-            val document = documentRepository.findById(documentId).get()
-            // return the corresponding metadata document dto pair
-            return document.toDTO()
-        } catch (e: RuntimeException) {
-            throw DocumentNotFoundException("Document Binary Data of Document with DocumentId:$documentId not found.")
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
+
+        // get document from id
+        val document = documentRepository.findById(documentId).orElseThrow {
+            DocumentNotFoundException("Document Binary Data of Document with DocumentId:$documentId not found.")
         }
+        // can download only your document if customer or professional
+        if (keycloakRole == "customer" || keycloakRole == "professional" && document.metaData.key.id != keycloakId) {
+            throw IllegalIdException("No permission to read details of Document of the User with Id ${document.metaData.key.id}")
+        }
+        // return the corresponding metadata document dto pair
+        return document.toDTO()
     }
 
-    override fun createDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
+    override fun createDocument(data: CreateUpdateDocumentDTO, authentication: Authentication):MetadataDTO {
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(data.userId)
-        if (findById(data.userId).isNotEmpty()) {
+        if (findById(data.userId,authentication).isNotEmpty()) {
             // query found documents related to this user, so throw the exception
             throw DocumentAlreadyExistsException("Documents Related to User with userId:${data.userId} Already Exists.")
         }
@@ -92,10 +102,10 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         return metadataRepository.save(m).toDTO()
     }
 
-    override fun updateDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
+    override fun updateDocument(data: CreateUpdateDocumentDTO, authentication: Authentication):MetadataDTO {
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(data.userId)
-        val documents = findById(data.userId);
+        val documents = findById(data.userId,authentication);
         if (documents.isEmpty()) {
             // query found no documents related to this user, so cannot update must create first, throw the exception
             throw DocumentNotFoundException("No Documents Related to User with userId${data.userId} Found.")

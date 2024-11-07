@@ -5,11 +5,13 @@ import it.polito.customerrelationshipmanagement.controllers.JobOfferController
 import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.entities.*
 import it.polito.customerrelationshipmanagement.exceptions.*
+import it.polito.customerrelationshipmanagement.getUserKeycloakIdRole
 import it.polito.customerrelationshipmanagement.repositories.*
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.query.Param
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -93,16 +95,31 @@ class JobOfferServiceImpl(
 
     // ----- Get a job offer by its ID -----
     override fun findJobOfferById(
-        jobOfferId: Long
+        jobOfferId: Long,
+        authentication: Authentication
     ): JobOfferDTO {
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
         if (jobOfferId < 0) {
             throw IllegalIdException("Invalid jobOfferId Parameter.")
         }
-        
+
         val jobOffer = jobOfferRepository.findById(jobOfferId).orElseThrow{
             throw JobOfferNotFoundException("Job Offer with jobOfferId:${jobOfferId} not found.")
         }
-        
+
+        // if joboffer not yours and not open block
+        val isYours = jobOffer.abortedProfessionals.map { it.id }.contains(keycloakId) ||
+                jobOffer.candidateProfessionals.map { it.id }.contains(keycloakId) ||
+                jobOffer.consolidatedProfessional?.id == keycloakId || jobOffer.completedProfessional?.id == keycloakId
+
+        if (keycloakRole == "professional" && !isYours) {
+            if ((jobOffer.currentState == jobOfferStatus.aborted ||
+                        jobOffer.currentState == jobOfferStatus.consolidated ||
+                        jobOffer.currentState == jobOfferStatus.done)
+            ) {
+                throw JobOfferNotFoundException("Job Offer with JobOfferId:${jobOfferId} not available to Professional with Id $keycloakId.")
+            }
+        }
         return jobOffer.toDTO()
     }
 
@@ -160,8 +177,10 @@ class JobOfferServiceImpl(
 
     // ----- Get the history of the job offer -----
     override fun listJobOfferHistory(
-        jobOfferId: Long
+        jobOfferId: Long,
+        authentication: Authentication
     ): List<JobOfferHistoryDTO> {
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
         if (jobOfferId < 0) {
             throw IllegalIdException("Invalid jobOfferId Parameter.")
         }
@@ -169,7 +188,21 @@ class JobOfferServiceImpl(
         val jobOffer = jobOfferRepository.findById(jobOfferId).orElseThrow {
             throw JobOfferNotFoundException("Job Offer with JobOfferId:${jobOfferId} not found.")
         }
-        
+
+        // if joboffer not yours and not open block
+        val isYours = jobOffer.abortedProfessionals.map { it.id }.contains(keycloakId) ||
+                jobOffer.candidateProfessionals.map { it.id }.contains(keycloakId) ||
+                jobOffer.consolidatedProfessional?.id == keycloakId || jobOffer.completedProfessional?.id == keycloakId
+
+        if (keycloakRole == "professional" && !isYours) {
+            if ((jobOffer.currentState == jobOfferStatus.aborted ||
+                        jobOffer.currentState == jobOfferStatus.consolidated ||
+                        jobOffer.currentState == jobOfferStatus.done)
+            ) {
+                throw JobOfferNotFoundException("Job Offer with JobOfferId:${jobOfferId} not available to Professional with Id $keycloakId.")
+            }
+        }
+
         return jobOffer.histories.map { it.toDTO() }
     }
 
@@ -470,7 +503,8 @@ class JobOfferServiceImpl(
 
 
     // ----- Get the value of a job offer -----
-    override fun getJobOfferValue(jobOfferId: Long): Number {
+    override fun getJobOfferValue(jobOfferId: Long, authentication: Authentication): Number {
+        val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
         if (jobOfferId < 0) {
             throw IllegalIdException("Invalid jobOfferId Parameter.")
         }
@@ -479,6 +513,19 @@ class JobOfferServiceImpl(
         }
         if (jobOffer.completedProfessional == null && jobOffer.consolidatedProfessional == null) {
             throw JobOfferStatusException("JobOffer with JobOfferId:$jobOfferId is not bound to a professional.")
+        }
+        // if joboffer not yours and not open block
+        val isYours = jobOffer.abortedProfessionals.map { it.id }.contains(keycloakId) ||
+                jobOffer.candidateProfessionals.map { it.id }.contains(keycloakId) ||
+                jobOffer.consolidatedProfessional?.id == keycloakId || jobOffer.completedProfessional?.id == keycloakId
+
+        if (keycloakRole == "professional" && !isYours) {
+            if ((jobOffer.currentState == jobOfferStatus.aborted ||
+                        jobOffer.currentState == jobOfferStatus.consolidated ||
+                        jobOffer.currentState == jobOfferStatus.done)
+            ) {
+                throw JobOfferNotFoundException("Job Offer with JobOfferId:${jobOfferId} not available to Professional with Id $keycloakId.")
+            }
         }
         var jobOfferValue: Number = 0;
         if (jobOffer.completedProfessional != null) {
