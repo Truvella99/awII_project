@@ -29,7 +29,7 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/documents/")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getAllDocuments(@RequestParam("pageNumber")pageNumber: Int,
                         @RequestParam("limit")limit: Int) : List<MetadataDTO> {
         return documentService.listAll(pageNumber, limit)
@@ -42,9 +42,9 @@ class HomeController(private val documentService: DocumentService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/documents/{userId}/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getDocument(@PathVariable("userId")userId: String): List<MetadataDTO> {
-        return documentService.findById(userId)
+    @PreAuthorize("isAuthenticated()")
+    fun getDocument(@PathVariable("userId")userId: String, authentication: Authentication): List<MetadataDTO> {
+        return documentService.findById(userId,authentication)
     }
 
     /**
@@ -53,9 +53,9 @@ class HomeController(private val documentService: DocumentService){
      * Byte content of document {documentId} or fail if it does not exist.
      */
     @GetMapping("/API/documents/{documentId}/data/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getByteDocument(@PathVariable("documentId")documentId: Long): ResponseEntity<ByteArrayResource> {
-        val document = documentService.getBinaryById(documentId)
+    @PreAuthorize("isAuthenticated()")
+    fun getByteDocument(@PathVariable("documentId")documentId: Long, authentication: Authentication): ResponseEntity<ByteArrayResource> {
+        val document = documentService.getBinaryById(documentId,authentication)
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.metaData.name}\"")
@@ -71,8 +71,8 @@ class HomeController(private val documentService: DocumentService){
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/documents/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun createDocument(@ModelAttribute d: CreateUpdateDocumentDTO): MetadataDTO {
-        return documentService.createDocument(d)
+    fun createDocument(@ModelAttribute d: CreateUpdateDocumentDTO, authentication: Authentication): MetadataDTO {
+        return documentService.createDocument(d,authentication)
     }
 
     /**
@@ -84,8 +84,8 @@ class HomeController(private val documentService: DocumentService){
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/documents/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun updateDocument(@ModelAttribute d: CreateUpdateDocumentDTO): MetadataDTO {
-        return documentService.updateDocument(d)
+    fun updateDocument(@ModelAttribute d: CreateUpdateDocumentDTO, authentication: Authentication): MetadataDTO {
+        return documentService.updateDocument(d,authentication)
     }
 
     /**

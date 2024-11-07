@@ -101,9 +101,11 @@ class CustomerServiceImpl(
         authentication: Authentication
     ): CustomerDTO {
         val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
-        println("---------------IDROLE--------------${keycloakId}----${keycloakRole}")
         if (!KeycloakConfig.checkExistingUserById(customerId)) {
             throw IllegalIdException("Invalid customerId Parameter.")
+        }
+        if (keycloakRole == "customer" && keycloakId != customerId) {
+            throw CustomerException("Customer With Id:$keycloakId cannot see other customer.")
         }
 
         try {

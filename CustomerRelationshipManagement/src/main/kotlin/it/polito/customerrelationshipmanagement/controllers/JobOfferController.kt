@@ -8,6 +8,7 @@ import it.polito.customerrelationshipmanagement.services.JobOfferService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -34,9 +35,9 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getJobOfferById(@PathVariable("jobOfferId") jobOfferId: Long): JobOfferDTO {
-        return jobOfferService.findJobOfferById(jobOfferId)
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional'))")
+    fun getJobOfferById(@PathVariable("jobOfferId") jobOfferId: Long, authentication: Authentication): JobOfferDTO {
+        return jobOfferService.findJobOfferById(jobOfferId, authentication)
     }
 
     /**
@@ -63,9 +64,9 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}/history")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun getJobOfferHistoryById(@PathVariable("jobOfferId") jobOfferId: Long): List<JobOfferHistoryDTO> {
-        return jobOfferService.listJobOfferHistory(jobOfferId)
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional'))")
+    fun getJobOfferHistoryById(@PathVariable("jobOfferId") jobOfferId: Long, authentication: Authentication): List<JobOfferHistoryDTO> {
+        return jobOfferService.listJobOfferHistory(jobOfferId,authentication)
     }
 
     /**
@@ -79,7 +80,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/open/{customerId}")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional'))")
     fun getCustomerOpenJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -99,7 +100,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/accepted/{professionalId}")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getProfessionalAcceptedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -118,7 +119,7 @@ class JobOfferController(private val jobOfferService: JobOfferService){
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/aborted/")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
     fun getAbortedJobOffers(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -149,9 +150,9 @@ class JobOfferController(private val jobOfferService: JobOfferService){
     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/joboffers/{jobOfferId}/value")
-    @PreAuthorize("isAuthenticated() && (hasRole('manager'))")
-    fun getJobOfferValue(@PathVariable("jobOfferId") jobOfferId: Long): Number {
-        return jobOfferService.getJobOfferValue(jobOfferId)
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('professional'))")
+    fun getJobOfferValue(@PathVariable("jobOfferId") jobOfferId: Long, authentication: Authentication): Number {
+        return jobOfferService.getJobOfferValue(jobOfferId,authentication)
     }
     /**
      * GET /API/joboffers/

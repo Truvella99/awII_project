@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Pattern
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -49,7 +50,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('customer'))")
     fun listAllProfessionals(
         @RequestParam("pageNumber") pageNumber: Int?,
         @RequestParam("limit") limit: Int?,
@@ -72,7 +73,7 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @Validated
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/distance/")
-    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
+    @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager') || hasRole('customer'))")
     fun listProfessionalsDistance(
         @RequestParam("skills") skills: List<String>?,
         @RequestParam("latitude") latitude: Double,
@@ -93,8 +94,8 @@ class ProfessionalController(private val professionalService: ProfessionalServic
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/{professionalId}")
     @PreAuthorize("isAuthenticated()")
-    fun getProfessional(@PathVariable("professionalId") professionalId: String): ProfessionalDTO {
-        return professionalService.findProfessionalById(professionalId)
+    fun getProfessional(@PathVariable("professionalId") professionalId: String, authentication: Authentication): ProfessionalDTO {
+        return professionalService.findProfessionalById(professionalId,authentication)
     }
 
     /**
