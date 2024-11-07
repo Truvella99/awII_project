@@ -58,7 +58,7 @@ class HomeController(private val documentService: DocumentService){
         val document = documentService.getBinaryById(documentId,authentication)
 
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.metaData.name}\"")
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"${document.metaData.key.fileName}\"")
             .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream")
             .body(ByteArrayResource(document.binaryData));
     }
@@ -71,8 +71,8 @@ class HomeController(private val documentService: DocumentService){
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/API/documents/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun createDocument(@ModelAttribute d: CreateUpdateDocumentDTO, authentication: Authentication): MetadataDTO {
-        return documentService.createDocument(d,authentication)
+    fun createDocument(@ModelAttribute d: CreateUpdateDocumentDTO): MetadataDTO {
+        return documentService.createDocument(d)
     }
 
     /**
@@ -84,19 +84,19 @@ class HomeController(private val documentService: DocumentService){
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/API/documents/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun updateDocument(@ModelAttribute d: CreateUpdateDocumentDTO, authentication: Authentication): MetadataDTO {
-        return documentService.updateDocument(d,authentication)
+    fun updateDocument(@ModelAttribute d: CreateUpdateDocumentDTO): MetadataDTO {
+        return documentService.updateDocument(d)
     }
 
     /**
-     * DELETE /API/documents/{userId}/{version}/
+     * DELETE /API/documents/{userId}/{version}/{fileName}
      *
-     * Remove document related to userId and version or fail if it does not exist.
+     * Remove document related to userId and version and fileName (all the composite key) or fail if it does not exist.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/API/documents/{userId}/{version}/")
+    @DeleteMapping("/API/documents/{userId}/{version}/{fileName}")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun deleteDocument(@PathVariable("userId")userId: String,@PathVariable("version")version: Long) {
-        return documentService.deleteDocument(userId, version)
+    fun deleteDocument(@PathVariable("userId")userId: String,@PathVariable("version")version: Long,@PathVariable("fileName") fileName: String) {
+        return documentService.deleteDocument(userId, version, fileName)
     }
 }

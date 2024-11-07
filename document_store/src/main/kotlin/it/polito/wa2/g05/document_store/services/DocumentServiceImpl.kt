@@ -74,14 +74,14 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         return document.toDTO()
     }
 
-    override fun createDocument(data: CreateUpdateDocumentDTO, authentication: Authentication):MetadataDTO {
+    override fun createDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(data.userId)
-        if (findById(data.userId,authentication).isNotEmpty()) {
-            // query found documents related to this user, so throw the exception
-            throw DocumentAlreadyExistsException("Documents Related to User with userId:${data.userId} Already Exists.")
+        if (metadataRepository.findMetadataByUserIdAndName(data.userId,data.name).isNotEmpty()) {
+            // query found documents related to this user and with the same filename, so throw the exception
+            throw DocumentAlreadyExistsException("Documents Related to User with userId:${data.userId} and fileName:${data.name} Already Exists.")
         }
-        // documents related to this user do not exist, proceed
+        // documents related to this user and with the same filename do not exist, proceed
         // create and insert the document
         val d = Document();
         d.binaryData = data.file.bytes;
@@ -90,9 +90,8 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         logger.info("Document ${data.name} uploaded.")
         // then create and insert the metadata
         val m = Metadata();
-        m.key = CompositeKey(data.userId,1)
+        m.key = CompositeKey(data.userId,1,data.name)
         m.document = d;
-        m.name = data.name;
         m.size = data.file.size;
         m.contentType = data.contentType;
         m.creationTimestamp = data.creationTimestamp
@@ -102,16 +101,16 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         return metadataRepository.save(m).toDTO()
     }
 
-    override fun updateDocument(data: CreateUpdateDocumentDTO, authentication: Authentication):MetadataDTO {
+    override fun updateDocument(data: CreateUpdateDocumentDTO):MetadataDTO {
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(data.userId)
-        val documents = findById(data.userId,authentication);
+        val documents = metadataRepository.findMetadataByUserIdAndName(data.userId,data.name)
         if (documents.isEmpty()) {
-            // query found no documents related to this user, so cannot update must create first, throw the exception
-            throw DocumentNotFoundException("No Documents Related to User with userId${data.userId} Found.")
+            // query found no documents related to this user and with the same filename, so cannot update must create first, throw the exception
+            throw DocumentNotFoundException("No Documents Related to User with userId:${data.userId} and fileName:${data.name} Found.")
         }
         // find the current maxVersionNumber
-        val maxVersionNumber = documents.maxByOrNull { it.keyVersion }!!.keyVersion
+        val maxVersionNumber = documents.maxByOrNull { it.key.version }!!.key.version
         // now repeat the creation process for this new document version
         val d = Document();
         d.binaryData = data.file.bytes;
@@ -120,9 +119,8 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         logger.info("Document ${data.name} uploaded.")
         // then create and insert the metadata
         val m = Metadata();
-        m.key = CompositeKey(data.userId,maxVersionNumber + 1)
+        m.key = CompositeKey(data.userId,maxVersionNumber + 1,data.name)
         m.document = d;
-        m.name = data.name;
         m.size = data.file.size;
         m.contentType = data.contentType;
         m.creationTimestamp = data.creationTimestamp
@@ -132,23 +130,23 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         return metadataRepository.save(m).toDTO()
     }
 
-    override fun deleteDocument(userId: String, metadataVersion: Long) {
+    override fun deleteDocument(userId: String, metadataVersion: Long, fileName: String) {
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(userId)
         if (metadataVersion < 0) {
             throw IllegalIdException("Invalid version Parameter.")
         }
         // get the metadata entry
-        val metadata = metadataRepository.findById(CompositeKey(userId, metadataVersion)).orElseThrow {
+        val metadata = metadataRepository.findById(CompositeKey(userId, metadataVersion,fileName)).orElseThrow {
             throw DocumentNotFoundException("Document related to User with userId:$userId and version:$metadataVersion not found")
         }
         // delete the metadata
         metadataRepository.deleteById(metadata.key)
         // Log the changes made at info level
-        logger.info("${metadata.name} metadata deleted.")
+        logger.info("${metadata.key.fileName} metadata deleted.")
         // delete the corresponding document
         documentRepository.deleteById(metadata.document.id)
         // Log the changes made at info level
-        logger.info("Document ${metadata.name} deleted.")
+        logger.info("Document ${metadata.key.fileName} deleted.")
     }
 }

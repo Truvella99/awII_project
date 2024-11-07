@@ -13,7 +13,8 @@ interface MetadataRepository: JpaRepository<Metadata, CompositeKey> {
     @Query("SELECT m from Metadata m where m.key.id = :userId")
     fun findMetadataByUserId(@Param("userId") userId: String): List<Metadata>
 
-//    fun findByName(name: String): List<Metadata>
+    @Query("SELECT m from Metadata m where m.key.id = :userId AND m.key.fileName = :fileName")
+    fun findMetadataByUserIdAndName(@Param("userId") userId: String,@Param("fileName") fileName: String): List<Metadata>
 }
 
 

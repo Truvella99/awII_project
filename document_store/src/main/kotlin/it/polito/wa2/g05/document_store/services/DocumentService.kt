@@ -13,11 +13,11 @@ interface DocumentService {
     //get binary of the document by id
     fun getBinaryById(documentId: Long, authentication: Authentication): DocumentDTO
     //create document and metadata given the userId to which associate the document
-    fun createDocument(data: CreateUpdateDocumentDTO, authentication: Authentication):MetadataDTO
+    fun createDocument(data: CreateUpdateDocumentDTO):MetadataDTO
     //update document and metadata (create another entry with incremented counter)
-    fun updateDocument(data: CreateUpdateDocumentDTO, authentication: Authentication):MetadataDTO
+    fun updateDocument(data: CreateUpdateDocumentDTO):MetadataDTO
     //delete document and metadata (one specific version of the document)
-    fun deleteDocument(userId: String, metadataVersion: Long)
+    fun deleteDocument(userId: String, metadataVersion: Long, fileName: String)
     // get Metadata by FileName (most recent)
     //fun findByName(name: String): MetadataDTO?
 }

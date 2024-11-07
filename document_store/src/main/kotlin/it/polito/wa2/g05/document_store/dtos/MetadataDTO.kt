@@ -6,12 +6,12 @@ import java.time.LocalDateTime
 class MetadataDTO (
     val keyId:String,
     val keyVersion: Long,
+    val fileName: String,
     val documentId: Long,
-    val name: String,
     val size: Number,
     val contentType: String,
     val creationTimestamp: LocalDateTime
 )
 
 fun Metadata.toDTO(): MetadataDTO =
-    MetadataDTO(this.key.id,this.key.version,this.document.id,this.name,this.size,this.contentType,this.creationTimestamp)
+    MetadataDTO(this.key.id,this.key.version,this.key.fileName,this.document.id,this.size,this.contentType,this.creationTimestamp)
