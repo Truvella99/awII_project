@@ -246,7 +246,7 @@ const CreateCustomer = ({xsrfToken}) => {
         try {
             const customerCreated = await API.createCustomer(customer, xsrfToken);
 
-            // Chiamata API per creare un nuovo Professional
+            // Chiamata API per creare un nuovo Document
             if (files.length > 0) {
                 // Chiamata API per caricare i file
                 console.log("files", files)

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import API from "../API.jsx";
-import {Alert, Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap";
+import {Accordion, Alert, Button, Card, Col, Container, Form, InputGroup, Row} from "react-bootstrap";
 import InputMask from "react-input-mask";
 import PhoneInput from "react-phone-number-input";
 import {AddressSelector} from "./Utils.jsx";
@@ -69,7 +69,19 @@ const EditProfessional = ({ xsrfToken }) => {
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
     const [files, setFiles] = useState([]);
+    const [oldFiles, setOldFiles] = useState([]);
+    const [filesData, setFilesData] = useState([]);
     const [fileError, setFileError] = useState(null);
+
+    // Raggruppa i file per fileName
+    const groupedByFileName = oldFiles.reduce((acc, file) => {
+        if (!acc[file.fileName]) {
+            acc[file.fileName] = [];
+        }
+        acc[file.fileName].push(file);
+        return acc;
+    }, {});
+
     const togglePasswordVisibility = () => {
         setShowPassword(prevState => !prevState);
     };
@@ -140,6 +152,19 @@ const EditProfessional = ({ xsrfToken }) => {
                     setLoading(true);
                     const fetchedProfessional = await API.getProfessionalById(professionalId, xsrfToken);
                     console.log("fetchedProf", fetchedProfessional);
+                    const fetchedFiles = await API.getDocumentByUserId(professionalId, xsrfToken);
+
+                    const filesData = await Promise.all(
+                        fetchedFiles.map(async (file) => {
+                            const fileData = await API.getDocumentData(file.documentId, xsrfToken);
+                            return { ...file, data: fileData };
+                        })
+                    );
+
+                    // Imposta i dati di stato
+                    setOldFiles(fetchedFiles);
+                    setFilesData(filesData);
+
                     setProfessional(fetchedProfessional);
                     setLoading(false);
                 } catch (err) {
@@ -150,7 +175,20 @@ const EditProfessional = ({ xsrfToken }) => {
             fetchProfessional();
         }
     }, [professionalId, xsrfToken]);
+    const downloadFile = (file) => {
+        console.log("Download file: ", file);
+        const { data, fileName, contentType } = file; // Estraggo i dati, nome e tipo dal file
+        const blob = new Blob([data], { type: contentType }); // Crea un Blob dai dati del file
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
+    };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setProfessional((prevProfessional) => ({
@@ -177,34 +215,17 @@ const EditProfessional = ({ xsrfToken }) => {
 
     };
     const handleFiles = (ev) => {
+
         const filesArray = [...ev.target.files];
         setFileError(null);
-
-        filesArray.forEach((file, index) => {
-            console.log(file);
-            // Read and save file content
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (file.size > 50000000) {
-                    setFileError(`File ${file.name} is too large (maximum size is 50MB).`);
-                } else {
-                    setFiles((prev) => [
-                        ...prev,
-                        {
-                            name: file.name,
-                            type: file.type,
-                            content: ev.target.result.split("base64,")[1]
-                        }
-                    ]);
-                }
-            };
-            reader.onerror = (ev) => {
-                console.error(`Error reading ${file.name}:`, ev);
-                setFileError(`Error reading ${file.name}: ${ev}`);
-            };
-            reader.readAsDataURL(file);
-        });
+        // Check if the file is too large
+        const tooLargeFiles = filesArray.filter(file => file.size > 50000000);
+        if (tooLargeFiles.length > 0) {
+            setFileError(`File ${tooLargeFiles[0].name} is too large (maximum size is 50MB).`);
+        }
+        setFiles(filesArray);
     }
+
 // // Gestisci il cambiamento di una skill
 //     const handleSkillChange = (index, value) => {
 //         const updatedSkills = [...newSkills];
@@ -294,7 +315,7 @@ const EditProfessional = ({ xsrfToken }) => {
             delete professional.password;
         }else
         if (professional.password.length < 8) {
-            errors.password = "Passwprd must be at least 8 characters long";
+            errors.password = "Password must be at least 8 characters long";
         }else if (!/[A-Z]/.test(professional.password)) {
             errors.password = "Password must contain at least one uppercase letter.";
         }else if (!/[a-z]/.test(professional.password)) {
@@ -401,6 +422,22 @@ const EditProfessional = ({ xsrfToken }) => {
             // Only update professional functionality
             professional.notes = newNotes
             professional.skills = newSkills
+
+
+            if (files.length > 0) {
+                // Chiamata API per caricare i file
+                for (const file of files) {
+
+                    const fileExists = oldFiles.some(oldFile => oldFile.fileName === file.name);
+                    if (fileExists) {
+                        console.log(`Updating existing file: ${file.fileName}`);
+                        await API.putDocument(professionalId, file, xsrfToken);
+                    } else {
+                        console.log(`Uploading new file: ${file.fileName}`);
+                        await API.postDocument(professionalId, file, xsrfToken);
+                    }
+                }
+            }
 
             await API.updateProfessional(professionalId, professional, xsrfToken);
             setLoading(false);
@@ -940,6 +977,78 @@ const EditProfessional = ({ xsrfToken }) => {
                                 {/* Submit Button */}
                                 <Button type="submit" className="btn-primary w-100">Save Changes</Button>
                             </Form>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+            {/* Files Accordion */}
+            <Row className="mb-3">
+                <Col>
+                    <Card className="shadow-lg" style={{ borderRadius: '15px' }}>
+                        <Card.Header className="bg-primary text-white">
+                            <h5>Files</h5>
+                        </Card.Header>
+                        <Card.Body className="bg-light">
+                            {Object.keys(groupedByFileName).length ? (
+                                <Accordion defaultActiveKey="0">
+                                    {Object.entries(groupedByFileName).map(([fileName, fileVersions], index) => {
+                                        // Ordina le versioni per `keyVersion` in ordine decrescente
+                                        const sortedVersions = fileVersions.sort((a, b) => b.keyVersion - a.keyVersion);
+
+                                        return (
+                                            <Accordion.Item eventKey={index.toString()} key={index}>
+                                                {/* Header: Mostra solo il fileName */}
+                                                <Accordion.Header>
+                                                    <span style={{ fontWeight: 'bold' }}>{fileName}</span>
+                                                </Accordion.Header>
+
+                                                {/* Body: Mostra tutte le versioni del file */}
+                                                <Accordion.Body>
+                                                    {sortedVersions.map((file, versionIndex) => (
+                                                        <div key={versionIndex} className="d-flex justify-content-between align-items-center" style={{
+                                                            borderBottom: versionIndex < sortedVersions.length - 1 ? '1px solid #ccc' : 'none',
+                                                            paddingBottom: '10px',
+                                                            marginBottom: '10px'
+                                                        }}>
+                                                            {/* Colonna per la versione e la data */}
+                                                            <div style={{ flex: 1 }}>
+                                                                <p><strong>Version:</strong> {file.keyVersion}</p>
+                                                                <p>
+                                                                    <strong>Upload Date:</strong>{" "}
+                                                                    {new Date(file.creationTimestamp).toLocaleDateString('en-BG', {
+                                                                        day: '2-digit',
+                                                                        month: 'long',
+                                                                        year: 'numeric'
+                                                                    })} -{" "}
+                                                                    {new Date(new Date(file.creationTimestamp).getTime() + 60 * 60 * 1000).toLocaleTimeString('en-BG', {
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Colonna per il bottone di download */}
+                                                            <div>
+                                                                <Button
+                                                                    variant="primary"
+                                                                    onClick={() => downloadFile(filesData.find((f) => f.documentId === file.documentId) || {})}
+                                                                    className="mt-2"
+                                                                >
+                                                                    <i className="bi bi-download"></i> Download
+                                                                </Button>
+                                                            </div>
+
+                                                        </div>
+                                                    ))}
+                                                </Accordion.Body>
+
+                                            </Accordion.Item>
+                                        );
+                                    })}
+                                </Accordion>
+                            ) : (
+                                <div>No files available</div>
+                            )}
                         </Card.Body>
                     </Card>
                 </Col>

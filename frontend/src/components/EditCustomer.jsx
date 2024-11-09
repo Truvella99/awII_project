@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Container, Row, Col, Card, Button, Form, Alert, InputGroup} from 'react-bootstrap';
+import {Container, Row, Col, Card, Button, Form, Alert, InputGroup, Accordion} from 'react-bootstrap';
 import API from '../API'; // API to handle saving and fetching data
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';
@@ -43,7 +43,19 @@ const EditCustomer = ({ xsrfToken }) => {
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
     const [files, setFiles] = useState([]);
+    const [oldFiles, setOldFiles] = useState([]);
+    const [filesData, setFilesData] = useState([]);
     const [fileError, setFileError] = useState(null);
+
+    // Raggruppa i file per fileName
+    const groupedByFileName = oldFiles.reduce((acc, file) => {
+        if (!acc[file.fileName]) {
+            acc[file.fileName] = [];
+        }
+        acc[file.fileName].push(file);
+        return acc;
+    }, {});
+
     const togglePasswordVisibility = () => {
         setShowPassword(prevState => !prevState);
     };
@@ -112,7 +124,21 @@ const EditCustomer = ({ xsrfToken }) => {
                 try {
                     setLoading(true);
                     const fetchedCustomer = await API.getCustomerById(customerId, xsrfToken);
-                    console.log("fetchedCustomer", fetchedCustomer);
+                    const fetchedFiles = await API.getDocumentByUserId(customerId, xsrfToken);
+
+                    const filesData = await Promise.all(
+                        fetchedFiles.map(async (file) => {
+                            const fileData = await API.getDocumentData(file.documentId, xsrfToken);
+                            return { ...file, data: fileData };
+                        })
+                    );
+
+                    // Imposta i dati di stato
+                    setOldFiles(fetchedFiles);
+                    setFilesData(filesData);
+
+
+
                     setCustomer(fetchedCustomer);
                     setLoading(false);
                 } catch (err) {
@@ -124,6 +150,20 @@ const EditCustomer = ({ xsrfToken }) => {
         }
     }, [customerId, xsrfToken]);
 
+    const downloadFile = (file) => {
+        console.log("Download file: ", file);
+        const { data, fileName, contentType } = file; // Estraggo i dati, nome e tipo dal file
+        const blob = new Blob([data], { type: contentType }); // Crea un Blob dai dati del file
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+    };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setCustomer((prevCustomer) => ({
@@ -150,33 +190,15 @@ const EditCustomer = ({ xsrfToken }) => {
 
     };
     const handleFiles = (ev) => {
+
         const filesArray = [...ev.target.files];
         setFileError(null);
-
-        filesArray.forEach((file, index) => {
-            console.log(file);
-            // Read and save file content
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (file.size > 50000000) {
-                    setFileError(`File ${file.name} is too large (maximum size is 50MB).`);
-                } else {
-                    setFiles((prev) => [
-                        ...prev,
-                        {
-                            name: file.name,
-                            type: file.type,
-                            content: ev.target.result.split("base64,")[1]
-                        }
-                    ]);
-                }
-            };
-            reader.onerror = (ev) => {
-                console.error(`Error reading ${file.name}:`, ev);
-                setFileError(`Error reading ${file.name}: ${ev}`);
-            };
-            reader.readAsDataURL(file);
-        });
+        // Check if the file is too large
+        const tooLargeFiles = filesArray.filter(file => file.size > 50000000);
+        if (tooLargeFiles.length > 0) {
+            setFileError(`File ${tooLargeFiles[0].name} is too large (maximum size is 50MB).`);
+        }
+        setFiles(filesArray);
     }
 
     const handleRemoveField = (field, index) => {
@@ -229,7 +251,7 @@ const EditCustomer = ({ xsrfToken }) => {
             delete customer.password;
         }else
         if (customer.password.length < 8) {
-            errors.password = "Passwprd must be at least 8 characters long";
+            errors.password = "Password must be at least 8 characters long";
         }else if (!/[A-Z]/.test(customer.password)) {
             errors.password = "Password must contain at least one uppercase letter.";
         }else if (!/[a-z]/.test(customer.password)) {
@@ -313,6 +335,21 @@ const EditCustomer = ({ xsrfToken }) => {
         try {
             // Only update customer functionality
             customer.notes = newNotes
+
+            if (files.length > 0) {
+                // Chiamata API per caricare i file
+                for (const file of files) {
+
+                    const fileExists = oldFiles.some(oldFile => oldFile.fileName === file.name);
+                    if (fileExists) {
+                        console.log(`Updating existing file: ${file.fileName}`);
+                        await API.putDocument(customerId, file, xsrfToken);
+                    } else {
+                        console.log(`Uploading new file: ${file.fileName}`);
+                        await API.postDocument(customerId, file, xsrfToken);
+                    }
+                }
+            }
 
             await API.updateCustomer(customerId, customer, xsrfToken);
             setLoading(false);
@@ -724,6 +761,7 @@ const EditCustomer = ({ xsrfToken }) => {
                                     </Col>
 
                                 </Row>
+
                                 {/*Files*/}
                                 <Row>
                                     <Col>
@@ -749,6 +787,78 @@ const EditCustomer = ({ xsrfToken }) => {
                                 {/* Submit Button */}
                                 <Button type="submit" className="btn-primary w-100">Save Changes</Button>
                             </Form>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+            {/* Files Accordion */}
+            <Row className="mb-3">
+                <Col>
+                    <Card className="shadow-lg" style={{ borderRadius: '15px' }}>
+                        <Card.Header className="bg-primary text-white">
+                            <h5>Files</h5>
+                        </Card.Header>
+                        <Card.Body className="bg-light">
+                            {Object.keys(groupedByFileName).length ? (
+                                <Accordion defaultActiveKey="0">
+                                    {Object.entries(groupedByFileName).map(([fileName, fileVersions], index) => {
+                                        // Ordina le versioni per `keyVersion` in ordine decrescente
+                                        const sortedVersions = fileVersions.sort((a, b) => b.keyVersion - a.keyVersion);
+
+                                        return (
+                                            <Accordion.Item eventKey={index.toString()} key={index}>
+                                                {/* Header: Mostra solo il fileName */}
+                                                <Accordion.Header>
+                                                    <span style={{ fontWeight: 'bold' }}>{fileName}</span>
+                                                </Accordion.Header>
+
+                                                {/* Body: Mostra tutte le versioni del file */}
+                                                <Accordion.Body>
+                                                    {sortedVersions.map((file, versionIndex) => (
+                                                        <div key={versionIndex} className="d-flex justify-content-between align-items-center" style={{
+                                                            borderBottom: versionIndex < sortedVersions.length - 1 ? '1px solid #ccc' : 'none',
+                                                            paddingBottom: '10px',
+                                                            marginBottom: '10px'
+                                                        }}>
+                                                            {/* Colonna per la versione e la data */}
+                                                            <div style={{ flex: 1 }}>
+                                                                <p><strong>Version:</strong> {file.keyVersion}</p>
+                                                                <p>
+                                                                    <strong>Upload Date:</strong>{" "}
+                                                                    {new Date(file.creationTimestamp).toLocaleDateString('en-BG', {
+                                                                        day: '2-digit',
+                                                                        month: 'long',
+                                                                        year: 'numeric'
+                                                                    })} -{" "}
+                                                                    {new Date(new Date(file.creationTimestamp).getTime() + 60 * 60 * 1000).toLocaleTimeString('en-BG', {
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit'
+                                                                    })}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Colonna per il bottone di download */}
+                                                            <div>
+                                                                <Button
+                                                                    variant="primary"
+                                                                    onClick={() => downloadFile(filesData.find((f) => f.documentId === file.documentId) || {})}
+                                                                    className="mt-2"
+                                                                >
+                                                                    <i className="bi bi-download"></i> Download
+                                                                </Button>
+                                                            </div>
+
+                                                        </div>
+                                                    ))}
+                                                </Accordion.Body>
+
+                                            </Accordion.Item>
+                                        );
+                                    })}
+                                </Accordion>
+                            ) : (
+                                <div>No files available</div>
+                            )}
                         </Card.Body>
                     </Card>
                 </Col>

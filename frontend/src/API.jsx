@@ -747,43 +747,70 @@ if (response.status === 200) {
 
 //### GET Document by User ID
 async function getDocumentByUserId(userId, xsrfToken) {
-    const response = await fetch(`http://localhost:8080/docStore/API/documents/${userId}/`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': xsrfToken,
+    try {
+        const response = await fetch(`http://localhost:8080/docStore/API/documents/${userId}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': xsrfToken,
+            }
+        }).catch(() => {
+            throw {error: "Connection Error"};
+        });
+        if (response.status === 200) {
+            const document = await response.json();
+            //
+            // // Fetch the document data using the document ID
+            // const data = await getDocumentData(document.id.toString(), xsrfToken);
+            // console.log("Data:", data);
+            // // Return an object containing both document and its data
+            const documets = await getDocuments(0, 10, xsrfToken);
+            const documentData = await getDocumentData(documets[0].documentId.toString(), xsrfToken);
+            return document;
+
+        } else {
+            const error = await response.json();
+            console.log(error);
         }
-    }).catch(() => {
-        throw {error: "Connection Error"};
-    });
-    if (response.status === 200) {
-        const document = await response.json();
-        return document;
-    } else {
-        const error = await response.json();
-        throw error;
+    }catch (err) {
+        throw err.error ? err : { error: "Connection Error" };
     }
 }
 
 //### GET Document Data by Document ID
+//### GET Document Data by Document ID
 async function getDocumentData(documentId, xsrfToken) {
-    const response = await fetch(`http://localhost:8080/docStore/API/documents/${documentId}/data/`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': xsrfToken,
+    try {
+        const response = await fetch(`http://localhost:8080/docStore/API/documents/${documentId}/data/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': xsrfToken,
+            }
+        });
+
+        if (response.status === 200) {
+            // Check response content type to parse correctly
+            const contentType = response.headers.get("Content-Type");
+            let data;
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                // If not JSON, assume it's binary data
+                data = await response.blob();
+            }
+            return data;
+        } else {
+            const error = await response.json();
+            console.log("API Error:", error);
+            throw error;
         }
-    }).catch(() => {
-        throw {error: "Connection Error"};
-    });
-    if (response.status === 200) {
-        const data = await response.json();
-        return data;
-    } else {
-        const error = await response.json();
-        throw error;
+    } catch (error) {
+        console.error("Connection or Parsing Error:", error);
+        throw { error: "Connection or Parsing Error" };
     }
 }
+
 
 //### POST Document
 async function postDocument(userId, file, xsrfToken) {
@@ -830,14 +857,15 @@ async function postDocument(userId, file, xsrfToken) {
 }
 
 //### PUT Document
-async function putDocument(userId, file, name, contentType, creationTimestamp, xsrfToken) {
+async function putDocument(userId, file, xsrfToken) {
     const formData = new FormData();
-    formData.append("userId", userId);
-    formData.append("file", file);
-    formData.append("name", name);
-    formData.append("contentType", contentType);
-    formData.append("creationTimestamp", creationTimestamp);
 
+    formData.append("file", file);  // 'fileInput' è un elemento di tipo file nella tua pagina HTML
+    formData.append("userId", userId.toString());
+    formData.append("name", file.name);
+    formData.append("contentType", file.type);
+    const now = new Date().toISOString().split('.')[0] + ".000";
+    formData.append("creationTimestamp", now);
     const response = await fetch('http://localhost:8080/API/documents/', {
         method: 'PUT',
         headers: {
@@ -909,5 +937,8 @@ export default {
     updateMessageState,
     updateMessagePriority,
 
-    postDocument
+    postDocument,
+    getDocumentByUserId,
+    getDocumentData,
+    putDocument
 };

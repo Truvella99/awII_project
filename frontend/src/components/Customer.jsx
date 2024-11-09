@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import {Container, Row, Col, Card, Button, Badge, Accordion} from 'react-bootstrap';
 import API from "../API";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {FaEdit} from "react-icons/fa";
@@ -42,6 +42,31 @@ const CustomerProfile = ({ xsrfToken,role}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    // const [files, setFiles] = useState([]);
+    const [filesData, setFilesData] = useState([]);
+
+    // Raggruppa i file per fileName
+    const groupedByFileName = filesData.reduce((acc, file) => {
+        if (!acc[file.fileName]) {
+            acc[file.fileName] = [];
+        }
+        acc[file.fileName].push(file);
+        return acc;
+    }, {});
+    const downloadFile = (file) => {
+        console.log("Download file: ", file);
+        const { data, fileName, contentType } = file; // Estraggo i dati, nome e tipo dal file
+        const blob = new Blob([data], { type: contentType }); // Crea un Blob dai dati del file
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+    };
     // Fetch customer data when the component mounts
     useEffect(() => {
 
@@ -49,6 +74,20 @@ const CustomerProfile = ({ xsrfToken,role}) => {
             try {
                 const fetchedCustomer = await API.getCustomerById(customerId, xsrfToken);
                 console.log("Customer data fetched: ", fetchedCustomer)
+                // Fetch files
+                const fetchedFiles = await API.getDocumentByUserId(customerId, xsrfToken);
+                // setFiles(fetchedFiles);
+
+                // Fetch data for each file in parallel
+                const filesData = await Promise.all(
+                    fetchedFiles.map(async (file) => {
+                        const fileData = await API.getDocumentData(file.documentId, xsrfToken);
+                        return { ...file, data: fileData }; // Combine file info with its data
+                    })
+                );
+
+                // Update state
+                setFilesData(filesData);
                 setCustomer(fetchedCustomer);
                 setLoading(false);
             } catch (err) {
@@ -131,9 +170,9 @@ const CustomerProfile = ({ xsrfToken,role}) => {
                 </Col>
 
                 {/* Additional Info */}
-                <Col lg={8} md={12}>
+                <Col >
                     <Row>
-                        <Col md={8} className="mb-4">
+                        <Col className="mb-4">
                             {/* Notes Section */}
                             <Card className="shadow-lg h-100" style={{ borderRadius: '15px' }}>
                                 <Card.Header className="bg-primary text-white" style={{ borderRadius: '15px 15px 0 0' }}>
@@ -151,14 +190,82 @@ const CustomerProfile = ({ xsrfToken,role}) => {
                             </Card>
                         </Col>
 
-                        <Col md={4} className="mb-4 ms-auto text-end">
-                        {/* Download CV Section */}
-                        <Button variant="success" className="shadow-sm">
-                            <i className="bi bi-download"></i> Download CV
-                        </Button>
-                    </Col>
+
                     </Row>
 
+                    {/* Files Accordion */}
+                    <Row className="mb-3">
+                        <Col>
+                            <Card className="shadow-lg" style={{ borderRadius: '15px' }}>
+                                <Card.Header className="bg-primary text-white">
+                                    <h5>Files</h5>
+                                </Card.Header>
+                                <Card.Body className="bg-light">
+                                    {Object.keys(groupedByFileName).length ? (
+                                        <Accordion defaultActiveKey="0">
+                                            {Object.entries(groupedByFileName).map(([fileName, fileVersions], index) => {
+                                                // Ordina le versioni per `keyVersion` in ordine decrescente
+                                                const sortedVersions = fileVersions.sort((a, b) => b.keyVersion - a.keyVersion);
+
+                                                return (
+                                                    <Accordion.Item eventKey={index.toString()} key={index}>
+                                                        {/* Header: Mostra solo il fileName */}
+                                                        <Accordion.Header>
+                                                            <span style={{ fontWeight: 'bold' }}>{fileName}</span>
+                                                        </Accordion.Header>
+
+                                                        {/* Body: Mostra tutte le versioni del file */}
+                                                        <Accordion.Body>
+                                                            {sortedVersions.map((file, versionIndex) => (
+                                                                <div key={versionIndex} className="d-flex justify-content-between align-items-center" style={{
+                                                                    borderBottom: versionIndex < sortedVersions.length - 1 ? '1px solid #ccc' : 'none',
+                                                                    paddingBottom: '10px',
+                                                                    marginBottom: '10px'
+                                                                }}>
+                                                                    {/* Colonna per la versione e la data */}
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <p><strong>Version:</strong> {file.keyVersion}</p>
+                                                                        <p>
+                                                                            <strong>Upload Date:</strong>{" "}
+                                                                            {new Date(file.creationTimestamp).toLocaleDateString('en-BG', {
+                                                                                day: '2-digit',
+                                                                                month: 'long',
+                                                                                year: 'numeric'
+                                                                            })} -{" "}
+                                                                            {new Date(new Date(file.creationTimestamp).getTime() + 60 * 60 * 1000).toLocaleTimeString('en-BG', {
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit'
+                                                                            })}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    {/* Colonna per il bottone di download */}
+                                                                    <div>
+                                                                        <Button
+                                                                            variant="primary"
+                                                                            onClick={() => downloadFile(filesData.find((f) => f.documentId === file.documentId) || {})}
+                                                                            className="mt-2"
+                                                                        >
+                                                                            <i className="bi bi-download"></i> Download
+                                                                        </Button>
+                                                                    </div>
+
+                                                                </div>
+                                                            ))}
+                                                        </Accordion.Body>
+
+                                                    </Accordion.Item>
+                                                );
+                                            })}
+                                        </Accordion>
+                                    ) : (
+                                        <div>No files available</div>
+                                    )}
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                    {/* Job Offers History */}
                     <Row>
                         <Col>
                             <Card className="shadow-lg" style={{ borderRadius: '15px' }}>
