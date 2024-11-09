@@ -725,6 +725,157 @@ async function updateMessagePriority(priority, id, xsrfToken) {
         throw await response.json();
 }
 
+//### GET Documents (with Pagination)
+async function getDocuments(pageNumber, limit, xsrfToken) {
+    const response = await fetch(`http://localhost:8080/docStore/API/documents/?pageNumber=${pageNumber}&limit=${limit}`, {
+    method: 'GET',
+        headers: {
+    'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': xsrfToken,
+}
+}).catch(() => {
+    throw {error: "Connection Error"};
+});
+if (response.status === 200) {
+    const documents = await response.json();
+    return documents;
+} else {
+    const error = await response.json();
+    throw error;
+}
+}
+
+//### GET Document by User ID
+async function getDocumentByUserId(userId, xsrfToken) {
+    const response = await fetch(`http://localhost:8080/docStore/API/documents/${userId}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => {
+        throw {error: "Connection Error"};
+    });
+    if (response.status === 200) {
+        const document = await response.json();
+        return document;
+    } else {
+        const error = await response.json();
+        throw error;
+    }
+}
+
+//### GET Document Data by Document ID
+async function getDocumentData(documentId, xsrfToken) {
+    const response = await fetch(`http://localhost:8080/docStore/API/documents/${documentId}/data/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => {
+        throw {error: "Connection Error"};
+    });
+    if (response.status === 200) {
+        const data = await response.json();
+        return data;
+    } else {
+        const error = await response.json();
+        throw error;
+    }
+}
+
+//### POST Document
+async function postDocument(userId, file, xsrfToken) {
+    const formData = new FormData();
+    //
+    //
+    //
+    // // Use hardcoded values for the other fields
+    // const name = 'prva.pdf';
+    // const contentType = 'pdf';
+    // const creationTimestamp = '2024-10-26T08:32:00.000';
+
+    formData.append("file", file);  // 'fileInput' è un elemento di tipo file nella tua pagina HTML
+    formData.append("userId", userId.toString());
+    formData.append("name", file.name);
+    formData.append("contentType", file.type);
+    const now = new Date().toISOString().split('.')[0] + ".000";
+    formData.append("creationTimestamp", now);
+    // Convert the other fields to a JSON string and append as a separate part
+
+    console.log(formData.get("file"));
+    // Send the request using fetch
+    try {
+        const response = await fetch('http://localhost:8080/API/documents/', {
+            method: 'POST',
+            headers: {
+                'X-XSRF-TOKEN': xsrfToken, // Include the XSRF token
+            },
+            body: formData, // FormData automatically handles file uploads
+        });
+
+        if (response.ok) {
+            // Handle success
+            const result = await response.json();
+            console.log('Document created successfully:', result);
+        } else {
+            // Handle error response
+            const errorData = await response.json();
+            throw new Error(`Error ${response.status}: ${errorData.detail}`);
+        }
+    } catch (error) {
+        console.error('Failed to create document:', error);
+    }
+}
+
+//### PUT Document
+async function putDocument(userId, file, name, contentType, creationTimestamp, xsrfToken) {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("file", file);
+    formData.append("name", name);
+    formData.append("contentType", contentType);
+    formData.append("creationTimestamp", creationTimestamp);
+
+    const response = await fetch('http://localhost:8080/API/documents/', {
+        method: 'PUT',
+        headers: {
+            'X-XSRF-TOKEN': xsrfToken,
+        },
+        body: formData
+    }).catch(() => {
+        throw {error: "Connection Error"};
+    });
+
+    if (response.status === 200) {
+        const updatedDocument = await response.json();
+        return updatedDocument;
+    } else {
+        const error = await response.json();
+        throw error;
+    }
+}
+
+//### DELETE Document Version
+async function deleteDocumentVersion(userId, version, xsrfToken) {
+    const response = await fetch(`http://localhost:8080/docStore/API/documents/${userId}/${version}/`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => {
+        throw {error: "Connection Error"};
+    });
+
+    if (response.status === 204) {
+        return {message: "Document version deleted successfully"};
+    } else {
+        const error = await response.json();
+        throw error;
+    }
+}
 export default {
     createJobOffer,
     getJobOfferById,
@@ -756,5 +907,7 @@ export default {
     getMessageById,
     getMessageHistory,
     updateMessageState,
-    updateMessagePriority
+    updateMessagePriority,
+
+    postDocument
 };

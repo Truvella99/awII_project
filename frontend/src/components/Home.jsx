@@ -110,6 +110,46 @@ function Home({ me }) {
             }
         ]
     };
+    const [files, setFiles] = useState([]);
+    const [documentData, setDocumentData] = useState();
+    const handleFiles = (ev) => {
+        const filesArray = [...ev.target.files];
+        // setFileError(null);
+
+        filesArray.forEach((file, index) => {
+            console.log(file);
+            // Read and save file content
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (file.size > 50000000) {
+                    // setFileError(`File ${file.name} is too large (maximum size is 50MB).`);
+                } else {
+                    setFiles((prev) => [
+                        ...prev,
+                        {
+                            name: file.name,
+                            type: file.type,
+                            content: file
+                        }
+                    ]);
+                    setDocumentData({
+                        name: file.name,
+                        type: file.type,
+                        content: file,
+                        userId: me.principal.subject,
+                        creationTimestamp: new Date().toISOString()
+                    });
+
+                }
+            };
+            reader.onerror = (ev) => {
+                console.error(`Error reading ${file.name}:`, ev);
+                // setFileError(`Error reading ${file.name}: ${ev}`);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     let createdCustomerId = 1;
     return (
         me && me.principal !== null ? (
@@ -135,6 +175,37 @@ function Home({ me }) {
                              await API.createCustomer(customer,me.xsrfToken);
 
                         }}>add customer prefixed</Button>
+
+                        {/*<Col>*/}
+                        {/*    <Form.Group className="mb-3" controlId="files">*/}
+                        {/*        <Form.Label>Attachments (optional)</Form.Label>*/}
+                        {/*        <Form.Control*/}
+                        {/*            type="file"*/}
+                        {/*            name="files"*/}
+                        {/*            multiple*/}
+                        {/*            onChange={handleFiles}*/}
+                        {/*        />*/}
+                        {/*    </Form.Group>*/}
+                        {/*    <input type="file" id="fileInput" />*/}
+
+                        {/*    <Button*/}
+                        {/*        onClick={async () => {*/}
+                        {/*            try {*/}
+
+                        {/*                // Assuming 'fileInput' is a reference to a file input element*/}
+
+                        {/*                const userId = me?.principal.subject;*/}
+                        {/*                const result = await API.postDocument(userId, me.xsrfToken);*/}
+
+                        {/*                console.log('Document created successfully:', result);*/}
+                        {/*            } catch (error) {*/}
+                        {/*                console.error('Failed to create document:', error);*/}
+                        {/*            }*/}
+                        {/*        }}*/}
+                        {/*    >*/}
+                        {/*        Add Document*/}
+                        {/*    </Button>*/}
+                        {/*</Col>*/}
                         <Button onClick={async () => {
                             let updatedCustomer = {
                                 name: "Gennaro Updated afwsef",

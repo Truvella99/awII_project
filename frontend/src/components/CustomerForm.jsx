@@ -30,7 +30,8 @@ const CreateCustomer = ({xsrfToken}) => {
     const [error, setError] = useState(null);
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
-
+    const [files, setFiles] = useState([]);
+    const [fileError, setFileError] = useState(null);
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
     const SSN_CODE = /^(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/;
@@ -41,6 +42,45 @@ const CreateCustomer = ({xsrfToken}) => {
     const togglePasswordVisibility = () => {
         setShowPassword(prevState => !prevState);
     };
+    const handleFiles = (ev) => {
+        setFiles([]); // Reset file list (to avoid duplicates
+
+        const filesArray = [...ev.target.files];
+        setFileError(null);
+        // Check if the file is too large
+        const tooLargeFiles = filesArray.filter(file => file.size > 50000000);
+        if (tooLargeFiles.length > 0) {
+            setFileError(`File ${tooLargeFiles[0].name} is too large (maximum size is 50MB).`);
+        }
+        setFiles(filesArray);
+
+
+
+        // filesArray.forEach((file, index) => {
+        //     console.log(file);
+        //     // Read and save file content
+        //     const reader = new FileReader();
+        //     reader.onload = (ev) => {
+        //         if (file.size > 50000000) {
+        //             setFileError(`File ${file.name} is too large (maximum size is 50MB).`);
+        //         } else {
+        //             setFiles((prev) => [
+        //                 ...prev,
+        //                 {
+        //                     name: file.name,
+        //                     type: file.type,
+        //                     content: file
+        //                 }
+        //             ]);
+        //         }
+        //     };
+        //     reader.onerror = (ev) => {
+        //         console.error(`Error reading ${file.name}:`, ev);
+        //         setFileError(`Error reading ${file.name}: ${ev}`);
+        //     };
+        //     reader.readAsDataURL(file);
+        // });
+    }
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
             // Create a Geocoder instance
@@ -194,15 +234,28 @@ const CreateCustomer = ({xsrfToken}) => {
         e.preventDefault();
         e.stopPropagation();
 
+
+        if (fileError)
+            return;
+
         const isValid = await validateForm().then((res) => res).catch((err) => false);
         console.log(isValid);
         if (!isValid) return;
 
         setLoading(true);
         try {
+            const customerCreated = await API.createCustomer(customer, xsrfToken);
 
             // Chiamata API per creare un nuovo Professional
-            await API.createCustomer(customer, xsrfToken);
+            if (files.length > 0) {
+                // Chiamata API per caricare i file
+                console.log("files", files)
+                for (const file of files) {
+                    console.log(file)
+                    await API.postDocument(customerCreated.id,file, xsrfToken);
+                }
+            }
+
             setLoading(false);
             navigate("/ui")
         } catch (err) {
@@ -427,6 +480,26 @@ const CreateCustomer = ({xsrfToken}) => {
                                             </Form.Group>
                                         </Col>
 
+                                    </Row>
+                                    {/*Files*/}
+                                    <Row>
+                                        <Col>
+                                            <Form.Group className="mb-3" controlId="files">
+                                                <Form.Label>Attachments (Optional)</Form.Label>
+                                                <Form.Control
+                                                    type="file"
+                                                    name="files"
+                                                    multiple
+                                                    onChange={handleFiles}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        { fileError?
+                                            <div className="text-danger mb-3">
+                                                {fileError}
+                                            </div>
+                                            : <></>
+                                        }
                                     </Row>
 
                                 </Row>

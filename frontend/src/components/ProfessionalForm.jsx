@@ -45,6 +45,8 @@ const AddProfessional = ({xsrfToken}) => {
     const [formErrors, setFormErrors] = useState({});
     const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
     const navigate = useNavigate()
+    const [files, setFiles] = useState([]);
+    const [fileError, setFileError] = useState(null);
     // Regex patterns for validation
     const NOT_EMPTY_IF_NOT_NULL = /^\s*\S.*$/;
     const SSN_CODE = /^(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}$/;
@@ -53,9 +55,23 @@ const AddProfessional = ({xsrfToken}) => {
     const ADDRESS = /^[a-zA-Z0-9\s.,'-]+$/;
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
+    const handleFiles = (ev) => {
+        setFiles([]); // Reset file list (to avoid duplicates
+
+        const filesArray = [...ev.target.files];
+        setFileError(null);
+        // Check if the file is too large
+        const tooLargeFiles = filesArray.filter(file => file.size > 50000000);
+        if (tooLargeFiles.length > 0) {
+            setFileError(`File ${tooLargeFiles[0].name} is too large (maximum size is 50MB).`);
+        }
+        setFiles(filesArray);
+
+    }
     const togglePasswordVisibility = () => {
         setShowPassword(prevState => !prevState);
     };
+
     function addressValidation(address, setAddress) {
         return new Promise((resolve, reject) => {
             // Create a Geocoder instance
@@ -266,6 +282,8 @@ const AddProfessional = ({xsrfToken}) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (fileError)
+            return;
 
         const isValid = await validateForm().then((res) => res).catch((err) => false);
         console.log(isValid);
@@ -275,7 +293,17 @@ const AddProfessional = ({xsrfToken}) => {
         try {
 
             // Chiamata API per creare un nuovo Professional
-            await API.createProfessional(professional, xsrfToken);
+            const profCreated = await API.createProfessional(professional, xsrfToken);
+
+            if (files.length > 0) {
+                // Chiamata API per caricare i file
+                console.log("files", files)
+                for (const file of files) {
+                    console.log(file)
+                    await API.postDocument(profCreated.id,file, xsrfToken);
+                }
+            }
+
             setLoading(false);
             navigate("/ui")
         } catch (err) {
@@ -574,6 +602,27 @@ const AddProfessional = ({xsrfToken}) => {
                                             </Form.Group>
                                         </Col>
                                     </Row>
+                                    {/*Files*/}
+                                    <Row>
+                                        <Col>
+                                            <Form.Group className="mb-3" controlId="files">
+                                                <Form.Label>Attachments (optional)</Form.Label>
+                                                <Form.Control
+                                                    type="file"
+                                                    name="files"
+                                                    multiple
+                                                    onChange={handleFiles}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        { fileError?
+                                            <div className="text-danger mb-3">
+                                                {fileError}
+                                            </div>
+                                            : <></>
+                                        }
+                                    </Row>
+
 
                                 </Row>
 

@@ -42,6 +42,8 @@ const EditCustomer = ({ xsrfToken }) => {
     const [newNotes, setNewNotes] = useState([]);
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
+    const [files, setFiles] = useState([]);
+    const [fileError, setFileError] = useState(null);
     const togglePasswordVisibility = () => {
         setShowPassword(prevState => !prevState);
     };
@@ -147,7 +149,35 @@ const EditCustomer = ({ xsrfToken }) => {
             setShowNewNoteField(false)
 
     };
+    const handleFiles = (ev) => {
+        const filesArray = [...ev.target.files];
+        setFileError(null);
 
+        filesArray.forEach((file, index) => {
+            console.log(file);
+            // Read and save file content
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (file.size > 50000000) {
+                    setFileError(`File ${file.name} is too large (maximum size is 50MB).`);
+                } else {
+                    setFiles((prev) => [
+                        ...prev,
+                        {
+                            name: file.name,
+                            type: file.type,
+                            content: ev.target.result.split("base64,")[1]
+                        }
+                    ]);
+                }
+            };
+            reader.onerror = (ev) => {
+                console.error(`Error reading ${file.name}:`, ev);
+                setFileError(`Error reading ${file.name}: ${ev}`);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     const handleRemoveField = (field, index) => {
         setCustomer((prevCustomer) => {
@@ -276,6 +306,8 @@ const EditCustomer = ({ xsrfToken }) => {
         console.log("isValid", isValid);
         console.log("customer", customer);
         if (!isValid) return;
+        if (fileError)
+            return;
 
         setLoading(true);
         try {
@@ -690,6 +722,27 @@ const EditCustomer = ({ xsrfToken }) => {
 
 
                                     </Col>
+
+                                </Row>
+                                {/*Files*/}
+                                <Row>
+                                    <Col>
+                                        <Form.Group className="mb-3" controlId="files">
+                                            <Form.Label>Attachments (optional)</Form.Label>
+                                            <Form.Control
+                                                type="file"
+                                                name="files"
+                                                multiple
+                                                onChange={handleFiles}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    { fileError?
+                                        <div className="text-danger mb-3">
+                                            {fileError}
+                                        </div>
+                                        : <></>
+                                    }
                                 </Row>
 
 
