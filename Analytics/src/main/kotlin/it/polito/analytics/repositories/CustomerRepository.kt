@@ -1,17 +1,44 @@
 package it.polito.analytics.repositories
 
-import it.polito.analytics.entities.CompositeKey
+import it.polito.analytics.dtos.CustomerOrProfessionalStatusCount
 import it.polito.analytics.entities.Customer
-import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.query.Param
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 
 @Repository
-interface CustomerRepository: JpaRepository<Customer, CompositeKey> {
-    @Query("SELECT count(*) FROM Customer c WHERE  c.key.id = :customerId AND c.finalStatus = 0")
-    fun computeAllCompleted(@Param("customerId") customerId: String): Long
+interface CustomerRepository: R2dbcRepository<Customer, String> {
+    @Query("""
+        SELECT c.id, c.name, c.surname, 
+               COUNT(jo.final_status_customer) as count
+        FROM customer c
+        JOIN customers_job_offers cjo ON c.id = cjo.customer_id
+        JOIN job_offer jo ON cjo.job_offer_id = jo.id
+        WHERE jo.final_status_customer = 0
+        GROUP BY c.id, c.name, c.surname
+    """)
+    fun findCustomerCompletedJobOffers(): Flux<CustomerOrProfessionalStatusCount>
 
-    @Query("SELECT count(*) FROM Customer c WHERE  c.key.id = :customerId AND c.finalStatus = 1")
-    fun computeAllAborted(@Param("customerId") customerId: String): Long
+    @Query("""
+        SELECT c.id, c.name, c.surname, 
+               COUNT(jo.final_status_customer) as count
+        FROM customer c
+        JOIN customers_job_offers cjo ON c.id = cjo.customer_id
+        JOIN job_offer jo ON cjo.job_offer_id = jo.id
+        WHERE jo.final_status_customer = 1
+        GROUP BY c.id, c.name, c.surname
+    """)
+    fun findCustomerAbortedJobOffers(): Flux<CustomerOrProfessionalStatusCount>
+
+    @Query("""
+        SELECT c.id, c.name, c.surname, 
+               COUNT(jo.final_status_customer) as count
+        FROM customer c
+        JOIN customers_job_offers cjo ON c.id = cjo.customer_id
+        JOIN job_offer jo ON cjo.job_offer_id = jo.id
+        WHERE jo.final_status_customer = 2
+        GROUP BY c.id, c.name, c.surname
+    """)
+    fun findCustomerCreatedJobOffers(): Flux<CustomerOrProfessionalStatusCount>
 }

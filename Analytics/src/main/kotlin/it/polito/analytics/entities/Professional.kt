@@ -1,18 +1,12 @@
 package it.polito.analytics.entities
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.ManyToMany
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
-@Entity
-class Professional {
+@Table(name = "professional")
+data class Professional(
     @Id
-    lateinit var id: String
-
-    @ManyToMany(mappedBy = "professionals")
-    val jobOffers = mutableSetOf<JobOffer>()
-    fun addJobOffer(jobOffer: JobOffer){
-        jobOffers.add(jobOffer)
-        jobOffer.professionals.add(this)
-    }
-}
+    var id: String,
+    var name: String,
+    var surname: String
+)

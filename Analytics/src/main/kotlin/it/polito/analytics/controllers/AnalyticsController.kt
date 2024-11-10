@@ -1,34 +1,37 @@
 package it.polito.analytics.controllers
 
+import it.polito.analytics.dtos.CustomerDTO
+import it.polito.analytics.dtos.ProfessionalDTO
 import it.polito.analytics.services.AnalyticsService
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 
 @RestController
 class AnalyticsController(private val analyticsService: AnalyticsService) {
 
     /**
-     * GET /API/customers/{customerId}/kpi
+     * GET /API/customers/
      *
-     * Return the kpi of the given customer
+     * Return the statistics for all the customers
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/API/customers/{customerId}/kpi")
-    //@PreAuthorize("isAuthenticated() && hasRole('manager')")
-    fun getCustomerKpi(@PathVariable("customerId")customerId: String) : Float {
-        return analyticsService.computeCustomerKPI(customerId)
+    @GetMapping("/API/customers/")
+    @PreAuthorize("isAuthenticated() && hasRole('manager')")
+    fun getCustomersAnalytics() : Flux<CustomerDTO> {
+        return analyticsService.computeCustomersData()
     }
 
     /**
-     * GET /API/professionals/{professionalId}/kpi
+     * GET /API/professionals/
      *
-     * Return the kpi of the given professional
+     * Return the statistics for all the professionals
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/API/professionals/{professionalId}/kpi")
-    //@PreAuthorize("isAuthenticated() && hasRole('manager')")
-    fun getProfessionalKpi(@PathVariable("professionalId")professionalId: String) : Float {
-        return analyticsService.computeProfessionalKPI(professionalId)
+    @GetMapping("/API/professionals/")
+    @PreAuthorize("isAuthenticated() && hasRole('manager')")
+    fun getProfessionalKpi() : Flux<ProfessionalDTO> {
+        return analyticsService.computeProfessionalsData()
     }
 }

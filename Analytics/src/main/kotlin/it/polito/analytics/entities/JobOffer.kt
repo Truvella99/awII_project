@@ -1,28 +1,20 @@
 package it.polito.analytics.entities
 
-import jakarta.persistence.*
-
-@Entity
-class JobOffer {
-    @Id
-    @GeneratedValue
-    var id : Long = 0
-
-    @ManyToMany
-    @JoinTable(
-        name = "job_offer_professionals",
-        joinColumns = [JoinColumn(name = "job_offer_id")],
-        inverseJoinColumns = [JoinColumn(name = "professional_id")]
-    )
-    val professionals = mutableSetOf<Professional>()
-    fun addProfessional(professional: Professional) {
-        professionals.add(professional)
-        professional.jobOffers.add(this)
-    }
-
-    var finalStatus: professionalJobOfferState? = null
-}
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
 enum class professionalJobOfferState {
     completed,aborted,candidated
 }
+
+enum class customerJobOfferState {
+    completed,aborted,created
+}
+
+@Table(name = "job_offer")
+data class JobOffer(
+    @Id
+    var id: Long,
+    var finalStatusCustomer: customerJobOfferState? = null,
+    var finalStatusProfessional: professionalJobOfferState? = null
+)
