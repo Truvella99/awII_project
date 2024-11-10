@@ -31,7 +31,7 @@ class AnalyticsController(private val analyticsService: AnalyticsService) {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/API/professionals/")
     @PreAuthorize("isAuthenticated() && hasRole('manager')")
-    fun getProfessionalKpi() : Flux<ProfessionalDTO> {
+    fun getProfessionalAnalytics() : Flux<ProfessionalDTO> {
         return analyticsService.computeProfessionalsData()
     }
 }
