@@ -42,5 +42,6 @@ interface ContactRepository: JpaRepository<Contact,Long> {
         @Param("telephone") telephone: String?
     ): List<Contact>
 
-
+    @Query("SELECT c FROM Contact c LEFT JOIN c.emails e LEFT JOIN c.telephones t LEFT JOIN c.addresses a WHERE (:email IS NULL OR e.email = :email) AND (:address IS NULL OR a.address = :address) AND (:telephone IS NULL OR t.telephone = :telephone)")
+    fun findNewPending(@Param("email") email: String?, @Param("address") address: String?, @Param("telephone") telephone: String?): Contact?
 }

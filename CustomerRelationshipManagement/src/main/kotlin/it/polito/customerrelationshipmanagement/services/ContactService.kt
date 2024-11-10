@@ -1,6 +1,8 @@
 package it.polito.customerrelationshipmanagement.services
 
 import it.polito.customerrelationshipmanagement.dtos.*
+import jakarta.validation.constraints.Pattern
+import org.springframework.web.bind.annotation.RequestParam
 
 interface ContactService {
     fun listAllPendingContacts(
@@ -20,6 +22,7 @@ interface ContactService {
     ): List<ContactDTO>
 
     fun findById(contactId: Long): ContactDTO
+    fun newPending(email: String?, address: String?, telephone: String?): Boolean
     fun createContact(c: CreateContactDTO, isPending: Boolean = false): ContactDTO
     fun updateContactCategory(contactId: Long, categoryDTO: UpdateCategoryDTO): ContactDTO
     fun updateContactName(contactId: Long, nameDTO: UpdateNameDTO): ContactDTO

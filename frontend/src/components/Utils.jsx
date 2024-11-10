@@ -8,6 +8,7 @@ import jobOffersImage from "../icons/jobOffers.png";
 import customersImage from "../icons/customers.png";
 import professionalsImage from "../icons/professionals.png";
 import messagesImage from "../icons/messages.png";
+import pendingImage from "../icons/pending.png";
 import { FaInfoCircle } from "react-icons/fa";
 
 const API_KEY = 'AIzaSyCO5hFwnkcQjDkoivao8qpJbKvITf_vb1g';
@@ -144,7 +145,7 @@ const hexToRgba = (hex, alpha) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-function SideBar({role, unreadMessages}) {
+function SideBar({role, unreadMessages, pending}) {
     const path = useLocation().pathname;
 
     const menuItemStyles = {
@@ -210,6 +211,13 @@ function SideBar({role, unreadMessages}) {
                         backgroundColor: path === "/ui/messages" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
                         color: path === "/ui/messages" ? sidebarThemes["light"].menu.active.color : ''
                     }} suffix={(unreadMessages > 0) ? <Badge pill bg="danger"> {unreadMessages} </Badge> : ''} component={<Link to="/ui/messages" />}> Messages </MenuItem> : ''
+                }
+                { (role === "manager" || role === "operator") ?
+                    <MenuItem icon={<img style={{marginTop: "10px"}} src={pendingImage} height={36} width={36}/>} style={{
+                        backgroundColor: path === "/ui/pending" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/pending" ? sidebarThemes["light"].menu.active.color : '',
+                        fontSize: (pending > 0) ? '16px' : ''
+                    }} suffix={(pending > 0) ? <Badge pill bg="primary"> {pending} </Badge> : ''} component={<Link to="/ui/pending" />}> Pending Contacts </MenuItem> : ''
                 }
                 { (role === "professional") ?
                     <MenuItem icon={<img src={jobOffersImage} height={28} width={28}/>} style={{

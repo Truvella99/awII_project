@@ -6,7 +6,7 @@ import PhoneInput from 'react-phone-number-input';
 import {DropdownButton, Dropdown} from "react-bootstrap";
 import {AddressSelector} from "./Utils.jsx";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import InputMask from "react-input-mask";
 import {MessageContext} from "../messageCtx.js";
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
@@ -44,7 +44,11 @@ const AddProfessional = ({xsrfToken}) => {
     const [error, setError] = useState(null);
     const [formErrors, setFormErrors] = useState({});
     const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const location = useLocation();
+    // Pending Id and contact
+    const pendingId = location.state?.id;
+    const pendingContact = location.state?.contact;
     const [files, setFiles] = useState([]);
     const [fileError, setFileError] = useState(null);
     // Regex patterns for validation

@@ -9,7 +9,7 @@ import Select from "react-select";
 import PostalMime from "postal-mime";
 
 
-function ViewMessage({loggedIn, role, unreadMessages}) {
+function ViewMessage({loggedIn, role, unreadMessages, pending}) {
     const { messageId } = useParams();
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
@@ -118,7 +118,7 @@ function ViewMessage({loggedIn, role, unreadMessages}) {
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
-                        <SideBar role={role} unreadMessages={unreadMessages}/>
+                        <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
                     <Row style={{marginBottom: '100px'}}>
                         { (role === "operator" || role === "manager") ?

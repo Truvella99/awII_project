@@ -13,7 +13,7 @@ import {InfiniteRowModelModule} from "@ag-grid-community/infinite-row-model";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function JobOffers({loggedIn, role, unreadMessages}) {
+function JobOffers({loggedIn, role, unreadMessages, pending}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -147,6 +147,27 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                     }
                 }
             }
+            if (filterModel.value) {
+                const value = item.value;
+                const allowedValue = parseInt(filterModel.value.filter);
+                if (filterModel.value.type === 'equals') {
+                    if (value !== allowedValue) {
+                        continue;
+                    }
+                } else if (filterModel.value.type === 'lessThan') {
+                    if (value >= allowedValue) {
+                        continue;
+                    }
+                } else if (filterModel.value.type === 'greaterThan') {
+                    if (value <= allowedValue) {
+                        continue;
+                    }
+                } else if (filterModel.value.type === 'inRange') {
+                    if ((value < parseInt(filterModel.value.filter)) || (value > parseInt(filterModel.value.filterTo))) {
+                        continue;
+                    }
+                }
+            }
             if (filterModel.currentState) {
                 if (filterModel.currentState.type === 'contains') {
                     if ( !((item.currentState.toLowerCase()).includes(filterModel.currentState.filter)) )
@@ -207,6 +228,7 @@ function JobOffers({loggedIn, role, unreadMessages}) {
         { field: "duration", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true, valueFormatter: durationFormatter },
         { field: "profitMargin", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "Profit Margin", suppressHeaderMenuButton: true },
         { field: "nCandidates", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "N. Candidates", suppressHeaderMenuButton: true },
+        { field: "value", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true },
         { field: "currentState", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, headerName: "Current State", suppressHeaderMenuButton: true, valueFormatter: stateFormatter }
     ]);
     const defaultColDef = useMemo(() => {
@@ -240,12 +262,21 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                 else if (role === "professional")
                     jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken);
 
-                const modifiedJobOffers = jobOffers.map(jobOffer => {
-                    return {
-                        ...jobOffer,
-                        nCandidates: jobOffer.candidateProfessionalsId.length
-                    };
-                });
+                const modifiedJobOffers = await Promise.all(jobOffers.map(async jobOffer => {
+                    if (jobOffer.completedProfessionalId || jobOffer.consolidatedProfessionalId) {
+                        const value = await API.getJobOfferValueById(jobOffer.id, xsrfToken);
+                        return {
+                            ...jobOffer,
+                            value: value,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    } else {
+                        return {
+                            ...jobOffer,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    }
+                }));
                 setJobOffers(modifiedJobOffers);
 
                 const dataSource = {
@@ -296,12 +327,21 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                 else if (role === "professional")
                     jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidates, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken);
 
-                const modifiedJobOffers = jobOffers.map(jobOffer => {
-                    return {
-                        ...jobOffer,
-                        nCandidates: jobOffer.candidateProfessionalsId.length
-                    };
-                });
+                const modifiedJobOffers = await Promise.all(jobOffers.map(async jobOffer => {
+                    if (jobOffer.completedProfessionalId || jobOffer.consolidatedProfessionalId) {
+                        const value = await API.getJobOfferValueById(jobOffer.id, xsrfToken);
+                        return {
+                            ...jobOffer,
+                            value: value,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    } else {
+                        return {
+                            ...jobOffer,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    }
+                }));
                 setJobOffers(modifiedJobOffers);
 
                 const dataSource = {
@@ -352,12 +392,21 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                 else if (role === "professional")
                     jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, aborteds, consolidatedProfessionals, completedProfessionals, xsrfToken);
 
-                const modifiedJobOffers = jobOffers.map(jobOffer => {
-                    return {
-                        ...jobOffer,
-                        nCandidates: jobOffer.candidateProfessionalsId.length
-                    };
-                });
+                const modifiedJobOffers = await Promise.all(jobOffers.map(async jobOffer => {
+                    if (jobOffer.completedProfessionalId || jobOffer.consolidatedProfessionalId) {
+                        const value = await API.getJobOfferValueById(jobOffer.id, xsrfToken);
+                        return {
+                            ...jobOffer,
+                            value: value,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    } else {
+                        return {
+                            ...jobOffer,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    }
+                }));
                 setJobOffers(modifiedJobOffers);
 
                 const dataSource = {
@@ -408,12 +457,21 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                 else if (role === "professional")
                     jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidated, completedProfessionals, xsrfToken);
 
-                const modifiedJobOffers = jobOffers.map(jobOffer => {
-                    return {
-                        ...jobOffer,
-                        nCandidates: jobOffer.candidateProfessionalsId.length
-                    };
-                });
+                const modifiedJobOffers = await Promise.all(jobOffers.map(async jobOffer => {
+                    if (jobOffer.completedProfessionalId || jobOffer.consolidatedProfessionalId) {
+                        const value = await API.getJobOfferValueById(jobOffer.id, xsrfToken);
+                        return {
+                            ...jobOffer,
+                            value: value,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    } else {
+                        return {
+                            ...jobOffer,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    }
+                }));
                 setJobOffers(modifiedJobOffers);
 
                 const dataSource = {
@@ -464,12 +522,21 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                 else if (role === "professional")
                     jobOffers = await API.getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completed, xsrfToken);
 
-                const modifiedJobOffers = jobOffers.map(jobOffer => {
-                    return {
-                        ...jobOffer,
-                        nCandidates: jobOffer.candidateProfessionalsId.length
-                    };
-                });
+                const modifiedJobOffers = await Promise.all(jobOffers.map(async jobOffer => {
+                    if (jobOffer.completedProfessionalId || jobOffer.consolidatedProfessionalId) {
+                        const value = await API.getJobOfferValueById(jobOffer.id, xsrfToken);
+                        return {
+                            ...jobOffer,
+                            value: value,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    } else {
+                        return {
+                            ...jobOffer,
+                            nCandidates: jobOffer.candidateProfessionalsId.length
+                        };
+                    }
+                }));
                 setJobOffers(modifiedJobOffers);
 
                 const dataSource = {
@@ -538,12 +605,21 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                     // console.log(uniqueSkills);
                     setOptionSkills(uniqueSkills);
 
-                    const modifiedJobOffers = jobOffers.map(jobOffer => {
-                        return {
-                            ...jobOffer,
-                            nCandidates: jobOffer.candidateProfessionalsId.length
-                        };
-                    });
+                    const modifiedJobOffers = await Promise.all(jobOffers.map(async jobOffer => {
+                        if (jobOffer.completedProfessionalId || jobOffer.consolidatedProfessionalId) {
+                            const value = await API.getJobOfferValueById(jobOffer.id, xsrfToken);
+                            return {
+                                ...jobOffer,
+                                value: value,
+                                nCandidates: jobOffer.candidateProfessionalsId.length
+                            };
+                        } else {
+                            return {
+                                ...jobOffer,
+                                nCandidates: jobOffer.candidateProfessionalsId.length
+                            };
+                        }
+                    }));
                     setJobOffers(modifiedJobOffers);
 
                     // Define the data source for AG-Grid
@@ -595,7 +671,7 @@ function JobOffers({loggedIn, role, unreadMessages}) {
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px', maxWidth: '250px'}}>
-                        <SideBar role={role} unreadMessages={unreadMessages}/>
+                        <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
                     <Row style={{marginBottom: '50px'}}>
                         { (role === "operator" || role === "manager") ?
@@ -609,7 +685,7 @@ function JobOffers({loggedIn, role, unreadMessages}) {
                         <h5> Filter by </h5>
                     </Row>
                     <Row>
-                        <Col ref={containerRef} style={role === "professional" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '33.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
+                        <Col ref={containerRef} style={role === "professional" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '27vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
                             <h6 key={0} ref={(f) => filtersRef.current[0] = f} >
                                 Skills:
                             </h6>

@@ -95,7 +95,28 @@ class ContactServiceImpl(
         }
     }
 
-    
+    // ----- Returns true if a new pending contact has been created with the given contact -----
+    override fun newPending(
+        email: String?,
+        address: String?,
+        telephone: String?
+    ): Boolean {
+        println(telephone)
+        try {
+            val contact = when {
+                email != null -> contactRepository.findNewPending(email, null, null)
+                address != null -> contactRepository.findNewPending(null, address, null)
+                telephone != null -> contactRepository.findNewPending(null, null, telephone)
+                else -> null
+            }
+            println(contact)
+            return contact?.name == null
+        } catch (e: RuntimeException) {
+            throw ContactNotFoundException("Contact not found")
+        }
+    }
+
+
     // ----- Create a new contact -----
     override fun createContact(
         c: CreateContactDTO,

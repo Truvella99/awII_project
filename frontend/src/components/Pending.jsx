@@ -14,11 +14,11 @@ import {Container} from "react-bootstrap/";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
+function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
-    const [messages, setMessages] = useState();
+    const [pendings, setPendings] = useState();
     const [nothing, setNothing] = useState(false);
     const [tableReady, setTableReady] = useState(false);
     const gridRef = useRef();
@@ -85,75 +85,12 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
         for (let i = 0; i < data.length; i++) {
             const item = data[i];
 
-            if (filterModel.subject) {
-                if (filterModel.subject.type === 'contains') {
-                    if ( !((item.subject.toLowerCase()).includes(filterModel.subject.filter)) )
-                        continue;
-                } else if (filterModel.subject.type === 'notContains') {
-                    if ( (item.subject.toLowerCase()).includes(filterModel.subject.filter) )
-                        continue;
-                }
-            }
             if (filterModel.contact) {
                 if (filterModel.contact.type === 'contains') {
                     if ( !((item.contact.toLowerCase()).includes(filterModel.contact.filter)) )
                         continue;
                 } else if (filterModel.contact.type === 'notContains') {
                     if ( (item.contact.toLowerCase()).includes(filterModel.contact.filter) )
-                        continue;
-                }
-            }
-            if (filterModel.channel) {
-                if (filterModel.channel.type === 'contains') {
-                    if ( !((item.channel.toLowerCase()).includes(filterModel.channel.filter)) )
-                        continue;
-                } else if (filterModel.channel.type === 'notContains') {
-                    if ( (item.channel.toLowerCase()).includes(filterModel.channel.filter) )
-                        continue;
-                }
-            }
-            if (filterModel.date) {
-                const dateAsString = item.date.toString();
-                const dateParts = dateAsString.split("/");
-                const date = new Date(Number(dateParts[2]), Number(dateParts[1]) - 1, Number(dateParts[0]));
-                const filterDate = new Date((filterModel.date.dateFrom).replace(" ", "T"));
-                if (filterModel.date.type === 'equals') {
-                    if (date.getTime() !== filterDate.getTime()) {
-                        continue;
-                    }
-                }
-                if (filterModel.date.type === 'lessThan') {
-                    if (date > filterDate) {
-                        continue;
-                    }
-                }
-                if (filterModel.date.type === 'greaterThan') {
-                    if (date < filterDate) {
-                        continue;
-                    }
-                }
-                if (filterModel.date.type === 'inRange') {
-                    const filterDateTo = new Date((filterModel.date.dateTo).replace(" ", "T"));
-                    if ((date < filterDate) || (date > filterDateTo)) {
-                        continue;
-                    }
-                }
-            }
-            if (filterModel.currentState) {
-                if (filterModel.currentState.type === 'contains') {
-                    if ( !((item.currentState.toLowerCase()).includes(filterModel.currentState.filter)) )
-                        continue;
-                } else if (filterModel.currentState.type === 'notContains') {
-                    if ( (item.currentState.toLowerCase()).includes(filterModel.currentState.filter) )
-                        continue;
-                }
-            }
-            if (filterModel.priority) {
-                if (filterModel.priority.type === 'contains') {
-                    if ( !((item.priority.toLowerCase()).includes(filterModel.priority.filter)) )
-                        continue;
-                } else if (filterModel.priority.type === 'notContains') {
-                    if ( (item.priority.toLowerCase()).includes(filterModel.priority.filter) )
                         continue;
                 }
             }
@@ -166,12 +103,8 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
     // Table settings
     const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
     const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
-    const valueFormatter = (params) => {
-        if (params.value)
-            return params.value.charAt(0).toUpperCase() + params.value.slice(1);
-    };
     const [columnDefs, setColumnDefs] = useState([
-        { field: "subject", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true,
+        { field: "contact", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true,
             cellRenderer: (props) => {
                 if (props.value === undefined) {
                     return (
@@ -185,11 +118,21 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
                 }
             },
         },
-        { field: "contact", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true },
-        { field: "channel", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true, valueFormatter: valueFormatter },
-        { field: "date", filter: "agDateColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true },
-        { field: "currentState", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, headerName: "Current State", suppressHeaderMenuButton: true, valueFormatter: valueFormatter },
-        { field: "priority", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true, valueFormatter: valueFormatter }
+        { field: "navigate", filter: false, sortable: false, headerName: "Add to customers or professionals", suppressHeaderMenuButton: true,
+            cellRenderer: (props) => {
+                return (
+                    <div style={{display: "flex", gap: "15px"}}>
+                        <Button style={{marginTop: "5px"}} variant="success" size={"sm"} onClick={() => {
+                            navigate("/ui/customers/addCustomer", {state: {id: props.data.id, contact: props.data.contact}});
+                        }}> Customer <i className="bi bi-caret-right-fill"></i> </Button>
+                        {' '}
+                        <Button style={{marginTop: "5px"}} variant="primary" size={"sm"} onClick={() => {
+                            navigate("/ui/professionals/addProfessional", {state: {id: props.data.id, contact: props.data.contact}});
+                        }}> Professional <i className="bi bi-caret-right-fill"></i> </Button>
+                    </div>
+                );
+            }
+        }
     ]);
     const defaultColDef = useMemo(() => {
         return {
@@ -205,34 +148,30 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
     const getRowId = useCallback(function (params) {
         return params.data.id;
     }, []);
-    const getRowStyle = useCallback(function (params) {
-        if (tableReady && params.node.data) {
-            if (params.node.data.currentState === 'received')
-                return {fontWeight: 'bold'}
-        }
-    }, [tableReady]);
 
     // Table data functions
     const onGridReady = useCallback((params) => {
-        const fetchMessages = async (params) => {
+        const fetchContacts = async (params) => {
             try {
                 if (loggedIn) {
-                    const messages = await API.getAllMessages(xsrfToken);
-                    console.log(messages);
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    console.log(pendings);
 
-                    const modifiedMessages = messages.map(message => {
+                    const modifiedPendings = pendings.map(pending => {
+                        let contact;
+                        if (pending.emails.length > 0) {
+                            contact = pending.emails[0].email;
+                        } else if (pending.telephones.length > 0) {
+                            contact = pending.telephones[0].telephone;
+                        } else if (pending.addresses.length > 0) {
+                            contact = pending.addresses[0].address;
+                        }
                         return {
-                            ...message,
-                            contact: message.email || message.telephone || message.address,
-                            date: new Date(message.date).toLocaleDateString("default", {day: "2-digit", month: "2-digit", year: "numeric"})
+                            ...pending,
+                            contact: contact
                         };
                     });
-                    modifiedMessages.forEach(message => {
-                        delete message.email;
-                        delete message.telephone;
-                        delete message.address;
-                    });
-                    setMessages(modifiedMessages);
+                    setPendings(modifiedPendings);
 
                     // Define the data source for AG-Grid
                     const dataSource = {
@@ -242,7 +181,7 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
                             // Call the server
                             // take a slice of the total rows
                             const dataAfterSortingAndFiltering = sortAndFilter(
-                                modifiedMessages,
+                                modifiedPendings,
                                 params.sortModel,
                                 params.filterModel
                             );
@@ -256,7 +195,7 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
                             params.successCallback(rowsThisPage, lastRow);
 
                             // If there are no messages, display the message
-                            if (messages.length === 0) {
+                            if (pendings.length === 0) {
                                 setNothing(true);
                             }
                             //
@@ -274,7 +213,7 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
             }
         };
 
-        fetchMessages(params);
+        fetchContacts(params);
     }, []);
 
 
@@ -285,19 +224,11 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
                         <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
-                    <Row style={{marginBottom: '100px'}}>
-                        { (role === "operator" || role === "manager") ?
-                            <Col className="d-flex justify-content-center">
-                                <Button variant="info" onClick={() => navigate('/ui/messages/addMessage')}> <i className="bi bi-plus-lg"></i> Add message </Button>
-                            </Col>
-                            : <></>
-                        }
-                    </Row>
                 </Col>
                 <Col>
                     { nothing &&
                         <div style={{position: "fixed", zIndex: 1, paddingLeft: "500px", paddingTop: "250px"}}>
-                            <h4> No Messages yet! </h4>
+                            <h4> No Pending Contacts yet! </h4>
                         </div>
                     }
                     <div style={containerStyle}>
@@ -309,8 +240,6 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
                                 columnDefs={columnDefs}
                                 defaultColDef={defaultColDef}
                                 gridOptions={gridOptions}
-                                getRowStyle={getRowStyle}
-                                rowStyle = {{cursor:'pointer'}}
                                 rowModelType={'infinite'}
                                 cacheBlockSize={100}
                                 cacheOverflowSize={2}
@@ -321,21 +250,6 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
                                 paginationAutoPageSize={true}
                                 getRowId={getRowId}
                                 onGridReady={onGridReady}
-                                onRowClicked={ useCallback(async (event) => {
-                                    try {
-                                        if (event.node.data.currentState !== 'received')
-                                            navigate(`/ui/messages/${event.node.data.id}`)
-                                        else {
-                                            const message = {targetState: 'read', comment: 'Message read'};
-                                            await API.updateMessageState(message, event.node.data.id, xsrfToken);
-                                            setUnreadMessages(unreadMessages - 1);
-                                            navigate(`/ui/messages/${event.node.data.id}`);
-                                        }
-                                    } catch (err) {
-                                        console.log(err);
-                                        handleError(err);
-                                    }
-                                }, [])}
                             />
                         </div>
                     </div>
@@ -345,4 +259,4 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
     );
 }
 
-export {Messages};
+export {Pending};

@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react';
 import {Form, Button, InputGroup, Col, Alert, Container, Row, Card, DropdownButton, Dropdown} from 'react-bootstrap';
 import API from "../API.jsx";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import axios from "axios";
 import PhoneInput from "react-phone-number-input";
 import {AddressSelector} from "./Utils.jsx";
@@ -26,7 +26,11 @@ const CreateCustomer = ({xsrfToken}) => {
     const [formErrors, setFormErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const location = useLocation();
+    // Pending Id and contact
+    const pendingId = location.state?.id;
+    const pendingContact = location.state?.contact;
     const [error, setError] = useState(null);
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password

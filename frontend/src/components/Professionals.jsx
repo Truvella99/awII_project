@@ -16,7 +16,7 @@ import {InfiniteRowModelModule} from "@ag-grid-community/infinite-row-model";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function Professionals({loggedIn, role, unreadMessages}) {
+function Professionals({loggedIn, role, unreadMessages, pending}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -706,7 +706,7 @@ function Professionals({loggedIn, role, unreadMessages}) {
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px', maxWidth: '250px'}}>
-                        <SideBar role={role} unreadMessages={unreadMessages}/>
+                        <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
                     <Row style={{marginBottom: '50px'}}>
                         { (role === "operator" || role === "manager") ?
@@ -720,7 +720,7 @@ function Professionals({loggedIn, role, unreadMessages}) {
                         <h5> Filter by </h5>
                     </Row>
                     <Row>
-                        <Col ref={containerRef} style={role === "customer" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '33.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
+                        <Col ref={containerRef} style={role === "customer" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '27vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
                             <h6 key={0} ref={(f) => filtersRef.current[0] = f}>
                                 Skills:
                             </h6>

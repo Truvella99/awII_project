@@ -21,7 +21,7 @@ import {MessageContext, TokenContext} from "../messageCtx.js";
 import Select from "react-select";
 
 
-function MessageForm({role, unreadMessages, setUnreadMessages}) {
+function MessageForm({role, unreadMessages, setUnreadMessages, pending, setPending}) {
     const [message, setMessage] = useState({
         channel: 'email',
         priority: 'low',
@@ -259,6 +259,18 @@ function MessageForm({role, unreadMessages, setUnreadMessages}) {
         try {
             // API call
             await API.createMessage(message, finalMessage, bodyFlag, xsrfToken);
+            // Update pendings
+            let newPending;
+            if (message.email) {
+                newPending = await API.updatePendingContacts(message.email, null, null, xsrfToken);
+            } else if (message.telephone) {
+                newPending = await API.updatePendingContacts(null, message.telephone, null, xsrfToken);
+            } else if (message.address) {
+                newPending = await API.updatePendingContacts(null, null, message.address, xsrfToken);
+            }
+            if (newPending) {
+                setPending(pending + 1);
+            }
             setUnreadMessages(unreadMessages + 1);
             navigate("/ui/messages");
         } catch (err) {
@@ -276,7 +288,7 @@ function MessageForm({role, unreadMessages, setUnreadMessages}) {
             <Row>
                 <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
-                        <SideBar role={role} unreadMessages={unreadMessages}/>
+                        <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
                 </Col>
                 <Col className="mx-auto">

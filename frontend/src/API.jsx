@@ -725,6 +725,39 @@ async function updateMessagePriority(priority, id, xsrfToken) {
         throw await response.json();
 }
 
+async function getPendingContacts(xsrfToken) {
+    const response = await fetch(`/crm/API/contacts/pendings/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+        return await response.json();
+    else
+        throw await response.json();
+}
+
+async function updatePendingContacts(email, telephone, address, xsrfToken) {
+    let params = new URLSearchParams();
+    if (email != null) params.append('email', encodeURIComponent(email));
+    if (telephone != null) params.append('telephone', encodeURIComponent(telephone));
+    if (address != null) params.append('address', encodeURIComponent(address));
+
+    const response = await fetch(`/crm/API/contacts/newPending/?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => { throw { error: "Connection Error" } });
+    if (response.status === 200)
+        return await response.json();
+    else
+        throw await response.json();
+}
+
 //### GET Documents (with Pagination)
 async function getDocuments(pageNumber, limit, xsrfToken) {
     const response = await fetch(`http://localhost:8080/docStore/API/documents/?pageNumber=${pageNumber}&limit=${limit}`, {
@@ -936,7 +969,8 @@ export default {
     getMessageHistory,
     updateMessageState,
     updateMessagePriority,
-
+    getPendingContacts,
+    updatePendingContacts,
     postDocument,
     getDocumentByUserId,
     getDocumentData,
