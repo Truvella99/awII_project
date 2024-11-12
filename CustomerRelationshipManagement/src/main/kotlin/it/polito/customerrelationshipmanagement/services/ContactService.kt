@@ -22,7 +22,7 @@ interface ContactService {
     ): List<ContactDTO>
 
     fun findById(contactId: Long): ContactDTO
-    fun newPending(email: String?, address: String?, telephone: String?): Boolean
+    fun newPending(data: CheckNewPendingDTO): Boolean
     fun createContact(c: CreateContactDTO, isPending: Boolean = false): ContactDTO
     fun updateContactCategory(contactId: Long, categoryDTO: UpdateCategoryDTO): ContactDTO
     fun updateContactName(contactId: Long, nameDTO: UpdateNameDTO): ContactDTO

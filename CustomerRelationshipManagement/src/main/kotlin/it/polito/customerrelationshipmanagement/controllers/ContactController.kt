@@ -81,14 +81,10 @@ class ContactController(private val contactService: ContactService) {
      * returns true if a new pending has been created with the given contact.
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/API/contacts/newPending/")
+    @PutMapping("/API/contacts/newPending/")
     @PreAuthorize("isAuthenticated() && (hasRole('operator') || hasRole('manager'))")
-    fun newPending(
-        @RequestParam("email") email: String?,
-        @RequestParam("address") address: String?,
-        @RequestParam("telephone") telephone: String?
-    ): Boolean {
-        return contactService.newPending(email, address, telephone)
+    fun newPending(@RequestBody @Valid data: CheckNewPendingDTO): Boolean {
+        return contactService.newPending(data)
     }
 
     /**
