@@ -244,4 +244,11 @@ class ContactController(private val contactService: ContactService) {
         return contactService.deleteContactTelephone(contactId, telephoneId)
     }
 
+// * DELETE /API/contacts/{contactId}/
+// *
+// * Remove contact {contactId} or fail if it does not exist.
+@DeleteMapping("/API/contacts/{contactId}")
+fun deleteContact(@PathVariable("contactId") contactId: Long) {
+    return contactService.deleteContact(contactId)
+}
 }

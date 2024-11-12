@@ -12,6 +12,12 @@ import {MessageContext} from "../messageCtx.js";
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 
 const AddProfessional = ({xsrfToken}) => {
+    const location = useLocation();
+    // Pending Id and contact
+    const pendingId = location.state?.id;
+    const pendingContact = location.state?.contact;
+    const pendingChannel = location.state?.channel;
+
     const [professional, setProfessional] = useState({
         name: '',
         surname: '',
@@ -22,9 +28,9 @@ const AddProfessional = ({xsrfToken}) => {
         employmentState: 'available',
         geographicalLocation: {first: "0", second: "0"},
         dailyRate: 1,
-        email: "",
-        telephone: '',
-        address: '',
+        email: pendingChannel === 'email' ? pendingContact : '',
+        telephone: pendingChannel === 'telephone' ? pendingContact : '',
+        address:  pendingChannel === 'address' ? pendingContact : '',
         skills: [{skill: ''}],
         notes: []
     });
@@ -43,13 +49,8 @@ const AddProfessional = ({xsrfToken}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [formErrors, setFormErrors] = useState({});
-    const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
+    const [address, setAddress] = useState({text: pendingChannel === 'address' ?pendingContact: '', lat: 0.0, lng: 0.0, invalid: false});
     const navigate = useNavigate();
-    const location = useLocation();
-    // Pending Id and contact
-    const pendingId = location.state?.id;
-    const pendingContact = location.state?.contact;
-    const pendingChannel = location.state?.channel;
 
     const [files, setFiles] = useState([]);
     const [fileError, setFileError] = useState(null);
@@ -308,6 +309,9 @@ const AddProfessional = ({xsrfToken}) => {
                     console.log(file)
                     await API.postDocument(profCreated.id,file, xsrfToken);
                 }
+            }
+            if(pendingId){
+                const  res = await API.deleteContact(pendingId, xsrfToken);
             }
 
             setLoading(false);

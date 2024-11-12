@@ -10,6 +10,8 @@ import {MessageContext} from "../messageCtx.js";
 import { Eye, EyeSlash } from 'react-bootstrap-icons'; // Impor
 
 const CreateCustomer = ({xsrfToken}) => {
+    const location = useLocation();
+
     const pendingId = location.state?.id;
     const pendingContact = location.state?.contact;
     const pendingChannel = location.state?.channel;
@@ -28,15 +30,11 @@ const CreateCustomer = ({xsrfToken}) => {
 
     const [formErrors, setFormErrors] = useState({});
     const [loading, setLoading] = useState(false);
-    const [address, setAddress] = useState({text: '', lat: 0.0, lng: 0.0, invalid: false});
+    const [address, setAddress] = useState({text: pendingChannel === 'address' ?pendingContact: '', lat: 0.0, lng: 0.0, invalid: false});
     const navigate = useNavigate();
-    const location = useLocation();
     // Pending Id and contact
 
 
-    console.log("Pending Id", pendingId);
-    console.log("Pending Contact", pendingContact);
-    console.log("Pending Channel", pendingChannel);
     const [error, setError] = useState(null);
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password
@@ -255,7 +253,6 @@ const CreateCustomer = ({xsrfToken}) => {
         setLoading(true);
         try {
             const customerCreated = await API.createCustomer(customer, xsrfToken);
-
             // Chiamata API per creare un nuovo Document
             if (files.length > 0) {
                 // Chiamata API per caricare i file
@@ -264,6 +261,9 @@ const CreateCustomer = ({xsrfToken}) => {
                     console.log(file)
                     await API.postDocument(customerCreated.id,file, xsrfToken);
                 }
+            }
+            if(pendingId){
+                const  res = await API.deleteContact(pendingId, xsrfToken);
             }
 
             setLoading(false);

@@ -35,4 +35,6 @@ interface ContactService {
     fun deleteContactAddress(contactId: Long, addressId: Long): ContactDTO
     fun addContactTelephone(contactId: Long, telephoneDTO: CreateUpdateTelephoneDTO): ContactDTO
     fun deleteContactTelephone(contactId: Long, telephoneId: Long): ContactDTO
+    fun deleteContact(contactId: Long)
+
 }

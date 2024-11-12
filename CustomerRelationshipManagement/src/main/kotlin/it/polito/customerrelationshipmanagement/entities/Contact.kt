@@ -40,5 +40,7 @@ import jakarta.persistence.*
         telephone.contact = this
         telephones.add(telephone)
     }
-
+    override fun toString(): String {
+        return "Contact(name='$name', surname='$surname', email=$emails, address=$addresses, telephone=$telephones)"
+    }
 }

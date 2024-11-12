@@ -740,17 +740,17 @@ async function getPendingContacts(xsrfToken) {
 }
 
 async function updatePendingContacts(email, telephone, address, xsrfToken) {
-    let params = new URLSearchParams();
-    if (email != null) params.append('email', encodeURIComponent(email));
-    if (telephone != null) params.append('telephone', encodeURIComponent(telephone));
-    if (address != null) params.append('address', encodeURIComponent(address));
-
-    const response = await fetch(`/crm/API/contacts/newPending/?${params.toString()}`, {
-        method: 'GET',
+    const response = await fetch(`/crm/API/contacts/newPending/`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             'X-XSRF-TOKEN': xsrfToken,
-        }
+        },
+        body: JSON.stringify(Object.assign({}, {
+            email: email ? email : null,
+            telephone: telephone ? telephone : null,
+            address: address ? address : null
+        }))
     }).catch(() => { throw { error: "Connection Error" } });
     if (response.status === 200)
         return await response.json();
@@ -937,6 +937,30 @@ async function deleteDocumentVersion(userId, version, xsrfToken) {
         throw error;
     }
 }
+async function deleteContact(contactId, xsrfToken) {
+    console.log(`Deleting contact with ID ${contactId}...`);
+    const response = await fetch(`/crm/API/contacts/${contactId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => {
+        throw { error: "Connection Error" };
+    });
+
+    if (response.status === 204 || response.status === 200 ) {
+        console.log("Contact Deleted Successfully")
+        return  true;
+    } else if (response.status === 404) {
+        throw { error: "Contact Not Found" };
+    } else if (response.status === 400) {
+        throw { error: "Invalid contactId Parameter." };
+    } else {
+        console.log("Error Deleting Contact")
+        throw await response.json();
+    }
+}
 export default {
     createJobOffer,
     getJobOfferById,
@@ -974,5 +998,6 @@ export default {
     postDocument,
     getDocumentByUserId,
     getDocumentData,
-    putDocument
+    putDocument,
+    deleteContact
 };

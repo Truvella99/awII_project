@@ -116,6 +116,32 @@ class ContactServiceImpl(
         }
     }
 
+    override fun deleteContact(contactId: Long) {
+        if (contactId < 0) {
+            throw IllegalIdException("Invalid contactId Parameter.")
+        }
+        try {
+            // get the contact entry
+            val contact = contactRepository.findById(contactId).orElseThrow {
+                ContactNotFoundException("Contact with contactId:$contactId not found")
+            }
+            println("contact "+ contact.toString())
+//             Rimuove tutte le email associate
+            if(contact.emails.isNotEmpty())
+                emailRepository.deleteByContactId(contactId)
+            // Rimuove tutti i telefoni associati
+            if(contact.telephones.isNotEmpty())
+                telephoneRepository.deleteByContactId(contactId)
+            // Rimuove tutti gli indirizzi associati
+            if(contact.addresses.isNotEmpty())
+                addressRepository.deleteByContactId(contactId)
+
+            // Rimuove il contatto
+            contactRepository.delete(contact);
+        } catch (e: RuntimeException) {
+            throw ContactNotFoundException("Contact with contactId:$contactId not found")
+        }    }
+
 
     // ----- Create a new contact -----
     override fun createContact(
