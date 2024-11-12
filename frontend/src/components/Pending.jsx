@@ -22,7 +22,6 @@ function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
     const [nothing, setNothing] = useState(false);
     const [tableReady, setTableReady] = useState(false);
     const gridRef = useRef();
-
     // Sort and filter in the table
     const sortAndFilter = (data, sortModel, filterModel) => {
         return sortData(sortModel, filterData(filterModel, data));
@@ -123,11 +122,11 @@ function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
                 return (
                     <div style={{display: "flex", gap: "15px"}}>
                         <Button style={{marginTop: "5px"}} variant="success" size={"sm"} onClick={() => {
-                            navigate("/ui/customers/addCustomer", {state: {id: props.data.id, contact: props.data.contact}});
+                            navigate("/ui/customers/addCustomer", {state: {id: props.data.id, contact: props.data.contact, channel: props.data.channel}});
                         }}> Customer <i className="bi bi-caret-right-fill"></i> </Button>
                         {' '}
                         <Button style={{marginTop: "5px"}} variant="primary" size={"sm"} onClick={() => {
-                            navigate("/ui/professionals/addProfessional", {state: {id: props.data.id, contact: props.data.contact}});
+                            navigate("/ui/professionals/addProfessional", {state: {id: props.data.id, contact: props.data.contact , channel: props.data.channel}});
                         }}> Professional <i className="bi bi-caret-right-fill"></i> </Button>
                     </div>
                 );
@@ -159,16 +158,21 @@ function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
 
                     const modifiedPendings = pendings.map(pending => {
                         let contact;
+                        let channel;
                         if (pending.emails.length > 0) {
                             contact = pending.emails[0].email;
+                            channel = "email";
                         } else if (pending.telephones.length > 0) {
                             contact = pending.telephones[0].telephone;
+                            channel = "telephone";
                         } else if (pending.addresses.length > 0) {
                             contact = pending.addresses[0].address;
+                            channel = "address";
                         }
                         return {
                             ...pending,
-                            contact: contact
+                            contact: contact,
+                            channel: channel
                         };
                     });
                     setPendings(modifiedPendings);

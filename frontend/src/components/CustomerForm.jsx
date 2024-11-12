@@ -10,15 +10,18 @@ import {MessageContext} from "../messageCtx.js";
 import { Eye, EyeSlash } from 'react-bootstrap-icons'; // Impor
 
 const CreateCustomer = ({xsrfToken}) => {
+    const pendingId = location.state?.id;
+    const pendingContact = location.state?.contact;
+    const pendingChannel = location.state?.channel;
     const [customer, setCustomer] = useState({
         name: '',
         surname: '',
         username: '',
         ssncode: '',
         category: 'customer',
-        email: '',
-        telephone: '',
-        address: '',
+        email: pendingChannel === 'email' ? pendingContact : '',
+        telephone: pendingChannel === 'telephone' ? pendingContact : '',
+        address:  pendingChannel === 'address' ? pendingContact : '',
         password: '',
         notes: [],
     });
@@ -29,8 +32,11 @@ const CreateCustomer = ({xsrfToken}) => {
     const navigate = useNavigate();
     const location = useLocation();
     // Pending Id and contact
-    const pendingId = location.state?.id;
-    const pendingContact = location.state?.contact;
+
+
+    console.log("Pending Id", pendingId);
+    console.log("Pending Contact", pendingContact);
+    console.log("Pending Channel", pendingChannel);
     const [error, setError] = useState(null);
     const handleErrors = useContext(MessageContext);
     const [showPassword, setShowPassword] = useState(false); // Stato per gestire visibilità password

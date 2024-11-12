@@ -49,6 +49,8 @@ const AddProfessional = ({xsrfToken}) => {
     // Pending Id and contact
     const pendingId = location.state?.id;
     const pendingContact = location.state?.contact;
+    const pendingChannel = location.state?.channel;
+
     const [files, setFiles] = useState([]);
     const [fileError, setFileError] = useState(null);
     // Regex patterns for validation
