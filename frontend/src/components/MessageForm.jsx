@@ -279,7 +279,7 @@ function MessageForm({role, unreadMessages, setUnreadMessages, pending, setPendi
     };
     // If error, show an error message
     if (error) {
-        handleError(error)
+        handleError(error);
         setError(null);
     }
 
