@@ -174,16 +174,9 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
 const KpiChart = ({ analyticsData, chartName }) => {
     const [hoveredSeriesIndex, setHoveredSeriesIndex] = useState(null);
 
-    // get data dependeing on chartName
-    let labels;
-    let kpidata;
-    if (chartName === "Customers") {
-        labels = analyticsData.map((item) => item.name + " " + item.surname);
-        kpidata = analyticsData.map((item) => item.kpi);
-    } else {
-        labels = analyticsData.map((item) => item.name + " " + item.surname);
-        kpidata = analyticsData.map((item) => item.kpi);
-    }
+    // get data
+    let labels = analyticsData.map((item) => item.name + " " + item.surname);
+    let kpidata = analyticsData.map((item) => item.kpi);
 
     const data = {
         labels: labels,
