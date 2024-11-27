@@ -23,6 +23,7 @@ import API from "./API.jsx";
 import {ViewMessage} from "./components/ViewMessage.jsx";
 import {MessageForm} from "./components/MessageForm.jsx";
 import {Pending} from "./components/Pending.jsx";
+import AnalyticsContainer from './components/Analytics.jsx';
 
 
 function App() {
@@ -146,8 +147,7 @@ function App() {
               <Route path="/ui/messages/:messageId" element={<ViewMessage loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
               <Route path="/ui/messages/addMessage" element={loggedIn && (role === "operator" || role === "manager" )?(<MessageForm role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/pending" element={<Pending loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
-              <Route path="/ui/Registration" element={<></>} /> // Giuseppe
-              <Route path="/ui/Analytics" element={<></>} />
+              <Route path="/ui/Analytics" element={<AnalyticsContainer loggedIn={loggedIn} role={role}/>}/>
             </Routes>
           </Container>
         </MessageContext.Provider>

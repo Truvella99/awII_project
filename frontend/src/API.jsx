@@ -961,6 +961,49 @@ async function deleteContact(contactId, xsrfToken) {
         throw await response.json();
     }
 }
+
+async function getCustomersAnalytics(xsrfToken) {
+    const response = await fetch(`/analytics/API/customers/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => {
+        throw {error: "Connection Error"}
+    });
+    if (response.status === 200) {
+        // 200 status code, parse and return the object
+        const customersAnalytics = await response.json();
+        return customersAnalytics;
+    } else {
+        // json object provided by the server with the error
+        const error = await response.json();
+        throw error;
+    }
+};
+
+async function getProfessionalsAnalytics(xsrfToken) {
+    const response = await fetch(`/analytics/API/professionals/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': xsrfToken,
+        }
+    }).catch(() => {
+        throw {error: "Connection Error"}
+    });
+    if (response.status === 200) {
+        // 200 status code, parse and return the object
+        const professionalsAnalytics = await response.json();
+        return professionalsAnalytics;
+    } else {
+        // json object provided by the server with the error
+        const error = await response.json();
+        throw error;
+    }
+};
+
 export default {
     createJobOffer,
     getJobOfferById,
@@ -999,5 +1042,7 @@ export default {
     getDocumentByUserId,
     getDocumentData,
     putDocument,
-    deleteContact
+    deleteContact,
+    getCustomersAnalytics,
+    getProfessionalsAnalytics
 };

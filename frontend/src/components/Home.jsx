@@ -281,6 +281,7 @@ function Home({ me }) {
                             await API.createMessage(message, me.xsrfToken);
                         }}>add message prefixed</Button>
                         <Button variant="primary" onClick={() => navigate("/ui/customers")}> Go to Home </Button>
+                        <Button variant="primary" onClick={() => navigate("/ui/analytics")}> Analytics </Button>
                     </Col>
                 </Row>
             </Container>
