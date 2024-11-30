@@ -11,7 +11,16 @@ import ChartjsPluginScrollBar from 'chartjs-plugin-scroll-bar';
 
 function AnalyticsContainer({ loggedIn, role }) {
     const navigate = useNavigate();
+    // stato da spostare fuori e passare al container dei grafici
     const [chartName, setChartName] = useState("Customers");
+    /* Dropdown da spostare in tabella
+    <DropdownButton id="dropdown-basic-button" title={`${chartName} JobOffers`} onSelect={(eventKey) => {setChartName(eventKey);}}>
+                <Dropdown.Item eventKey="Customers">Customers JobOffers</Dropdown.Item>
+                <Dropdown.Item eventKey="Customers KPI">Customers Kpi</Dropdown.Item>
+                <Dropdown.Item eventKey="Professionals">Professionals JobOffers</Dropdown.Item>
+                <Dropdown.Item eventKey="Professionals KPI">Professionals Kpi</Dropdown.Item>
+            </DropdownButton>
+    */
     const [data, setData] = useState([]);
     const handleErrors = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -48,17 +57,9 @@ function AnalyticsContainer({ loggedIn, role }) {
     }, [chartName]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <DropdownButton id="dropdown-basic-button" title={`${chartName} JobOffers`} onSelect={(eventKey) => {setChartName(eventKey);}}>
-                <Dropdown.Item eventKey="Customers">Customers JobOffers</Dropdown.Item>
-                <Dropdown.Item eventKey="Customers KPI">Customers Kpi</Dropdown.Item>
-                <Dropdown.Item eventKey="Professionals">Professionals JobOffers</Dropdown.Item>
-                <Dropdown.Item eventKey="Professionals KPI">Professionals Kpi</Dropdown.Item>
-            </DropdownButton>
-            <div style={{ display: 'flex-column', justifyContent: 'space-between', alignItems: 'center', flex: 1 }}>
-                {((chartName.includes("KPI")) ? <KpiChart analyticsData={data} chartName={chartName} /> 
-                : <JobOffersChart analyticsData={data} chartName={chartName} />)}    
-            </div>
+        <div style={{ display: 'flex-column', justifyContent: 'space-between', alignItems: 'center', flex: 1 }}>
+            {((chartName.includes("KPI")) ? <KpiChart analyticsData={data} chartName={chartName} /> 
+            : <JobOffersChart analyticsData={data} chartName={chartName} />)}    
         </div>
     );
 }

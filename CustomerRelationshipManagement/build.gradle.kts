@@ -28,6 +28,15 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation ("org.keycloak:keycloak-admin-client:20.0.0")  // O la versione di Keycloak che stai usando
+	// Spring for Apache Kafka
+	implementation ("org.springframework.kafka:spring-kafka")
+	// Jackson for JSON serialization/deserialization
+	implementation ("com.fasterxml.jackson.core:jackson-databind")
+	implementation ("org.springdoc:springdoc-openapi-ui:1.8.0")
+	// Debezium dependencies
+	implementation("io.debezium:debezium-api:2.4.0.Final")
+	implementation("io.debezium:debezium-embedded:2.4.0.Final")
+	implementation("io.debezium:debezium-connector-postgres:2.4.0.Final")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	runtimeOnly("org.postgresql:postgresql")

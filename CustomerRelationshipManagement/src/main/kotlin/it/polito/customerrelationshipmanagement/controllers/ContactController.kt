@@ -2,6 +2,7 @@ package it.polito.customerrelationshipmanagement.controllers
 
 import com.nimbusds.jwt.JWT
 import it.polito.customerrelationshipmanagement.dtos.*
+import it.polito.customerrelationshipmanagement.producers.AnalyticsProducer
 import it.polito.customerrelationshipmanagement.services.ContactService
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Pattern
@@ -13,13 +14,14 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-class ContactController(private val contactService: ContactService) {
+class ContactController(private val contactService: ContactService, private val analyticsProducer: AnalyticsProducer) {
 
     @GetMapping("/data")
     fun getRoles(authentication: Authentication): Map<String, Any> {
         val principal = authentication.principal as Jwt//prima era JWT TODO
         val realmAccess = principal.getClaim<Map<String, List<String>>>("realm_access")
         val roles = realmAccess["roles"] ?: emptyList()
+        analyticsProducer.sendJobOffer("job-offers",ProvaDTO(22L,"ale","queen"));
         return mapOf("roles" to roles)
     }
 
