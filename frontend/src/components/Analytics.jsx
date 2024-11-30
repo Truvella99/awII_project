@@ -7,6 +7,7 @@ import API from "../API";
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, plugins } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
+import ChartjsPluginScrollBar from 'chartjs-plugin-scroll-bar';
 
 function AnalyticsContainer({ loggedIn, role }) {
     const navigate = useNavigate();
@@ -48,53 +49,54 @@ function AnalyticsContainer({ loggedIn, role }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-            <DropdownButton id="dropdown-basic-button" title={`${chartName} Analytics`} onSelect={(eventKey) => {setChartName(eventKey);}}>
-                <Dropdown.Item eventKey="Customers">Customers Analytics</Dropdown.Item>
-                <Dropdown.Item eventKey="Professionals">Professionals Analytics</Dropdown.Item>
+            <DropdownButton id="dropdown-basic-button" title={`${chartName} JobOffers`} onSelect={(eventKey) => {setChartName(eventKey);}}>
+                <Dropdown.Item eventKey="Customers">Customers JobOffers</Dropdown.Item>
+                <Dropdown.Item eventKey="Customers KPI">Customers Kpi</Dropdown.Item>
+                <Dropdown.Item eventKey="Professionals">Professionals JobOffers</Dropdown.Item>
+                <Dropdown.Item eventKey="Professionals KPI">Professionals Kpi</Dropdown.Item>
             </DropdownButton>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flex: 1 }}>
-                <JobOffersChart analyticsData={data} chartName={chartName} />
-                <KpiChart analyticsData={data} chartName={chartName} />
+            <div style={{ display: 'flex-column', justifyContent: 'space-between', alignItems: 'center', flex: 1 }}>
+                {((chartName.includes("KPI")) ? <KpiChart analyticsData={data} chartName={chartName} /> 
+                : <JobOffersChart analyticsData={data} chartName={chartName} />)}    
             </div>
         </div>
     );
 }
 
-const underLineKpiPlugin = {
-    id: 'underlineKpi',
-    afterDraw: (chart, args, opts) => {
-        const { ctx } = chart;
-        ctx.save();
-
-        const yScale = chart.scales.y;
-        if (yScale && yScale.ticks) {
-
-            yScale.ticks.forEach((tick, index) => {
-                const tickPosition = yScale.getPixelForTick(index);
-
-                ctx.strokeStyle = opts.lineColor || 'blue';
-                ctx.lineWidth = opts.lineWidth || 1;
-                ctx.beginPath();
-
-                const offset_start = 3;
-                const offset_end = 8;
-                // Adjust the start and end positions by offset
-                ctx.moveTo(yScale.left + offset_start, tickPosition + (opts.yOffset || 0)); // Start slightly after
-                ctx.lineTo(yScale.right - offset_end, tickPosition + (opts.yOffset || 0)); // End slightly before
-
-                ctx.stroke();
-            });
-        }
-
-        ctx.restore();
-    },
-};
+function redirect(chartName, id) {
+    if (chartName.includes("Customers")) {
+        window.open(`/ui/customers/${id}`, '_blank');
+    } else {
+        window.open(`/ui/professionals/${id}`, '_blank');
+    }
+}
 
 // Registering chart components and zoom plugin
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, zoomPlugin, underLineKpiPlugin);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, zoomPlugin, ChartjsPluginScrollBar);// underLineKpiPlugin);
 
 const JobOffersChart = ({ analyticsData, chartName }) => {
     const containerRef = useRef(null); // Reference to the container
+
+    // get data dependeing on chartName
+    let labels = analyticsData.map((item) => item.name + " " + item.surname);
+    let ids = analyticsData.map((item) => item.id);
+    let series1, series2, series3;
+    let data1,data2,data3;
+    if (chartName === "Customers") {
+        series1 = "abortedJobOffers";
+        data1 = analyticsData.map((item) => item.abortedJobOffers);
+        series2 = "completedJobOffers";
+        data2 = analyticsData.map((item) => item.completedJobOffers);
+        series3 = "createdJobOffers";
+        data3 = analyticsData.map((item) => item.createdJobOffers);
+    } else {
+        series1 = "abortedJobOffers";
+        data1 = analyticsData.map((item) => item.abortedJobOffers);
+        series2 = "completedJobOffers";
+        data2 = analyticsData.map((item) => item.completedJobOffers);
+        series3 = "candidatedJobOffers";
+        data3 = analyticsData.map((item) => item.candidatedJobOffers);
+    }
 
     // Handle mouse move over the container to check if the cursor is over the x-axis labels
     const handleMouseMove = (event) => {
@@ -109,10 +111,10 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
         const xAxisLeft = xScale.left;
         const xAxisRight = xScale.right;
         const xAxisTop = xScale.top;
-        const xAxisBottom = xScale.bottom;
+        const xAxisBottom = xScale.bottom - 10;
 
         // Determine the height of the x-axis labels
-        const labelHeight = (xAxisBottom - xAxisTop) / chart.data.labels.length;
+        // const labelHeight = (xAxisBottom - xAxisTop) / chart.data.labels.length;
 
         const isHoveringOverLabel =
             mouseX >= xAxisLeft && mouseX <= xAxisRight && mouseY >= xAxisTop && mouseY <= xAxisBottom;
@@ -138,7 +140,7 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
         const xAxisLeft = xScale.left;
         const xAxisRight = xScale.right;
         const xAxisTop = xScale.top;
-        const xAxisBottom = xScale.bottom;
+        const xAxisBottom = xScale.bottom - 10;
     
         // Ensure that the click is within the x-axis label area
         if (mouseY >= xAxisTop && mouseY <= xAxisBottom) {
@@ -152,34 +154,13 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
     
                 // Ensure the label index is within the range of the dataset
                 if (labelIndex >= 0 && labelIndex < chart.data.labels.length) {
-                    const clickedLabel = chart.data.labels[labelIndex];
-                    alert(`You clicked on label: ${clickedLabel}`);
+                    //const clickedLabel = chart.data.labels[labelIndex];
+                    //alert(`You clicked on label: ${clickedLabel}`);
+                    redirect(chartName, ids[labelIndex]);
                 }
             }
         }
     };
-
-    // get data dependeing on chartName
-    let labels;
-    let series1, series2, series3;
-    let data1,data2,data3;
-    if (chartName === "Customers") {
-        labels = analyticsData.map((item) => item.name + " " + item.surname);
-        series1 = "abortedJobOffers";
-        data1 = analyticsData.map((item) => item.abortedJobOffers);
-        series2 = "completedJobOffers";
-        data2 = analyticsData.map((item) => item.completedJobOffers);
-        series3 = "createdJobOffers";
-        data3 = analyticsData.map((item) => item.createdJobOffers);
-    } else {
-        labels = analyticsData.map((item) => item.name + " " + item.surname);
-        series1 = "abortedJobOffers";
-        data1 = analyticsData.map((item) => item.abortedJobOffers);
-        series2 = "completedJobOffers";
-        data2 = analyticsData.map((item) => item.completedJobOffers);
-        series3 = "candidatedJobOffers";
-        data3 = analyticsData.map((item) => item.candidatedJobOffers);
-    }
 
     // Chart.js data
     const data = {
@@ -232,7 +213,7 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
                   mode: 'x',  // Only enable zooming on the x-axis
                 },*/
             },
-            underlineKpi: false
+            scrollBar: {enable: true, scrollType: 'Horizontal'}
         },
         scales: {
             x: {
@@ -247,10 +228,19 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
                     // Set the label color and underline style (if possible)
                     color: 'blue', // Set label text color
                     // Unfortunately, there is no built-in way to underline with Chart.js, but this is the closest approach
-                    /*callback: function(value, index, ticks) {
-                        const label = this.getLabelForValue(value); // Use this method to get the label
-                        return label + label;
-                    },*/
+                    callback: function(value, index, ticks) {
+                        const labels = this.getLabelForValue(value).split(" "); // Use this method to get the label
+                        return labels.map((label, index) => {
+                            if (label.length > 21) {
+                                return label.substring(0, 18) + '...';
+                            }
+                            return label;
+                        })
+                    },
+                    maxRotation: 0, // Prevent rotation
+                    minRotation: 0, // Prevent rotation
+                    autoSkip: false, // Ensure no labels are skipped
+                    padding: 10
                 },
                 // Ensure the x-axis is large enough to scroll
                 grid: {
@@ -284,7 +274,7 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
     };
 
     return (
-        <Container ref={containerRef} onClick={handleClick} onMouseMove={handleMouseMove} style={{ height: "80%", width: "50%" }}>
+        <Container ref={containerRef} onClick={handleClick} onMouseMove={handleMouseMove} style={{width: "100%" }}>
             <Bar data={data} options={options} />
         </Container>
     );
@@ -295,70 +285,99 @@ const KpiChart = ({ analyticsData, chartName }) => {
 
     // get data
     let labels = analyticsData.map((item) => item.name + " " + item.surname);
+    let ids = analyticsData.map((item) => item.id);
     let kpidata = analyticsData.map((item) => item.kpi);
 
     const handleClick = (event) => {
-        const canvas = containerRef.current.querySelector('canvas'); // Find the canvas using the ref
+        const canvas = containerRef.current.querySelector('canvas');
         if (!canvas) return;
-
-        const rect = canvas.getBoundingClientRect(); // Get canvas position
-        const offsetX = event.clientX - rect.left; // X-coordinate relative to the canvas
-        const offsetY = event.clientY - rect.top; // Y-coordinate relative to the canvas
-
-        // Get the Chart.js instance
+    
         const chart = ChartJS.getChart(canvas);
-        if (!chart) {
-            return;
-        }
-
-        const chartArea = chart.chartArea; // Chart's drawing area
-        const yScale = chart.scales.y; // Access the y-axis scale
-
-        // Check if the click is outside the chart area but near the y-axis labels
-        if (offsetX < chartArea.left) {
-            // Loop through y-axis ticks and check if the click is near a label
-            yScale.ticks.forEach((tick, index) => {
-                const tickPosition = yScale.getPixelForTick(index); // Get pixel position of the tick
-                if (Math.abs(offsetY - tickPosition) < 10) { // Check proximity to tick
-                    const label = tick.label; // Get the label text
-                    alert(`You clicked on label: ${label}`);
-                    // Replace the alert with your custom action
+        if (!chart) return;
+    
+        const yScale = chart.scales.y;
+        const chartArea = chart.chartArea;
+    
+        const rect = canvas.getBoundingClientRect();
+        const offsetX = event.clientX - rect.left; // X-coordinate relative to canvas
+        const offsetY = event.clientY - rect.top; // Y-coordinate relative to canvas
+    
+        // Compute the longest label
+        let longestName = 0;
+        yScale.ticks.forEach((tick) => {
+            const label = tick.label;
+            if (label.length > longestName) {
+                longestName = label.length;
+            }
+        });
+    
+        // Shrink the clickable area based on the longest label length
+        const shrinkAmount = Math.round(80 * longestName / 10);
+        const reducedLeftBoundary = chartArea.left - shrinkAmount;
+    
+        // Check if the click is within the reduced label area
+        const yAxisTop = yScale.top;
+        const yAxisBottom = yScale.bottom;
+    
+        const isWithinYAxisLabels =
+            offsetX >= reducedLeftBoundary &&
+            offsetX < chartArea.left &&
+            offsetY >= yAxisTop &&
+            offsetY <= yAxisBottom;
+    
+        if (isWithinYAxisLabels) {
+            // Check which label was clicked
+            yScale.ticks.forEach((tick, labelIndex) => {
+                const tickPosition = yScale.getPixelForTick(labelIndex); // Get pixel position of the tick
+                if (Math.abs(offsetY - tickPosition) < 10) { // Check proximity to the tick
+                    //const label = tick.label; // Get the label text
+                    //alert(`You clicked on label: ${label}`);
+                    redirect(chartName, ids[labelIndex]);
                 }
             });
         }
-    };
+    };    
 
     const handleMouseMove = (event) => {
-        const canvas = containerRef.current.querySelector('canvas'); // Find the canvas using the ref
+        const canvas = containerRef.current.querySelector('canvas');
         if (!canvas) return;
-
-        const chart = ChartJS.getChart(canvas); // Get chart instance
+    
+        const chart = ChartJS.getChart(canvas);
+        if (!chart) return;
+    
         const yScale = chart.scales.y;
-
-        // Get mouse position relative to the canvas
         const mouseX = event.nativeEvent.offsetX;
         const mouseY = event.nativeEvent.offsetY;
-
-        // Check if the mouse is within the y-axis range
-        const yAxisLeft = yScale.left;
-        const yAxisRight = yScale.right;
+    
+        const chartArea = chart.chartArea;
+    
+        // compute longest name
+        let longestName = 0;
+        yScale.ticks.forEach((tick, index) => {
+            const label = tick.label; // Get the label text
+            if (label.length > longestName) {
+                longestName = label.length;
+            }
+        });
+        // Shrink the hover area based on the longest name
+        const shrinkAmount = Math.round(80 * longestName/10);
+        // Reduce the hover area for y-axis labels
+        const reducedLeftBoundary = chartArea.left - shrinkAmount;
         const yAxisTop = yScale.top;
         const yAxisBottom = yScale.bottom;
-
-        // Calculate label area height
-        const labelAreaHeight = (yAxisBottom - yAxisTop) / chart.data.labels.length;
-        const labelHoverBottom = yAxisTop + labelAreaHeight * chart.data.labels.length;
-
+    
         const isOverYAxisLabels =
-            mouseX >= yAxisLeft && mouseX <= yAxisRight && mouseY >= yAxisTop && mouseY <= labelHoverBottom;
-
-        // Change cursor style if hovering over y-axis labels
+            mouseX >= reducedLeftBoundary &&
+            mouseX < chartArea.left &&
+            mouseY >= yAxisTop &&
+            mouseY <= yAxisBottom;
+    
         if (isOverYAxisLabels) {
-            canvas.style.cursor = 'pointer'; // Change to pointer (like a clickable link)
+            canvas.style.cursor = 'pointer';
         } else {
-            canvas.style.cursor = 'default'; // Reset to default cursor
+            canvas.style.cursor = 'default';
         }
-    };
+    };    
 
     const data = {
         labels: labels,
@@ -381,7 +400,7 @@ const KpiChart = ({ analyticsData, chartName }) => {
         plugins: {
             title: {
                 display: true,
-                text: `${chartName} KPI Analytics`,
+                text: `${chartName} Analytics`,
             },
             zoom: {
                 pan: {
@@ -398,11 +417,7 @@ const KpiChart = ({ analyticsData, chartName }) => {
                     },
                 },
             },
-            underlineKpi: false,/* {
-                yOffset: 5,
-                lineWidth: 1,
-                lineColor: 'blue'
-            }*/
+            scrollBar: {enable: true, scrollType: 'Vertical'},
         },
         scales: {
             x: {
@@ -425,6 +440,7 @@ const KpiChart = ({ analyticsData, chartName }) => {
                         // Return label with underline using font style
                         return `Month ${value}`;
                     },*/
+                    padding: 20
                 },
                 grid: {
                     display: false,
@@ -447,12 +463,11 @@ const KpiChart = ({ analyticsData, chartName }) => {
     };
 
     return (
-        <Container ref={containerRef} onMouseMove={handleMouseMove} onClick={handleClick} style={{ height: "80%", width: "50%" }}>
+        <Container ref={containerRef} onMouseMove={handleMouseMove} onClick={handleClick} style={{ width: "100%" }}>
             <Bar data={data} options={options}/>
         </Container>
     );
 };
-
 
 /*
 const data = {
@@ -481,6 +496,40 @@ const data = {
             },
         ],
     };
-    */
+    const underLineKpiPlugin = {
+    id: 'underlineKpi',
+    afterDraw: (chart, args, opts) => {
+        const { ctx } = chart;
+        ctx.save();
+
+        const yScale = chart.scales.y;
+        if (yScale && yScale.ticks) {
+
+            yScale.ticks.forEach((tick, index) => {
+                const tickPosition = yScale.getPixelForTick(index);
+
+                ctx.strokeStyle = opts.lineColor || 'blue';
+                ctx.lineWidth = opts.lineWidth || 1;
+                ctx.beginPath();
+
+                const offset_start = 3;
+                const offset_end = 8;
+                // Adjust the start and end positions by offset
+                ctx.moveTo(yScale.left + offset_start, tickPosition + (opts.yOffset || 0)); // Start slightly after
+                ctx.lineTo(yScale.right - offset_end, tickPosition + (opts.yOffset || 0)); // End slightly before
+
+                ctx.stroke();
+            });
+        }
+
+        ctx.restore();
+    },
+    
+};
+underlineKpi: false,/* {
+                yOffset: 5,
+                lineWidth: 1,
+                lineColor: 'blue'
+            }*/
 
 export default AnalyticsContainer;
