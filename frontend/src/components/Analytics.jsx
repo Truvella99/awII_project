@@ -49,7 +49,7 @@ function AnalyticsContainer({ loggedIn, role }) {
                 handleErrors({ detail: err.message });
             }
         }
-        if (chartName === "Customers") {
+        if (chartName.includes("Customers")) {
             getCustomerAnalytics();
         } else {
             getProfessionalAnalytics();
