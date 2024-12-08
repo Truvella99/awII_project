@@ -23,7 +23,7 @@ class DebeziumConnectorConfig {
             .with("offset.storage.file.filename", offsetStorageTempFile.absolutePath)
             .with("offset.flush.interval.ms", "60000")
             .with("database.hostname", env.getProperty("spring.datasource.url")?.let { extractHost(it) })
-            .with("database.port", env.getProperty("spring.datasource.url")?.let { extractPort(it, "5432") })
+            .with("database.port", env.getProperty("spring.datasource.url")?.let { extractPort(it, "5433") })
             .with("database.user", env.getProperty("spring.datasource.username"))
             .with("database.password", env.getProperty("spring.datasource.password"))
             .with("database.dbname", env.getProperty("spring.datasource.url")?.let { extractDatabase(it) })

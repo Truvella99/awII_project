@@ -21,7 +21,6 @@ class ContactController(private val contactService: ContactService, private val 
         val principal = authentication.principal as Jwt//prima era JWT TODO
         val realmAccess = principal.getClaim<Map<String, List<String>>>("realm_access")
         val roles = realmAccess["roles"] ?: emptyList()
-        analyticsProducer.sendJobOffer("job-offers",ProvaDTO(22L,"ale","queen"));
         return mapOf("roles" to roles)
     }
 

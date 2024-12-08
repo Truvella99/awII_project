@@ -1,5 +1,6 @@
 package it.polito.customerrelationshipmanagement.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import it.polito.customerrelationshipmanagement.KeycloakConfig
 import it.polito.customerrelationshipmanagement.controllers.ProfessionalController
 import it.polito.customerrelationshipmanagement.dtos.*
@@ -23,11 +24,12 @@ class ProfessionalServiceImpl(
     private val contactRepository: ContactRepository,
     private val skillRepository: SkillRepository,
     private val contactService: ContactService,
-    private val noteRepository: NoteRepository
+    private val noteRepository: NoteRepository,
+    private val outboxRepository: OutboxRepository
 ) : ProfessionalService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(ProfessionalController::class.java)
-
+    private val objectMapper = ObjectMapper()
     // functions for km distance
     private fun deg2rad(deg: Double): Double {
         return deg * (Math.PI/180)
@@ -163,7 +165,15 @@ class ProfessionalServiceImpl(
         professional.notes?.forEach { noteDTO ->
             addProfessionalNote(p.id, CreateUpdateNoteDTO(note = noteDTO))
         }
-
+        val o = OutBox();
+        o.eventType = eventType.CreateCustomer;
+        o.data = objectMapper.writeValueAsString(AnalyticsCustomerProfessionalDTO(
+            id = p.id,
+            name = p.contact.name!!,
+            surname = p.contact.surname!!,
+            event = eventType.CreateProfessional
+        ))
+        outboxRepository.save(o)
         logger.info("Professional ${p.contact.name} created.")
         return p.toDTO()
     }
@@ -350,7 +360,15 @@ class ProfessionalServiceImpl(
         }
 
         professionalRepository.save(p)
-
+        val o = OutBox();
+        o.eventType = eventType.UpdateProfessional;
+        o.data = objectMapper.writeValueAsString(AnalyticsCustomerProfessionalDTO(
+            id = p.id,
+            name = p.contact.name!!,
+            surname = p.contact.surname!!,
+            event = eventType.UpdateProfessional
+        ))
+        outboxRepository.save(o)
         logger.info("Professional ${p.contact.name} updated.")
         return p.toDTO()
     }

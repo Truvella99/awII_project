@@ -16,9 +16,13 @@ class OutBox {
 }
 
 enum class eventType(val type: Short) {
-    ProvaDto(0),
-    B(1),
-    C(2);
+    None(0),
+    CreateCustomer(1),
+    UpdateCustomer(2),
+    CreateProfessional(3),
+    UpdateProfessional(4),
+    CreateJobOffer(5),
+    UpdateJobOffer(6);
 
     companion object {
         fun fromType(type: Short): eventType {

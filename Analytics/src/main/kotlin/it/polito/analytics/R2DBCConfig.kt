@@ -39,7 +39,7 @@ class R2DBCConfig(
     }
 
     private fun createDatabaseIfNotExists() {
-        DriverManager.getConnection("jdbc:postgresql://localhost:5433/postgres", "myuser", "secret").use { connection ->
+        DriverManager.getConnection("jdbc:postgresql://localhost:5434/postgres", "myuser", "secret").use { connection ->
             val dbName = "mydatabase"  // Replace with your database name
             val statement = connection.createStatement()
             // Check if the database exists

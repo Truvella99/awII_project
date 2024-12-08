@@ -12,6 +12,7 @@ import it.polito.customerrelationshipmanagement.dtos.CreateUpdateUserDTO
 import it.polito.customerrelationshipmanagement.KeycloakConfig
 import it.polito.customerrelationshipmanagement.getUserKeycloakIdRole
 import org.springframework.security.core.Authentication
+import com.fasterxml.jackson.databind.ObjectMapper
 
 @Service
 @Transactional
@@ -22,10 +23,12 @@ class CustomerServiceImpl(
     private val skillRepository: SkillRepository,
     private val contactRepository: ContactRepository,
     private val contactService: ContactService,
-    private val jobOfferService: JobOfferService
+    private val jobOfferService: JobOfferService,
+    private val outboxRepository: OutboxRepository
 ) : CustomerService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(CustomerController::class.java)
+    private val objectMapper = ObjectMapper()
 
     // ----- Create a new customer -----
     override fun createCustomer(
@@ -90,6 +93,15 @@ class CustomerServiceImpl(
             addCustomerNote(c.id, CreateUpdateNoteDTO(note = note))
         }
 
+        val o = OutBox();
+        o.eventType = eventType.CreateCustomer;
+        o.data = objectMapper.writeValueAsString(AnalyticsCustomerProfessionalDTO(
+            id = c.id,
+            name = c.contact.name!!,
+            surname = c.contact.surname!!,
+            event = eventType.CreateCustomer
+        ))
+        outboxRepository.save(o)
         logger.info("Customer ${c.contact.name} created.")
         return c.toDTO()
     }
@@ -210,7 +222,15 @@ class CustomerServiceImpl(
                 jobOfferService.createJobOffer(jDTO)
             }
         }
-
+        val o = OutBox();
+        o.eventType = eventType.UpdateCustomer;
+        o.data = objectMapper.writeValueAsString(AnalyticsCustomerProfessionalDTO(
+            id = c.id,
+            name = c.contact.name!!,
+            surname = c.contact.surname!!,
+            event = eventType.UpdateCustomer
+        ))
+        outboxRepository.save(o)
         logger.info("Customer ${c.contact.name} updated.")
         return c.toDTO()
     }

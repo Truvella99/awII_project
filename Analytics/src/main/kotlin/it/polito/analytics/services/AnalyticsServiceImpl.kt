@@ -6,10 +6,12 @@ import it.polito.analytics.dtos.ProfessionalDTO
 import it.polito.analytics.repositories.CustomerRepository
 import it.polito.analytics.repositories.JobOfferRepository
 import it.polito.analytics.repositories.ProfessionalRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 
 @Service
+@Transactional
 class AnalyticsServiceImpl(
     private val customerRepository: CustomerRepository,
     private val jobOfferRepository: JobOfferRepository,
@@ -36,7 +38,7 @@ class AnalyticsServiceImpl(
                 val kpi = if ((completedDTO.count + abortedDTO.count).toInt() == 0) {
                     0.0F
                 } else {
-                    completedDTO.count.toFloat() / (completedDTO.count + abortedDTO.count)
+                    100 * (completedDTO.count.toFloat() / (completedDTO.count + abortedDTO.count))
                 }
                 // Now you have all three sources
                 CustomerDTO(
@@ -70,7 +72,7 @@ class AnalyticsServiceImpl(
                 val kpi = if ((completedDTO.count + abortedDTO.count).toInt() == 0) {
                     0.0F
                 } else {
-                    completedDTO.count.toFloat() / (completedDTO.count + abortedDTO.count)
+                    100 * (completedDTO.count.toFloat() / (completedDTO.count + abortedDTO.count))
                 }
                 // Now you have all three sources
                 ProfessionalDTO(

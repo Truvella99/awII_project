@@ -8,8 +8,6 @@ import io.debezium.engine.DebeziumEngine
 import io.debezium.engine.RecordChangeEvent
 import io.debezium.engine.format.ChangeEventFormat
 import it.polito.customerrelationshipmanagement.controllers.JobOfferController
-import it.polito.customerrelationshipmanagement.dtos.ProvaDTO
-import it.polito.customerrelationshipmanagement.dtos.toOutBoxDTO
 import it.polito.customerrelationshipmanagement.entities.eventType
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
@@ -24,6 +22,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.stream.Collectors
 import com.fasterxml.jackson.databind.ObjectMapper
+import it.polito.customerrelationshipmanagement.dtos.*
 import it.polito.customerrelationshipmanagement.producers.AnalyticsProducer
 
 @Component
@@ -53,14 +52,17 @@ class DebeziumListener(
         logger.info("DTO: {}",outboxDto);
         val objectMapper = ObjectMapper()
         when (outboxDto.eventType) {
-            eventType.ProvaDto -> {
-                val json = """{"id":1,"name":"john","surname":"Doe"}"""
-                val provaDto = objectMapper.readValue(json, ProvaDTO::class.java)
-                logger.info("Sending {}",provaDto);
-                analyticsProducer.sendJobOffer("job-offers", provaDto)
+            eventType.CreateCustomer,eventType.UpdateCustomer,eventType.CreateProfessional,eventType.UpdateProfessional  -> {
+                val customerDto = objectMapper.readValue(outboxDto.data, AnalyticsCustomerProfessionalDTO::class.java)
+                logger.info("Sending Kafka {} {}",outboxDto.eventType, customerDto);
+                analyticsProducer.sendCustomerOrProfessional("crm-analytics", customerDto)
             }
-            eventType.B -> TODO()
-            eventType.C -> TODO()
+            eventType.CreateJobOffer,eventType.UpdateJobOffer -> {
+                val jobOfferDTO = objectMapper.readValue(outboxDto.data, AnalyticsJobOfferDTO::class.java)
+                logger.info("Sending Kafka {} {}",outboxDto.eventType, jobOfferDTO);
+                analyticsProducer.sendJobOffer("crm-analytics", jobOfferDTO)
+            }
+            eventType.None -> TODO()
         }
     }
 

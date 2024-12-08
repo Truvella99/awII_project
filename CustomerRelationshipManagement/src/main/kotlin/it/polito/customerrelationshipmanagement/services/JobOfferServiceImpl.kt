@@ -1,5 +1,6 @@
 package it.polito.customerrelationshipmanagement.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import it.polito.customerrelationshipmanagement.KeycloakConfig
 import it.polito.customerrelationshipmanagement.controllers.JobOfferController
 import it.polito.customerrelationshipmanagement.dtos.*
@@ -10,7 +11,6 @@ import it.polito.customerrelationshipmanagement.repositories.*
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.repository.query.Param
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import java.util.*
@@ -22,11 +22,12 @@ class JobOfferServiceImpl(
     private val professionalRepository: ProfessionalRepository,
     private val jobOfferRepository: JobOfferRepository,
     private val skillRepository: SkillRepository,
-    private val jobOfferHistoryRepository: JobOfferHistoryRepository
+    private val jobOfferHistoryRepository: JobOfferHistoryRepository,
+    private val outboxRepository: OutboxRepository
 ) : JobOfferService {
     // logger to log messages in the APIs
     private val logger = LoggerFactory.getLogger(JobOfferController::class.java)
-
+    private val objectMapper = ObjectMapper()
     override fun deleteJobOfferSkill(jobOfferId: Long, skillId: Long): JobOfferDTO {
         if (jobOfferId < 0 && skillId < 0) {
             throw IllegalIdException("Invalid jobOfferId and skillId Parameter.")
@@ -87,7 +88,16 @@ class JobOfferServiceImpl(
             jobOffer.addSkill(s)
             skillRepository.save(s)
         }
-
+        jobOfferRepository.save(jobOffer)
+        val o = OutBox();
+        o.eventType = eventType.CreateJobOffer;
+        o.data = objectMapper.writeValueAsString(AnalyticsJobOfferDTO(
+            jobOfferId = jobOffer.id,
+            finalStatusCustomerAndId = FinalStatusCustomerAndId(customerJobOfferState.Created,customer.id),
+            finalStatusProfessionalsAndIds = listOf(),
+            event = eventType.CreateJobOffer
+        ))
+        outboxRepository.save(o)
         logger.info("jobOffer ${jobOfferDTO.name} created.")
         return jobOfferRepository.save(jobOffer).toDTO()
     }
@@ -335,6 +345,14 @@ class JobOfferServiceImpl(
         }
     }
 
+    private fun fromJobOfferStatusToCustomerJobOfferState(jobOfferState: jobOfferStatus): customerJobOfferState {
+        return when (jobOfferState) {
+            jobOfferStatus.created -> customerJobOfferState.Created
+            jobOfferStatus.aborted -> customerJobOfferState.Aborted
+            jobOfferStatus.done -> customerJobOfferState.Completed
+            else -> customerJobOfferState.Processing
+        }
+    }
 
     // ----- Update the status of a job offer -----
     override fun updateJobOfferStatus(
@@ -347,6 +365,9 @@ class JobOfferServiceImpl(
         val jobOffer = jobOfferRepository.findById(jobOfferId).orElseThrow{
             throw JobOfferNotFoundException("JobOffer with JobOfferId:$jobOfferId not found.")
         }
+        // data for analytics kafka dto (replicate the behaviour OF crm)
+        val finalStatusCustomerAndId: FinalStatusCustomerAndId;
+        var finalStatusProfessionalsAndIds: MutableList<FinalStatusProfessionalAndId> = mutableListOf();
 
         when (jobOffer.currentState) {
             jobOfferStatus.created -> if (data.targetStatus != jobOfferStatus.aborted && data.targetStatus != jobOfferStatus.selection_phase) {
@@ -365,6 +386,7 @@ class JobOfferServiceImpl(
                     // not available is not added
                     if (professional.employmentState == employmentState.available) {
                         jobOffer.addCandidateProfessional(professional)
+                        finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Candidated,professionalId))
                     }
                 }
             }
@@ -396,15 +418,22 @@ class JobOfferServiceImpl(
                 consolidatedProfessional.currentJobOffer = jobOffer
                 jobOffer.consolidatedProfessional = consolidatedProfessional
                 jobOffer.candidateProfessionals.remove(consolidatedProfessional)
+                finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Processing,consolidatedProfessional.id))
                 consolidatedProfessional.candidateJobOffers.remove(jobOffer)
                 jobOffer.candidateProfessionals.forEach { professional ->
                     professional.candidateJobOffers.remove(jobOffer)
                     professional.abortedJobOffers.add(jobOffer)
+                    finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Aborted,professional.id))
                 }
                 jobOffer.abortedProfessionals.addAll(jobOffer.candidateProfessionals)
                 jobOffer.candidateProfessionals.clear()
             } else if (data.targetStatus == jobOfferStatus.aborted) {
                 // flush the professional candidates
+                jobOffer.candidateProfessionals.forEach { professional ->
+                    professional.candidateJobOffers.remove(jobOffer)
+                    professional.abortedJobOffers.add(jobOffer)
+                    finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Aborted,professional.id))
+                }
                 jobOffer.abortedProfessionals.addAll(jobOffer.candidateProfessionals)
                 jobOffer.candidateProfessionals.clear()
             } else if(data.targetStatus == jobOfferStatus.consolidated && data.consolidatedProfessionalId == null) {
@@ -428,6 +457,7 @@ class JobOfferServiceImpl(
                 jobOffer.candidateProfessionals.forEach { professional ->
                     professional.candidateJobOffers.remove(jobOffer)
                     professional.abortedJobOffers.remove(jobOffer)
+                    finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Removed,professional.id))
                 }
                 jobOffer.abortedProfessionals.clear()
                 jobOffer.candidateProfessionals.clear()
@@ -456,11 +486,13 @@ class JobOfferServiceImpl(
                 jobOffer.consolidatedProfessional?.employmentState = employmentState.available
                 jobOffer.addAbortedProfessional(jobOffer.consolidatedProfessional!!)
                 //jobOffer.professional?.addJobOffer(jobOffer)
+                finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Aborted,jobOffer.consolidatedProfessional!!.id))
                 jobOffer.consolidatedProfessional?.currentJobOffer = null
                 jobOffer.consolidatedProfessional = null
             } else {
                 // done status all correct
                 jobOffer.completedProfessional = jobOffer.consolidatedProfessional
+                finalStatusProfessionalsAndIds.add(FinalStatusProfessionalAndId(professionalJobOfferState.Completed,jobOffer.completedProfessional!!.id))
                 jobOffer.consolidatedProfessional = null
 
                 jobOffer.completedProfessional?.employmentState = employmentState.available
@@ -487,6 +519,7 @@ class JobOfferServiceImpl(
 
         //Update status
         jobOffer.currentState = data.targetStatus
+        finalStatusCustomerAndId = FinalStatusCustomerAndId(fromJobOfferStatusToCustomerJobOfferState(jobOffer.currentState),jobOffer.customer.id)
 
         //Add history
         val history = JobOffersHistory()
@@ -498,6 +531,15 @@ class JobOfferServiceImpl(
         logger.info("History with historyId ${savedHistory.id} saved.")
         jobOffer.addHistory(history)
         logger.info("JobOffer ${jobOffer.name} status updated.")
+        val o = OutBox();
+        o.eventType = eventType.UpdateJobOffer;
+        o.data = objectMapper.writeValueAsString(AnalyticsJobOfferDTO(
+            jobOfferId = jobOffer.id,
+            finalStatusCustomerAndId = FinalStatusCustomerAndId(finalStatusCustomerAndId.first,finalStatusCustomerAndId.second),
+            finalStatusProfessionalsAndIds = finalStatusProfessionalsAndIds,
+            event = eventType.UpdateJobOffer
+        ))
+        outboxRepository.save(o)
         return jobOfferRepository.save(jobOffer).toDTO()
     }
 

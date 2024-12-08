@@ -10,7 +10,7 @@ spring:
   application:
     name: CustomerRelationshipManagement
   datasource:
-    url: jdbc:postgresql://localhost:5432/debezium_master?createDatabaseIfNotExist=true
+    url: jdbc:postgresql://localhost:5433/debezium_master?createDatabaseIfNotExist=true
     username: docker
     password: docker
   security:
@@ -20,11 +20,11 @@ spring:
           issuer-uri: http://localhost:9090/realms/CRMRealm
   kafka:
     producer:
-      bootstrap-servers: 127.0.0.1:9092
+      bootstrap-servers: kafka:29092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       client-id: producer
 server:
-    port: 9080
+    port: 8081
 
 #spring.sql.init.mode = always

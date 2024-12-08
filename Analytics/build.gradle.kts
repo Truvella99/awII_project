@@ -29,6 +29,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    // Spring for Apache Kafka
+    implementation ("org.springframework.kafka:spring-kafka")
+    // Jackson for JSON serialization/deserialization
+    implementation ("com.fasterxml.jackson.core:jackson-databind")
+    // Debezium dependencies
+    implementation("io.debezium:debezium-api:2.4.0.Final")
+    implementation("io.debezium:debezium-embedded:2.4.0.Final")
+    implementation("io.debezium:debezium-connector-postgres:2.4.0.Final")
+    implementation ("org.springdoc:springdoc-openapi-ui:1.8.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")

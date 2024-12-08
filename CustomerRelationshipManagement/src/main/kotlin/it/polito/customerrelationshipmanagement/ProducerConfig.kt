@@ -1,6 +1,8 @@
 package it.polito.customerrelationshipmanagement
 
-import it.polito.customerrelationshipmanagement.dtos.ProvaDTO
+import it.polito.customerrelationshipmanagement.dtos.AnalyticsCustomerProfessionalDTO
+import it.polito.customerrelationshipmanagement.dtos.AnalyticsJobOfferDTO
+import it.polito.customerrelationshipmanagement.dtos.CustomerDTO
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.context.annotation.Bean
@@ -12,8 +14,11 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 
 @Configuration
 class KafkaProducerConfig {
-    private val dtos = listOf(ProvaDTO::class.java) // Replace with your actual classes
-    private val address = "localhost:9092"
+    private val dtos = listOf(
+        AnalyticsCustomerProfessionalDTO::class.java,
+        AnalyticsJobOfferDTO::class.java
+    ) // Replace with your actual classes
+    private val address = "localhost:29092"
 
     @Bean
     fun producerFactory(): ProducerFactory<String, Any> {
