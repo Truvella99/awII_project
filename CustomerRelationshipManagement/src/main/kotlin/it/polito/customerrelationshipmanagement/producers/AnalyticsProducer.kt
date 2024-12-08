@@ -11,7 +11,7 @@ class AnalyticsProducer(private val kafkaTemplateMap: Map<Class<*>, KafkaTemplat
     fun sendCustomerOrProfessional(topic: String, customer: AnalyticsCustomerProfessionalDTO) {
         val template = kafkaTemplateMap[AnalyticsCustomerProfessionalDTO::class.java] as KafkaTemplate<String, AnalyticsCustomerProfessionalDTO>;
         template.send(topic, customer)
-        println("JobOfferDTO sent: $customer")
+        println("Customer/Professional sent: $customer")
     }
 
     fun sendJobOffer(topic: String, jobOffer: AnalyticsJobOfferDTO) {

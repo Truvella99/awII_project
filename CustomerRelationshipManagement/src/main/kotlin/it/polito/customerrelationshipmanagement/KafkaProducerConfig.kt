@@ -2,7 +2,6 @@ package it.polito.customerrelationshipmanagement
 
 import it.polito.customerrelationshipmanagement.dtos.AnalyticsCustomerProfessionalDTO
 import it.polito.customerrelationshipmanagement.dtos.AnalyticsJobOfferDTO
-import it.polito.customerrelationshipmanagement.dtos.CustomerDTO
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.context.annotation.Bean

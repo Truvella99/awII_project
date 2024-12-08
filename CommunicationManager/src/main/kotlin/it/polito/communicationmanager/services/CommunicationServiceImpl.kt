@@ -10,6 +10,7 @@ import it.polito.communicationmanager.controllers.CommunicationController
 import it.polito.communicationmanager.dtos.*
 import it.polito.communicationmanager.exceptions.EmailProcessingException
 import it.polito.communicationmanager.exceptions.WrongEmailException
+import it.polito.communicationmanager.producers.CrmProducer
 import org.apache.camel.*
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.google.mail.GoogleMailEndpoint
@@ -94,7 +95,7 @@ class CommunicationServiceImpl() : CommunicationService {
 }
 
 @Component
-class EMailRoute(private val producerTemplate: ProducerTemplate) :
+class EMailRoute(private val crmProducer: CrmProducer)://private val producerTemplate: ProducerTemplate) :
     RouteBuilder() {
     @EndpointInject("google-mail:messages/list")
     lateinit var ep: GoogleMailEndpoint
@@ -140,7 +141,7 @@ class EMailRoute(private val producerTemplate: ProducerTemplate) :
                 )
                 logger.info("Sending message: $createMessageDTO") // Log the message
 
-                val jsonMessage = objectMapper.writeValueAsString(createMessageDTO)
+                /*val jsonMessage = objectMapper.writeValueAsString(createMessageDTO)
 
                 // Send the message using HTTP POST with JSON body
                 producerTemplate.sendBodyAndHeader(
@@ -148,7 +149,8 @@ class EMailRoute(private val producerTemplate: ProducerTemplate) :
                     jsonMessage,
                     Exchange.CONTENT_TYPE,
                     "application/json"
-                )
+                )*/
+                crmProducer.sendMessage("cm-crm",createMessageDTO)
             }
     }
 }
@@ -170,7 +172,7 @@ class GmailConfig {
 
             // Set refresh token
             credential.refreshToken =
-                "1//04pfNhenSdvCvCgYIARAAGAQSNwF-L9IrxcRrnXNN9Fg0cw3sbH2UHRrzY0_bPduBsTic0HFrfzL5wUApp1FdA1adimgqfJqzht8"
+                "1//04UKTwen3jvgDCgYIARAAGAQSNwF-L9Ir43Qwm18tkkbr6ZUetSEBrMF3gveb_qC3CHNIEkPq5T0gCo4odr7oGEkTTrMDnZK-fLg"
             return Gmail.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName("WebAppOAuthClient")
                 .build()
