@@ -23,7 +23,7 @@ import API from "./API.jsx";
 import {ViewMessage} from "./components/ViewMessage.jsx";
 import {MessageForm} from "./components/MessageForm.jsx";
 import {Pending} from "./components/Pending.jsx";
-import AnalyticsContainer from './components/Analytics.jsx';
+import {Analytics} from "./components/Analytics.jsx";
 
 
 function App() {
@@ -131,23 +131,23 @@ function App() {
           <Navigation  me={me} role={role} logout={handleLogout} loggedIn={loggedIn} />
           <Container fluid /*className="mt-5"*/>
             <Routes>
-              <Route path="/ui" element={<Home me={me}/>} />
-              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} /> // Ale Costa
-              <Route path="/ui/professionals/:professionalId" element={loggedIn  && (role !== "customer" )?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
-              <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
-              <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
-              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} /> // Ale Costa
-              <Route path="/ui/customers/:customerId" element={loggedIn && role !== "professional"?(<CustomerProfile role={role} xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} /> // Gaetano view and edit
-              <Route path="/ui/customers/edit/:customerId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
-              <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />  // Gaetano view and edit
-              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} /> // Ale Costa
-              <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} /> // Minicucc
-              <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />  // Minicucc view and edit
+              <Route path="/ui" element={<Home me={me} role={role}/>} />
+              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/professionals/:professionalId" element={loggedIn  && (role !== "customer" )?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/customers/:customerId" element={loggedIn && role !== "professional"?(<CustomerProfile role={role} xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/customers/edit/:customerId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />
+              <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />
               <Route path="/ui/messages" element={<Messages loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending}/>} />
               <Route path="/ui/messages/:messageId" element={<ViewMessage loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
               <Route path="/ui/messages/addMessage" element={loggedIn && (role === "operator" || role === "manager" )?(<MessageForm role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/pending" element={<Pending loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
-              <Route path="/ui/Analytics" element={<AnalyticsContainer loggedIn={loggedIn} role={role}/>}/>
+              <Route path="/ui/analytics" element={<Analytics loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>}/>
             </Routes>
           </Container>
         </MessageContext.Provider>

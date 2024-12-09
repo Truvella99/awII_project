@@ -9,6 +9,7 @@ import customersImage from "../icons/customers.png";
 import professionalsImage from "../icons/professionals.png";
 import messagesImage from "../icons/messages.png";
 import pendingImage from "../icons/pending.png";
+import analyticsImage from "../icons/analytics.png";
 import { FaInfoCircle } from "react-icons/fa";
 
 const API_KEY = 'AIzaSyCO5hFwnkcQjDkoivao8qpJbKvITf_vb1g';
@@ -218,6 +219,12 @@ function SideBar({role, unreadMessages, pending}) {
                         color: path === "/ui/pending" ? sidebarThemes["light"].menu.active.color : '',
                         fontSize: (pending > 0) ? '16px' : ''
                     }} suffix={(pending > 0) ? <Badge pill bg="primary"> {pending} </Badge> : ''} component={<Link to="/ui/pending" />}> Pending Contacts </MenuItem> : ''
+                }
+                { (role === "manager") ?
+                    <MenuItem icon={<img src={analyticsImage} height={28} width={28}/>} style={{
+                        backgroundColor: path === "/ui/analytics" ? hexToRgba(sidebarThemes["light"].menu.active.backgroundColor, 1) : '',
+                        color: path === "/ui/analytics" ? sidebarThemes["light"].menu.active.color : ''
+                    }} component={<Link to="/ui/analytics" />}> Analytics </MenuItem> : ''
                 }
                 { (role === "professional") ?
                     <MenuItem icon={<img src={jobOffersImage} height={28} width={28}/>} style={{

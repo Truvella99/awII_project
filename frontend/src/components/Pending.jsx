@@ -224,7 +224,7 @@ function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
     return (
         <Container fluid>
             <Row>
-                <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
+                <Col xs={'auto'} style={{height: '90vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
                         <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>

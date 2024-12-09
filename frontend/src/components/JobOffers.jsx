@@ -669,11 +669,11 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
     return (
         <Container fluid>
             <Row>
-                <Col xs={'auto'} style={{height: '80vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
+                <Col xs={'auto'} style={{height: '90vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px', maxWidth: '250px'}}>
                         <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
-                    <Row style={{marginBottom: '50px'}}>
+                    <Row style={role === "professional" ? {marginBottom: '58px'} : {marginBottom: '50px'}}>
                         { (role === "operator" || role === "manager") ?
                             <Col className="d-flex justify-content-center">
                                 <Button style={{marginRight: '15px'}} variant="info" onClick={() => navigate('/ui/jobOffers/addJobOffer')}> <i className="bi bi-plus-lg"></i> Add job offer </Button>
@@ -685,7 +685,7 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
                         <h5> Filter by </h5>
                     </Row>
                     <Row>
-                        <Col ref={containerRef} style={role === "professional" ? {maxHeight: '58vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '27vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
+                        <Col ref={containerRef} style={role === "professional" ? {maxHeight: '68vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '29.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
                             <h6 key={0} ref={(f) => filtersRef.current[0] = f} >
                                 Skills:
                             </h6>
