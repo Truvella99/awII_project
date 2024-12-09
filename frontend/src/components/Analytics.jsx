@@ -9,10 +9,7 @@ import {useNavigate} from "react-router-dom";
 
 function Analytics({loggedIn, role, unreadMessages, pending}) {
     const navigate = useNavigate();
-    const handleError = useContext(MessageContext);
-    const xsrfToken = useContext(TokenContext);
-    const [chartName, setChartName] = useState("Customers");
-    const [nothing, setNothing] = useState(false);
+    const [isEmpty, setIsEmpty] = useState(false);
     const optionCharts = [
         {value: "Customers", label: "Customers job offers"},
         {value: "Customers KPI", label: "Customers KPI"},
@@ -58,14 +55,15 @@ function Analytics({loggedIn, role, unreadMessages, pending}) {
                     />
                 </Col>
                 <Col>
-                    {nothing &&
-                        <div style={{position: "fixed", zIndex: 1, paddingLeft: "500px", paddingTop: "250px"}}>
+                    {isEmpty ?
+                        <div style={{ position: "fixed", zIndex: 1, paddingLeft: "500px", paddingTop: "250px" }}>
                             <h4> No Analytics yet! </h4>
                         </div>
+                        :
+                        <div>
+                            <AnalyticsContainer chartName={selectedChart.value} setIsEmpty={setIsEmpty} />
+                        </div>
                     }
-                    <div>
-                        {/*<AnalyticsContainer chartName={chartName}/>*/}
-                    </div>
                 </Col>
             </Row>
         </Container>

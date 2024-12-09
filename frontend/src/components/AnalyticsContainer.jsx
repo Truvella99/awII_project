@@ -9,15 +9,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 import zoomPlugin from 'chartjs-plugin-zoom';
 import ChartjsPluginScrollBar from 'chartjs-plugin-scroll-bar';
 
-function AnalyticsContainer({ chartName }) {
-    /*
-    <DropdownButton id="dropdown-basic-button" title={`${chartName} JobOffers`} onSelect={(eventKey) => {setChartName(eventKey);}}>
-                <Dropdown.Item eventKey="Customers">Customers JobOffers</Dropdown.Item>
-                <Dropdown.Item eventKey="Customers KPI">Customers Kpi</Dropdown.Item>
-                <Dropdown.Item eventKey="Professionals">Professionals JobOffers</Dropdown.Item>
-                <Dropdown.Item eventKey="Professionals KPI">Professionals Kpi</Dropdown.Item>
-            </DropdownButton>
-    */
+function AnalyticsContainer({ chartName, setIsEmpty }) {
     const [data, setData] = useState([]);
     const handleErrors = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -28,6 +20,7 @@ function AnalyticsContainer({ chartName }) {
                 const customers = await API.getCustomersAnalytics(xsrfToken);
                 //console.log(customers);
                 setData(customers);
+                setIsEmpty(customers.length === 0);
             } catch (err) {
                 //console.log(err);
                 handleErrors({ detail: err.message });
@@ -38,6 +31,7 @@ function AnalyticsContainer({ chartName }) {
                 const professionals = await API.getProfessionalsAnalytics(xsrfToken);
                 //console.log(professionals);
                 setData(professionals);
+                setIsEmpty(professionals.length === 0);
             } catch (err) {
                 //console.log(err);
                 handleErrors({ detail: err.message });
@@ -224,6 +218,10 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
                     color: 'blue', // Set label text color
                     // Unfortunately, there is no built-in way to underline with Chart.js, but this is the closest approach
                     callback: function(value, index, ticks) {
+                        // if no data return empty label
+                        if (analyticsData.length === 0) {
+                            return "";
+                        }
                         const labels = this.getLabelForValue(value).split(" "); // Use this method to get the label
                         return labels.map((label, index) => {
                             if (label.length > 21) {
