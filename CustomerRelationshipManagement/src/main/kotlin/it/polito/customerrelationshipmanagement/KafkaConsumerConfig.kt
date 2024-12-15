@@ -4,6 +4,7 @@ import it.polito.customerrelationshipmanagement.consumers.CmConsumer
 import it.polito.customerrelationshipmanagement.dtos.CreateMessageDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
@@ -22,7 +23,10 @@ class KafkaConsumerConfig(
     private val dtoTopicMap = mapOf(
         CreateMessageDTO::class.java to "cm-crm"
     )
-    private val address = "localhost:29092"
+    // Inject the bootstrap server URL from application.yml
+    @Value("\${spring.kafka.bootstrap-servers}")
+    private lateinit var address: String
+    //private val address = "localhost:29092"
 
     fun <T> consumerFactory(clazz: Class<T>, groupId: String): ConsumerFactory<String, T> {
         val configProps = mapOf(

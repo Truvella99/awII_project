@@ -19,11 +19,10 @@ spring:
         jwt:
           issuer-uri: http://localhost:9090/realms/CRMRealm
   kafka:
+    bootstrap-servers: localhost:29092
     producer:
-      bootstrap-servers: kafka:29092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      client-id: producer
 server:
     port: 8081
 

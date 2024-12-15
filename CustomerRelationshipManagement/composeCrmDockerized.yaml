@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: debezium/postgres:13
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=debezium_master
+    networks:
+      - shared_network
+
+  debezium:
+    image: debezium/connect:1.4
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    ports:
+      - 8091:8083
+    networks:
+      - shared_network
+
+  crm:
+    image: 'docker.io/library/customer-relationship-management:0.0.1-SNAPSHOT'
+    ports:
+      - "8081:8080"
+    expose:
+      - "8081"
+    build:
+      context: .
+    volumes:
+      - ./logs:/workspace/logs
+    depends_on:
+      - postgres
+      - debezium
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/debezium_master?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=docker
+      - SPRING_DATASOURCE_PASSWORD=docker
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    networks:
+      - shared_network
+
+  debezium-ui:
+    image: debezium/debezium-ui:2.4
+    platform: linux/amd64
+    environment:
+      - KAFKA_CONNECT_URIS=http://connect:8091
+    ports:
+      - 9091:8080
+    depends_on:
+      - debezium
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true
+    name: shared_network
+    driver: bridge

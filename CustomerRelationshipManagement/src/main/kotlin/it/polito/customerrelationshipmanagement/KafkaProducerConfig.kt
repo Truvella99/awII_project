@@ -4,6 +4,7 @@ import it.polito.customerrelationshipmanagement.dtos.AnalyticsCustomerProfession
 import it.polito.customerrelationshipmanagement.dtos.AnalyticsJobOfferDTO
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
@@ -17,7 +18,10 @@ class KafkaProducerConfig {
         AnalyticsCustomerProfessionalDTO::class.java,
         AnalyticsJobOfferDTO::class.java
     ) // Replace with your actual classes
-    private val address = "localhost:29092"
+    // Inject the bootstrap server URL from application.yml
+    @Value("\${spring.kafka.bootstrap-servers}")
+    private lateinit var address: String
+    //private val address = "localhost:29092"
 
     @Bean
     fun producerFactory(): ProducerFactory<String, Any> {
