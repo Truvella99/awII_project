@@ -1,3 +1,14 @@
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+  datasource:
+    url: jdbc:postgresql://postgres:5432/debezium_master
+    username: docker
+    password: docker
   kafka:
     bootstrap-servers: kafka:9092

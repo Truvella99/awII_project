@@ -4,6 +4,10 @@ spring:
     hibernate:
       ddl-auto: create
     generate-ddl: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
   mvc:
     problemdetails:
       enabled: true
