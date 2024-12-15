@@ -3,6 +3,7 @@ package it.polito.communicationmanager
 import it.polito.communicationmanager.dtos.CreateMessageDTO
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
@@ -15,7 +16,9 @@ class KafkaProducerConfig {
     private val dtos = listOf(
         CreateMessageDTO::class.java
     ) // Replace with your actual classes
-    private val address = "localhost:29092"
+    // Inject the bootstrap server URL from application.yml
+    @Value("\${spring.kafka.bootstrap-servers}")
+    private lateinit var address: String
 
     @Bean
     fun producerFactory(): ProducerFactory<String, Any> {

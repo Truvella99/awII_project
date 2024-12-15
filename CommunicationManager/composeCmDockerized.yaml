@@ -1,0 +1,21 @@
+services:
+  cm:
+    image: 'docker.io/library/communication-manager:0.0.1-snapshot'
+    ports:
+      - "8082:8080"
+    expose:
+      - "8082"
+    build:
+      context: .
+    volumes:
+      - ./logs:/workspace/logs
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true
+    name: shared_network
+    driver: bridge

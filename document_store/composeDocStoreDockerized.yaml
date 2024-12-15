@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
+
+  docStore:
+    image: 'docker.io/library/document-store:0.0.1-SNAPSHOT'
+    ports:
+      - "8083:8080"
+    expose:
+      - "8083"
+    build:
+      context: .
+    volumes:
+      - ./logs:/workspace/logs
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+volumes:
+  postgres_data:
