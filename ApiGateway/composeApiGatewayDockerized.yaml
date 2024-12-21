@@ -2,14 +2,15 @@ services:
   keycloak:
     image: keycloak/keycloak
     ports:
-      - '9090:8080'
+      - '9090:9090' # Bind port 9090 externally to 9090 internally
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: password
       KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
+      KEYCLOAK_HOSTNAME: http://localhost:9090 # Updated to match the external port
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
-    command: start-dev --import-realm
+    command: start-dev --import-realm --http-port=9090 # Set Keycloak to use port 9090 internally
     networks:
       - shared_network
 
@@ -74,6 +75,8 @@ services:
       - "--web.listen-address=:9091"  # Change the web listen port to 9091
     ports:
       - 9091:9091
+    networks:
+      - shared_network
 
   grafana:
     image: grafana/grafana-oss:8.5.2
@@ -96,6 +99,8 @@ services:
       # Enabled for logging
       - GF_LOG_MODE=console file
       - GF_LOG_FILTERS=alerting.notifier.slack:debug alertmanager:debug ngalert:debug
+    networks:
+      - shared_network
 
   loki:
     image: grafana/loki:main
@@ -104,6 +109,41 @@ services:
       - "--config.file=/etc/loki/local-config.yaml"
     ports:
       - 3100:3100
+    networks:
+      - shared_network
+
+  apiGateway:
+    image: 'docker.io/library/api-gateway:0.0.1-SNAPSHOT'
+    restart: always
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    build:
+      context: .
+    volumes:
+      - ./logs:/workspace/logs
+    depends_on:
+      - keycloak
+      - kafka
+      - zookeeper
+      - kafka-ui
+      - schema-registry
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      #- CLIENT_SECRET=hyNPBlfIeAlG9xk1RpqZb7t0a4ZxShLE
+      #- ISSUER_URI=http://keycloak:8080/realms/CRMRealm
+      #- REDIRECT_URI=http://localhost:8089/login/oauth2/code/api-gateway-client
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+    networks:
+      - shared_network
+
+  frontend:
+    image: 'frontend:1.0'
+    ports:
+      - "5173:80"
+    networks:
+      - shared_network
 
 networks:
   shared_network:

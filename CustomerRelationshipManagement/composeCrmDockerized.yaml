@@ -28,8 +28,9 @@ services:
 
   crm:
     image: 'docker.io/library/customer-relationship-management:0.0.1-SNAPSHOT'
+    restart: always
     ports:
-      - "8081:8080"
+      - "8081:8081"
     expose:
       - "8081"
     build:
@@ -45,18 +46,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=docker
       - SPRING_DATASOURCE_PASSWORD=docker
       - SPRING_JPA_HIBERNATE_DDL_AUTO=create
-    networks:
-      - shared_network
-
-  debezium-ui:
-    image: debezium/debezium-ui:2.4
-    platform: linux/amd64
-    environment:
-      - KAFKA_CONNECT_URIS=http://connect:8091
-    ports:
-      - 9091:8080
-    depends_on:
-      - debezium
     networks:
       - shared_network
 

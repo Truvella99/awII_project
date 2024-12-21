@@ -1,0 +1,26 @@
+<configuration>
+    <!-- Import Default Console Logger To Print On The Console in the Default Way-->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <!-- Use an environment variable for the Loki URL -->
+            <url>${LOKI_URL:-http://localhost:3100/loki/api/v1/push}</url>
+        </http>
+        <format>
+            <label>
+                <!-- App Name to use into Grafana to filter by microservice -->
+                <pattern>app=api-gateway,host=${HOSTNAME}</pattern>
+            </label>
+            <message>
+                <pattern>%-5level [%.5(${HOSTNAME})] %.10thread %logger{20} | %msg %ex</pattern>
+            </message>
+        </format>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="LOKI" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

@@ -37,7 +37,7 @@ class SecurityConfig(val crr: ClientRegistrationRepository) {
                 it.requestMatchers("/ui/**").permitAll()
                 it.anyRequest().permitAll()
             }
-            .oauth2Login {  }
+            .oauth2Login { it.successHandler { request, response, authentication -> response.sendRedirect("http://localhost:8080/ui") } }
             .csrf { it.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     it.csrfTokenRequestHandler(SpaCsrfTokenRequestHandler())}
             .logout { it.logoutSuccessHandler(oidcLogoutSuccessHandler()) }

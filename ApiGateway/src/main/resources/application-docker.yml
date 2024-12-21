@@ -8,39 +8,39 @@ spring:
           type: autodetect
         routes:
           - id: crm
-            uri: http://localhost:8081
+            uri: http://crm:8081
             predicates:
               - Path=/crm/**
             filters:
               - StripPrefix=1
               - TokenRelay
           - id: communicationManager
-            uri: http://localhost:8082
+            uri: http://cm:8082
             predicates:
               - Path=/communicationManager/**
             filters:
               - StripPrefix=1
               - TokenRelay
           - id: docStore
-            uri: http://localhost:8083
+            uri: http://docStore:8083
             predicates:
               - Path=/docStore/**
             filters:
               - StripPrefix=1
               - TokenRelay
           - id: analytics
-            uri: http://localhost:8084
+            uri: http://analytics:8084
             predicates:
               - Path=/analytics/**
             filters:
               - StripPrefix=1
               - TokenRelay
           - id: ui
-            uri: http://localhost:5173
+            uri: http://frontend:80
             predicates:
               - Path=/ui/**
             filters:
-#              - StripPrefix=1
+              - StripPrefix=1
           - id: home
             uri: http://localhost:8080
             predicates:
@@ -52,7 +52,7 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://localhost:9090/realms/CRMRealm
+            issuer-uri: http://keycloak:9090/realms/CRMRealm
         registration:
           crmclient:
             provider: keycloak
@@ -63,11 +63,5 @@ spring:
               - offline_access
             authorization-grant-type: authorization_code
             redirect-uri: http://localhost:8080/login/oauth2/code/crmclient
-management:
-  endpoints:
-    web:
-      exposure:
-        include:
-          - prometheus
 server:
   port: 8080

@@ -7,15 +7,20 @@ import org.keycloak.admin.client.KeycloakBuilder
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.jwt.Jwt
+import java.io.File
 
 @Configuration
 class KeycloakConfig {
     companion object {
-        private var serverURL: String = "http://localhost:9090"
+        private var serverURL: String = if(isRunningInDocker()) "http://keycloak:9090" else "http://localhost:9090";
         private var realm: String = "CRMRealm"
         private var clientID: String = "crmclient"
         private var clientSecret: String = "UAGMutFg200hRp3pfFomluDh7GAQ8epl"
         private var keycloak: Keycloak? = null
+
+        private fun isRunningInDocker(): Boolean {
+            return File("/.dockerenv").exists()
+        }
 
         private fun getInstance(): Keycloak {
             if (keycloak == null) {

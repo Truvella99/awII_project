@@ -13,7 +13,7 @@ services:
   docStore:
     image: 'docker.io/library/document-store:0.0.1-SNAPSHOT'
     ports:
-      - "8083:8080"
+      - "8083:8083"
     expose:
       - "8083"
     build:

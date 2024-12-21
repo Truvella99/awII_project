@@ -26,18 +26,6 @@ services:
     networks:
       - shared_network
 
-  debezium-ui:
-    image: debezium/debezium-ui:2.4
-    platform: linux/amd64
-    environment:
-      - KAFKA_CONNECT_URIS=http://connect:8091
-    ports:
-      - 9091:8080
-    depends_on:
-      - debezium
-    networks:
-      - shared_network
-
 networks:
   shared_network:
     external: true
