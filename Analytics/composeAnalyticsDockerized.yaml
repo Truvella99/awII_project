@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    ports:
+      - '5434:5432'
+    networks:
+      - shared_network
+
+  analytics:
+    image: 'docker.io/library/analytics:0.0.1-SNAPSHOT'
+    ports:
+      - "8084:8080"
+    expose:
+      - "8084"
+    build:
+      context: .
+    volumes:
+      - ./logs:/workspace/logs
+      - ./compose.yaml:/app/compose.yaml
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+#      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mydatabase
+#      - SPRING_DATASOURCE_USERNAME=myuser
+#      - SPRING_DATASOURCE_PASSWORD=secret
+      #- SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true
+    name: shared_network
+    driver: bridge

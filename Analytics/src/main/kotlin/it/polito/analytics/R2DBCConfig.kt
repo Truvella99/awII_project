@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.transaction.annotation.EnableTransactionManagement
+import reactor.core.publisher.Mono
 import java.nio.charset.Charset
 import java.sql.DriverManager
 
@@ -20,9 +21,11 @@ class R2DBCConfig(
 ): InitializingBean {
     @Value("classpath:/schema.sql")
     private lateinit var schemaSql: org.springframework.core.io.Resource // file taken from resources folder
+//    @Value("\${spring.datasource.url}")
+//    lateinit var datasourceUrl: String
 
     override fun afterPropertiesSet() {
-        createDatabaseIfNotExists()
+        //createDatabaseIfNotExists()
         // do something before class get visible to the world
         // load the sql script
         val schema = schemaSql.inputStream.bufferedReader().use { it.readText() }
@@ -38,8 +41,8 @@ class R2DBCConfig(
         LoggerFactory.getLogger(R2DBCConfig::class.java).info("Database Started")
     }
 
-    private fun createDatabaseIfNotExists() {
-        DriverManager.getConnection("jdbc:postgresql://localhost:5434/postgres", "myuser", "secret").use { connection ->
+    /*private fun createDatabaseIfNotExists() {
+        DriverManager.getConnection(datasourceUrl, "myuser", "secret").use { connection ->
             val dbName = "mydatabase"  // Replace with your database name
             val statement = connection.createStatement()
             // Check if the database exists
@@ -52,5 +55,5 @@ class R2DBCConfig(
                 LoggerFactory.getLogger(R2DBCConfig::class.java).info("Database '$dbName' already exists.")
             }
         }
-    }
+    }*/
 }

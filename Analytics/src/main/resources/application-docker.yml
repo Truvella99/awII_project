@@ -9,7 +9,7 @@ spring:
     compose:
       enabled: true
   r2dbc:
-    url: r2dbc:pool:postgresql://localhost:5434/mydatabase
+    url: r2dbc:pool:postgresql://postgres:5432/mydatabase
     username: myuser
     password: secret
     # driver-class-name: org.postgresql.Driver
@@ -19,7 +19,7 @@ spring:
         jwt:
           issuer-uri: http://localhost:9090/realms/CRMRealm
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: crm-analytics
       auto-offset-reset: earliest

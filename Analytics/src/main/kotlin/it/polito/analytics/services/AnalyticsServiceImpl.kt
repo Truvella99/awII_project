@@ -6,12 +6,12 @@ import it.polito.analytics.dtos.ProfessionalDTO
 import it.polito.analytics.repositories.CustomerRepository
 import it.polito.analytics.repositories.JobOfferRepository
 import it.polito.analytics.repositories.ProfessionalRepository
-import jakarta.transaction.Transactional
+//import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 
 @Service
-@Transactional
+//@Transactional
 class AnalyticsServiceImpl(
     private val customerRepository: CustomerRepository,
     private val jobOfferRepository: JobOfferRepository,

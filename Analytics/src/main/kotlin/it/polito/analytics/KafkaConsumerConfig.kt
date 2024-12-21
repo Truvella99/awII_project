@@ -1,17 +1,16 @@
 package it.polito.analytics
 
 import it.polito.analytics.consumers.CrmConsumer
-import it.polito.analytics.consumers.ProvaDTO
 import it.polito.analytics.dtos.AnalyticsCustomerProfessionalDTO
 import it.polito.analytics.dtos.AnalyticsJobOfferDTO
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.kafka.support.serializer.JsonDeserializer
@@ -25,7 +24,9 @@ class KafkaConsumerConfig(
         AnalyticsCustomerProfessionalDTO::class.java to "crm-analytics",
         AnalyticsJobOfferDTO::class.java to "crm-analytics"
     )
-    private val address = "localhost:29092"
+    // Inject the bootstrap server URL from application.yml
+    @Value("\${spring.kafka.bootstrap-servers}")
+    private lateinit var address: String
 
     fun <T> consumerFactory(clazz: Class<T>, groupId: String): ConsumerFactory<String, T> {
         val configProps = mapOf(
