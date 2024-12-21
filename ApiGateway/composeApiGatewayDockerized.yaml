@@ -131,10 +131,10 @@ services:
       - schema-registry
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
       #- CLIENT_SECRET=hyNPBlfIeAlG9xk1RpqZb7t0a4ZxShLE
       #- ISSUER_URI=http://keycloak:8080/realms/CRMRealm
       #- REDIRECT_URI=http://localhost:8089/login/oauth2/code/api-gateway-client
-      - LOKI_URL=http://loki:3100/loki/api/v1/push
     networks:
       - shared_network
 

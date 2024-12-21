@@ -172,7 +172,7 @@ class GmailConfig {
 
             // Set refresh token
             credential.refreshToken =
-                "1//04UKTwen3jvgDCgYIARAAGAQSNwF-L9Ir43Qwm18tkkbr6ZUetSEBrMF3gveb_qC3CHNIEkPq5T0gCo4odr7oGEkTTrMDnZK-fLg"
+                "1//04UY-jwbPVHF0CgYIARAAGAQSNwF-L9IrfviMfW4ucQvQ9QTRUpnATLMqsHWPDDVnJYA3nQqZNTZEMw8sas06W10to9YN3QCf55o"
             return Gmail.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName("WebAppOAuthClient")
                 .build()

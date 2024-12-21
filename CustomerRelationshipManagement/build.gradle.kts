@@ -37,6 +37,7 @@ dependencies {
 	implementation("io.debezium:debezium-api:2.4.0.Final")
 	implementation("io.debezium:debezium-embedded:2.4.0.Final")
 	implementation("io.debezium:debezium-connector-postgres:2.4.0.Final")
+	implementation("com.github.loki4j:loki-logback-appender:1.5.2")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	runtimeOnly("org.postgresql:postgresql")

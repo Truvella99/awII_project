@@ -24,6 +24,7 @@ services:
       - postgres
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/mydatabase?createDatabaseIfNotExist=true
       - SPRING_DATASOURCE_USERNAME=myuser
       - SPRING_DATASOURCE_PASSWORD=secret

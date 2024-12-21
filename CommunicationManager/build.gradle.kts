@@ -35,6 +35,7 @@ dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("com.github.loki4j:loki-logback-appender:1.5.2")
     //implementation("org.springframework.boot:spring-boot-starter-jdbc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     //runtimeOnly("org.springframework.boot:spring-boot-docker-compose")

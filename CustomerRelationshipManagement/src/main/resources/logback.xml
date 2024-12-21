@@ -2,19 +2,25 @@
     <!-- Import Default Console Logger To Print On The Console in the Default Way-->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
-    <!-- Define the file appender -->
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/CustomerRelationshipManagement.log</file>
-        <encoder>
-            <!-- Define the log message format to save on the file -->
-            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
-        </encoder>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <!-- Use an environment variable for the Loki URL -->
+            <url>${LOKI_URL:-http://localhost:3100/loki/api/v1/push}</url>
+        </http>
+        <format>
+            <label>
+                <!-- App Name to use into Grafana to filter by microservice -->
+                <pattern>app=crm,host=${HOSTNAME}</pattern>
+            </label>
+            <message>
+                <pattern>%-5level [%.5(${HOSTNAME})] %.10thread %logger{20} | %msg %ex</pattern>
+            </message>
+        </format>
     </appender>
 
-    <!-- Specify the root logger -->
-    <root level="info">
-        <!-- Attach both appenders to the root logger (to save on the file and print on the console) -->
-        <appender-ref ref="FILE" />
+    <root level="INFO">
+        <appender-ref ref="LOKI" />
         <appender-ref ref="CONSOLE" />
     </root>
 </configuration>

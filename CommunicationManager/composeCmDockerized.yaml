@@ -11,6 +11,7 @@ services:
       - ./logs:/workspace/logs
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
     networks:
       - shared_network
 

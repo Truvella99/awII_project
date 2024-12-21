@@ -33,6 +33,7 @@ dependencies {
     implementation ("org.springframework.kafka:spring-kafka")
     // Jackson for JSON serialization/deserialization
     implementation ("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.github.loki4j:loki-logback-appender:1.5.2")
     // Debezium dependencies
 //    implementation("io.debezium:debezium-api:2.4.0.Final")
 //    implementation("io.debezium:debezium-embedded:2.4.0.Final")
