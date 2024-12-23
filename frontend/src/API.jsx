@@ -771,9 +771,13 @@ async function getDocuments(pageNumber, limit, xsrfToken) {
 });
 if (response.status === 200) {
     const documents = await response.json();
+    console.log("Documents:", documents);
     return documents;
 } else {
+
     const error = await response.json();
+    console.error("Connection or Parsing Error:", error);
+
     throw error;
 }
 }
@@ -792,13 +796,14 @@ async function getDocumentByUserId(userId, xsrfToken) {
         });
         if (response.status === 200) {
             const document = await response.json();
+            console.log("Document:", document);
             //
             // // Fetch the document data using the document ID
             // const data = await getDocumentData(document.id.toString(), xsrfToken);
             // console.log("Data:", data);
             // // Return an object containing both document and its data
-            const documets = await getDocuments(0, 10, xsrfToken);
-            const documentData = await getDocumentData(documets[0].documentId.toString(), xsrfToken);
+            // const documets = await getDocuments(0, 10, xsrfToken);
+            // const documentData = await getDocumentData(documets[0].documentId.toString(), xsrfToken);
             return document;
 
         } else {
@@ -806,6 +811,7 @@ async function getDocumentByUserId(userId, xsrfToken) {
             console.log(error);
         }
     }catch (err) {
+        console.log(err);
         throw err.error ? err : { error: "Connection Error" };
     }
 }

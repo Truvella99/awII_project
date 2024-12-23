@@ -38,7 +38,7 @@ const CustomerProfile = ({ xsrfToken,role}) => {
     const {customerId} = useParams();
     console.log("Customer ID: ", customerId)
     // State for customer data and loading/error handling
-    const [customer, setCustomer] = useState(null);
+    const [customer, setCustomer] = useState({}); // Cambiato da null a {}
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -69,33 +69,35 @@ const CustomerProfile = ({ xsrfToken,role}) => {
     };
     // Fetch customer data when the component mounts
     useEffect(() => {
-
         const fetchCustomer = async () => {
             try {
                 const fetchedCustomer = await API.getCustomerById(customerId, xsrfToken);
-                console.log("Customer data fetched: ", fetchedCustomer)
-                // Fetch files
-                const fetchedFiles = await API.getDocumentByUserId(customerId, xsrfToken);
-                // setFiles(fetchedFiles);
+                console.log("Customer data fetched 1: ", fetchedCustomer);
 
-                // Fetch data for each file in parallel
+                const fetchedFiles = await API.getDocumentByUserId(customerId, xsrfToken);
+                console.log("Customer  data fetched 2: ", fetchedFiles);
+
                 const filesData = await Promise.all(
                     fetchedFiles.map(async (file) => {
                         const fileData = await API.getDocumentData(file.documentId, xsrfToken);
-                        return { ...file, data: fileData }; // Combine file info with its data
+                        return { ...file, data: fileData };
                     })
                 );
-
-                // Update state
+                console.log("Customer data fetcheddaq");
                 setFilesData(filesData);
                 setCustomer(fetchedCustomer);
+                console.log("Customer data fetched 3: ", fetchedCustomer);
                 setLoading(false);
             } catch (err) {
+                console.log("Error fetching customer data: ", err);
                 setError(err.error || "Error fetching customer data");
                 setLoading(false);
             }
         };
-        fetchCustomer().then(r => console.log("Customer data fetched: ", r))
+
+        fetchCustomer()
+            .then(() => console.log("Customer data fetched successfully"))
+            .catch((e) => console.log("Error fetching customer data: ", e));
     }, [customerId, xsrfToken]);
 
     // If loading, show a loading message
