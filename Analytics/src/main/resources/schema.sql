@@ -1,3 +1,6 @@
+-- Begin the transaction
+BEGIN;
+
 DROP TABLE IF EXISTS public.customers_job_offers CASCADE;
 DROP TABLE IF EXISTS public.professionals_job_offers CASCADE;
 DROP TABLE IF EXISTS public.job_offer CASCADE;
@@ -79,3 +82,5 @@ INSERT INTO public.job_offer(id) VALUES (1),(2),(3);
 INSERT INTO public.customers_job_offers VALUES ('1e19391c-134e-49cd-89cd-863bba1bf58f',1,0),('1e19391c-134e-49cd-89cd-863bba1bf58f',2,1),('1e19391c-134e-49cd-89cd-863bba1bf58f',3,2);
 INSERT INTO public.job_offer(id) VALUES (4),(5),(6);
 INSERT INTO public.professionals_job_offers VALUES ('6189efed-3c1f-4f81-b838-04371721804f',4,0),('6189efed-3c1f-4f81-b838-04371721804f',5,1),('6189efed-3c1f-4f81-b838-04371721804f',6,2);
+
+COMMIT;
