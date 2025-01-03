@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import java.io.File
 import java.security.Principal
 import java.time.LocalDateTime
 
@@ -76,13 +77,17 @@ class HomeController(private val authorizedClientService: OAuth2AuthorizedClient
         return null
     }
 
+    private fun isRunningInDocker(): Boolean {
+        return File("/.dockerenv").exists()
+    }
+
     @PostMapping("/API/documents", "/API/documents/")
     fun createDocument(
         @RequestPart file: MultipartFile,
         @ModelAttribute d: CreateUpdateDocumentDTO,
         authentication: Authentication
     ): MetadataDTO {
-        val client = WebClient.create("http://localhost:8083")
+        val client = if(isRunningInDocker()) WebClient.create("http://docStore:8083") else WebClient.create("http://localhost:8083")
         val uri = "/API/documents/"
         val method = client.post()
         val accessToken = getAccessToken(authentication)
@@ -125,7 +130,7 @@ class HomeController(private val authorizedClientService: OAuth2AuthorizedClient
         @ModelAttribute d: CreateUpdateDocumentDTO,
         authentication: Authentication
     ): MetadataDTO {
-        val client = WebClient.create("http://localhost:8083")
+        val client = if(isRunningInDocker()) WebClient.create("http://docStore:8083") else WebClient.create("http://localhost:8083")
         val uri = "/API/documents/"
         val method = client.put()
         val accessToken = getAccessToken(authentication)

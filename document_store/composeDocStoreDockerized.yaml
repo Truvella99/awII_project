@@ -9,9 +9,12 @@ services:
       - '5432:5432'
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
+    networks:
+      - shared_network
 
   docStore:
     image: 'docker.io/library/document-store:0.0.1-SNAPSHOT'
+    restart: always
     ports:
       - "8083:8083"
     expose:
@@ -29,5 +32,14 @@ services:
       - SPRING_DATASOURCE_USERNAME=myuser
       - SPRING_DATASOURCE_PASSWORD=secret
       - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true
+    name: shared_network
+    driver: bridge
+
 volumes:
   postgres_data:

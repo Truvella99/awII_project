@@ -2,11 +2,15 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     defer-datasource-initialization: true
   sql:
     init:
       mode: always
+  datasource:
+    url: jdbc:postgresql://postgres:5432/mydatabase
+    username: myuser
+    password: secret
   mvc:
     problemdetails:
       enabled: true

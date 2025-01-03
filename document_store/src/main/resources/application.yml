@@ -7,6 +7,10 @@ spring:
   sql:
     init:
       mode: always
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
   mvc:
     problemdetails:
       enabled: true

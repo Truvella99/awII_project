@@ -4,12 +4,12 @@ camel:
       application-name: 'WebAppOAuthClient'
       client-id: '677529689861-7hcila8392i0sc6jcbsov4raqr00bf6f.apps.googleusercontent.com'
       client-secret: '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'
-      refresh-token: '1//04UY-jwbPVHF0CgYIARAAGAQSNwF-L9IrfviMfW4ucQvQ9QTRUpnATLMqsHWPDDVnJYA3nQqZNTZEMw8sas06W10to9YN3QCf55o'
+      refresh-token: '1//04j6FATFdY212CgYIARAAGAQSNwF-L9IrhA9OGfS4cg7l9PrL2B6iClVOhRpaExABwmwr1dv2sNmB_gUP7DCLKAoycF6tdZul2pM'
     google-mail:
       application-name: 'WebAppOAuthClient'
       client-id: '677529689861-7hcila8392i0sc6jcbsov4raqr00bf6f.apps.googleusercontent.com'
       client-secret: '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'
-      refresh-token: '1//04UY-jwbPVHF0CgYIARAAGAQSNwF-L9IrfviMfW4ucQvQ9QTRUpnATLMqsHWPDDVnJYA3nQqZNTZEMw8sas06W10to9YN3QCf55o'
+      refresh-token: '1//04j6FATFdY212CgYIARAAGAQSNwF-L9IrhA9OGfS4cg7l9PrL2B6iClVOhRpaExABwmwr1dv2sNmB_gUP7DCLKAoycF6tdZul2pM'
 
 spring:
   application:

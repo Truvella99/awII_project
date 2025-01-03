@@ -65,7 +65,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const JobOffersChart = ({ analyticsData, chartName }) => {
     const containerRef = useRef(null); // Reference to the container
-
+    console.log(analyticsData);
     // get data dependeing on chartName
     let labels = analyticsData.map((item) => item.name + " " + item.surname);
     let ids = analyticsData.map((item) => item.id);

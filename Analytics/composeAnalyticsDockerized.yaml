@@ -12,6 +12,7 @@ services:
 
   analytics:
     image: 'docker.io/library/analytics:0.0.1-SNAPSHOT'
+    restart: always
     ports:
       - "8084:8084"
     expose:

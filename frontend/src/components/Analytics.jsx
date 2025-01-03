@@ -60,7 +60,7 @@ function Analytics({loggedIn, role, unreadMessages, pending}) {
                             <h4> No Analytics yet! </h4>
                         </div>
                         :
-                        <div>
+                        <div style={{width: '90%', height: '90%'}}>
                             <AnalyticsContainer chartName={selectedChart.value} setIsEmpty={setIsEmpty} />
                         </div>
                     }
