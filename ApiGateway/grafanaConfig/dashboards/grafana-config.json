@@ -32,6 +32,12 @@
       "version": "8.5.2"
     },
     {
+      "type": "panel",
+      "id": "logs",
+      "name": "Logs",
+      "version": ""
+    },
+    {
       "type": "datasource",
       "id": "loki",
       "name": "Loki",
@@ -42,12 +48,6 @@
       "id": "prometheus",
       "name": "Prometheus",
       "version": "1.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": ""
     },
     {
       "type": "panel",
@@ -78,86 +78,88 @@
       }
     ]
   },
+  "description": "",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1734908441884,
+  "iteration": 1735926489901,
   "links": [],
   "liveNow": false,
   "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 28,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "process_cpu_seconds_total{}",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Usage",
+      "type": "gauge"
+    },
     {
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 6,
       "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "max": 100,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 9,
-            "x": 0,
-            "y": 1
-          },
-          "id": 28,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "8.5.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "expr": "process_cpu_seconds_total{}",
-              "refId": "A"
-            }
-          ],
-          "title": "CPU Usage",
-          "type": "gauge"
-        },
         {
           "datasource": {
             "type": "prometheus",
@@ -201,7 +203,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -215,11 +218,11 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 15,
-            "x": 9,
-            "y": 1
+            "w": 24,
+            "x": 0,
+            "y": 9
           },
-          "id": 26,
+          "id": 29,
           "options": {
             "legend": {
               "calcs": [],
@@ -238,13 +241,13 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "rate(prometheus_http_request_duration_seconds_count{}[$__rate_interval])",
-              "legendFormat": "{{handler}}",
+              "expr": "rate(scrape_duration_seconds{instance=\"host.docker.internal:8080\"}[$__interval])",
+              "legendFormat": "Gateway api latency",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Overall API usage",
+          "title": "Gateway usage and latency",
           "type": "timeseries"
         },
         {
@@ -252,64 +255,22 @@
             "type": "loki",
             "uid": "${DS_LOKI}"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 179
-                  }
-                ]
-              }
-            ]
-          },
           "gridPos": {
-            "h": 9,
-            "w": 8,
+            "h": 13,
+            "w": 24,
             "x": 0,
-            "y": 8
+            "y": 16
           },
           "id": 2,
           "options": {
-            "footer": {
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": []
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": false,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
           },
           "pluginVersion": "8.5.2",
           "targets": [
@@ -323,271 +284,12 @@
               "refId": "A"
             }
           ],
-          "title": "Gateway Info logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"api-gateway\", detected_level=\"info\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"api-gateway\", detected_level=\"info\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}": 1
-                },
-                "renameByName": {
-                  "line {app=\"api-gateway\", detected_level=\"info\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "hg"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 416
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 147
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Log details"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 204
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 8,
-            "y": 8
-          },
-          "id": 4,
-          "options": {
-            "footer": {
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "frameIndex": 1,
-            "showHeader": true,
-            "sortBy": []
-          },
-          "pluginVersion": "8.5.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "loki",
-                "uid": "${DS_LOKI}"
-              },
-              "expr": "{service_name=\"api-gateway\"}",
-              "legendFormat": "",
-              "queryType": "instant",
-              "refId": "A",
-              "resolution": 1
-            }
-          ],
-          "title": "Gateway Warning logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"api-gateway\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"api-gateway\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}": 1
-                },
-                "renameByName": {
-                  "Time": "",
-                  "line {app=\"api-gateway\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 163
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 8,
-            "x": 16,
-            "y": 8
-          },
-          "id": 8,
-          "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": []
-          },
-          "pluginVersion": "8.5.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "loki",
-                "uid": "${DS_LOKI}"
-              },
-              "expr": "{service_name=\"api-gateway\"}",
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "Gateway Error logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"api-gateway\", detected_level=\"error\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"api-gateway\", detected_level=\"error\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}": 1
-                },
-                "renameByName": {
-                  "line {app=\"api-gateway\", detected_level=\"error\", host=\"1c2bcb3a5fc7\", service_name=\"api-gateway\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
+          "title": "Gateway logs",
+          "transformations": [],
+          "type": "logs"
         }
       ],
-      "title": "Gateway",
+      "title": "Api Gateway",
       "type": "row"
     },
     {
@@ -596,7 +298,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 9
       },
       "id": 16,
       "panels": [
@@ -643,7 +345,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -659,7 +362,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 2
+            "y": 13
           },
           "id": 22,
           "options": {
@@ -694,63 +397,22 @@
             "type": "loki",
             "uid": "${DS_LOKI}"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 180
-                  }
-                ]
-              }
-            ]
-          },
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 12,
+            "w": 24,
             "x": 0,
-            "y": 9
+            "y": 20
           },
           "id": 20,
           "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": []
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": false,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
           },
           "pluginVersion": "8.5.2",
           "targets": [
@@ -764,139 +426,9 @@
               "refId": "A"
             }
           ],
-          "title": "CRM Info logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"crm\", detected_level=\"info\", host=\"95c7f5e38b3d\", service_name=\"crm\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"crm\", detected_level=\"info\", host=\"95c7f5e38b3d\", service_name=\"crm\"}": 1
-                },
-                "renameByName": {
-                  "line {app=\"crm\", detected_level=\"info\", host=\"95c7f5e38b3d\", service_name=\"crm\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "${DS_LOKI}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 185
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 9
-          },
-          "id": 18,
-          "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "frameIndex": 0,
-            "showHeader": true,
-            "sortBy": []
-          },
-          "pluginVersion": "8.5.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "loki",
-                "uid": "${DS_LOKI}"
-              },
-              "expr": "{service_name=\"crm\"}",
-              "queryType": "range",
-              "refId": "A"
-            }
-          ],
-          "title": "CRM Warning logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"crm\", host=\"95c7f5e38b3d\", service_name=\"crm\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"crm\", host=\"95c7f5e38b3d\", service_name=\"crm\"}": 1
-                },
-                "renameByName": {
-                  "line {app=\"crm\", host=\"95c7f5e38b3d\", service_name=\"crm\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
+          "title": "CRM logs",
+          "transformations": [],
+          "type": "logs"
         }
       ],
       "title": "Customer Relationship Management",
@@ -908,7 +440,149 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 2
+        "y": 10
+      },
+      "id": 37,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 38,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "rate(scrape_duration_seconds{instance=\"host.docker.internal:8083\"}[$__interval])",
+              "legendFormat": "Gateway api latency",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Document Store usage and latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "${DS_LOKI}"
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 24,
+            "x": 0,
+            "y": 21
+          },
+          "id": 39,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": false,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
+          },
+          "pluginVersion": "8.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${DS_LOKI}"
+              },
+              "expr": "{service_name=\"doc-store\"}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Document Store logs",
+          "transformations": [],
+          "type": "logs"
+        }
+      ],
+      "title": "Document Store",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
       },
       "id": 10,
       "panels": [
@@ -955,7 +629,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -971,7 +646,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 3
+            "y": 15
           },
           "id": 24,
           "options": {
@@ -1006,64 +681,22 @@
             "type": "loki",
             "uid": "${DS_LOKI}"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 185
-                  }
-                ]
-              }
-            ]
-          },
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 14,
+            "w": 24,
             "x": 0,
-            "y": 11
+            "y": 23
           },
           "id": 12,
           "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "frameIndex": 0,
-            "showHeader": true,
-            "sortBy": []
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": false,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
           },
           "pluginVersion": "8.5.2",
           "targets": [
@@ -1078,97 +711,44 @@
             }
           ],
           "title": "Analytics Info logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"analytics\", detected_level=\"info\", host=\"ab44b70cf27a\", service_name=\"analytics\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"analytics\", detected_level=\"info\", host=\"ab44b70cf27a\", service_name=\"analytics\"}": 1
-                },
-                "renameByName": {
-                  "line {app=\"analytics\", detected_level=\"info\", host=\"ab44b70cf27a\", service_name=\"analytics\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
-        },
+          "transformations": [],
+          "type": "logs"
+        }
+      ],
+      "title": "Analytics",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 43,
+      "panels": [
         {
           "datasource": {
             "type": "loki",
             "uid": "${DS_LOKI}"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": true,
-                "inspect": true
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 184
-                  }
-                ]
-              }
-            ]
-          },
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 11
+            "h": 15,
+            "w": 24,
+            "x": 0,
+            "y": 16
           },
-          "id": 14,
+          "id": 44,
           "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "frameIndex": 0,
-            "showHeader": true,
-            "sortBy": []
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": false,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
           },
           "pluginVersion": "8.5.2",
           "targets": [
@@ -1177,47 +757,21 @@
                 "type": "loki",
                 "uid": "${DS_LOKI}"
               },
-              "expr": "{service_name=\"analytics\"}",
+              "expr": "{service_name=\"cm\"}",
               "queryType": "range",
               "refId": "A"
             }
           ],
-          "title": "Analytics Warning logs",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "line {app=\"analytics\", host=\"ab44b70cf27a\", service_name=\"analytics\"}"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time ns": true,
-                  "id": true
-                },
-                "indexByName": {
-                  "Time": 0,
-                  "Time ns": 3,
-                  "id": 2,
-                  "line {app=\"analytics\", host=\"ab44b70cf27a\", service_name=\"analytics\"}": 1
-                },
-                "renameByName": {
-                  "Time": "",
-                  "line {app=\"analytics\", host=\"ab44b70cf27a\", service_name=\"analytics\"}": "Details"
-                }
-              }
-            }
-          ],
-          "type": "table"
+          "title": "CM logs",
+          "transformations": [],
+          "type": "logs"
         }
       ],
-      "title": "Analytics",
+      "title": "Communication Manager",
       "type": "row"
     }
   ],
-  "refresh": "5s",
+  "refresh": "",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
@@ -1242,8 +796,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "JobPlacement",
-  "uid": "Xpr9Y_SHz",
-  "version": 7,
+  "title": "Job Placement",
+  "uid": "Xpr9Y_SHzz",
+  "version": 3,
   "weekStart": ""
 }
