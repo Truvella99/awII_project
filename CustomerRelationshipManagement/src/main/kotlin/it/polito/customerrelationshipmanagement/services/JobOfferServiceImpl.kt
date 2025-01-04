@@ -545,6 +545,10 @@ class JobOfferServiceImpl(
 
 
     // ----- Get the value of a job offer -----
+    private fun hoursToDays(hours: Double): Double {
+        return hours / 24.0  // Divide by 24 and use Double for fractional results
+    }
+
     override fun getJobOfferValue(jobOfferId: Long, authentication: Authentication): Number {
         val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
         if (jobOfferId < 0) {
@@ -571,10 +575,10 @@ class JobOfferServiceImpl(
         }
         var jobOfferValue: Number = 0;
         if (jobOffer.completedProfessional != null) {
-            jobOfferValue = (jobOffer.duration.toDouble() * jobOffer.completedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
+            jobOfferValue = (hoursToDays(jobOffer.duration.toDouble()) * jobOffer.completedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
         } else {
             // consolidatedProfessional
-            jobOfferValue = (jobOffer.duration.toDouble() * jobOffer.consolidatedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
+            jobOfferValue = (hoursToDays(jobOffer.duration.toDouble()) * jobOffer.consolidatedProfessional!!.dailyRate.toDouble() * jobOffer.profitMargin.toDouble())
         }
         return jobOfferValue
     }
