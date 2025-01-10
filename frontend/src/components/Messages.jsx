@@ -14,7 +14,7 @@ import {Container} from "react-bootstrap/";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
+function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending, setPending}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -87,28 +87,28 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
 
             if (filterModel.subject) {
                 if (filterModel.subject.type === 'contains') {
-                    if ( !((item.subject.toLowerCase()).includes(filterModel.subject.filter)) )
+                    if ( !((item.subject.toLowerCase()).includes(filterModel.subject.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.subject.type === 'notContains') {
-                    if ( (item.subject.toLowerCase()).includes(filterModel.subject.filter) )
+                    if ( (item.subject.toLowerCase()).includes(filterModel.subject.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.contact) {
                 if (filterModel.contact.type === 'contains') {
-                    if ( !((item.contact.toLowerCase()).includes(filterModel.contact.filter)) )
+                    if ( !((item.contact.toLowerCase()).includes(filterModel.contact.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.contact.type === 'notContains') {
-                    if ( (item.contact.toLowerCase()).includes(filterModel.contact.filter) )
+                    if ( (item.contact.toLowerCase()).includes(filterModel.contact.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.channel) {
                 if (filterModel.channel.type === 'contains') {
-                    if ( !((item.channel.toLowerCase()).includes(filterModel.channel.filter)) )
+                    if ( !((item.channel.toLowerCase()).includes(filterModel.channel.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.channel.type === 'notContains') {
-                    if ( (item.channel.toLowerCase()).includes(filterModel.channel.filter) )
+                    if ( (item.channel.toLowerCase()).includes(filterModel.channel.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -141,19 +141,19 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
             }
             if (filterModel.currentState) {
                 if (filterModel.currentState.type === 'contains') {
-                    if ( !((item.currentState.toLowerCase()).includes(filterModel.currentState.filter)) )
+                    if ( !((item.currentState.toLowerCase()).includes(filterModel.currentState.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.currentState.type === 'notContains') {
-                    if ( (item.currentState.toLowerCase()).includes(filterModel.currentState.filter) )
+                    if ( (item.currentState.toLowerCase()).includes(filterModel.currentState.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.priority) {
                 if (filterModel.priority.type === 'contains') {
-                    if ( !((item.priority.toLowerCase()).includes(filterModel.priority.filter)) )
+                    if ( !((item.priority.toLowerCase()).includes(filterModel.priority.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.priority.type === 'notContains') {
-                    if ( (item.priority.toLowerCase()).includes(filterModel.priority.filter) )
+                    if ( (item.priority.toLowerCase()).includes(filterModel.priority.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -275,6 +275,25 @@ function Messages({loggedIn, role, unreadMessages, setUnreadMessages, pending}) 
         };
 
         fetchMessages(params);
+    }, []);
+
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager" || role === "operator") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
     }, []);
 
 

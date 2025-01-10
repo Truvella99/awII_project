@@ -46,11 +46,14 @@ interface JobOfferRepository: JpaRepository<JobOffer,Long> {
             "LEFT JOIN j.abortedProfessionals aps " +
             "LEFT JOIN j.consolidatedProfessional cnp " +
             "LEFT JOIN j.completedProfessional cmp " +
-            "WHERE (:skills IS NULL OR s.skill IN :skills)" +
-            "AND (:candidateProfessionals IS NULL OR cps.id IN :candidateProfessionals)" +
-            "AND (:abortedProfessionals IS NULL OR aps.id IN :abortedProfessionals)" +
-            "AND (:consolidatedProfessionals IS NULL OR cnp.id IN :consolidatedProfessionals)" +
-            "AND (:completedProfessionals IS NULL OR cmp.id IN :completedProfessionals)"
+            "WHERE (:skills IS NULL AND :candidateProfessionals IS NULL AND :abortedProfessionals IS NULL " +
+            "AND :consolidatedProfessionals IS NULL AND :completedProfessionals IS NULL) " +
+            "OR (" +
+            "(:skills IS NOT NULL AND s.skill IN :skills) " +
+            "OR (:candidateProfessionals IS NOT NULL AND cps.id IN :candidateProfessionals) " +
+            "OR (:abortedProfessionals IS NOT NULL AND aps.id IN :abortedProfessionals) " +
+            "OR (:consolidatedProfessionals IS NOT NULL AND cnp.id IN :consolidatedProfessionals) " +
+            "OR (:completedProfessionals IS NOT NULL AND cmp.id IN :completedProfessionals))"
     )
     fun filterHome(
         @Param("skills") skills: List<String>?,

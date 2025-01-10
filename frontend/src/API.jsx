@@ -439,7 +439,7 @@ async function getAllCustomers(xsrfToken) {
 
 async function getCustomersJobOffers(jobOffers, xsrfToken) {
     let params = new URLSearchParams();
-    jobOffers.forEach(jobOffer => params.append('jobOffers', jobOffer));
+    jobOffers.forEach(jobOffer => params.append('jobOffers', encodeURIComponent(jobOffer)));
 
     const response = await fetch(`/crm/API/customers/?${params.toString()}`, {
         method: 'GET',
@@ -470,11 +470,11 @@ async function getAllProfessionals(xsrfToken) {
 
 async function getProfessionalSkillsJobOffers(skills, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers, xsrfToken) {
     let params = new URLSearchParams();
-    skills.forEach(skill => params.append('skills', skill));
-    candidateJobOffers.forEach(candidateProfessional => params.append('candidateProfessionals', candidateProfessional));
-    abortedJobOffers.forEach(abortedProfessional => params.append('abortedProfessionals', abortedProfessional));
-    consolidatedJobOffers.forEach(consolidatedProfessional => params.append('consolidatedProfessionals', consolidatedProfessional));
-    completedJobOffers.forEach(completedProfessional => params.append('completedProfessionals', completedProfessional));
+    skills.forEach(skill => params.append('skills', encodeURIComponent(skill)));
+    candidateJobOffers.forEach(candidateProfessional => params.append('candidateJobOffers', encodeURIComponent(candidateProfessional)));
+    abortedJobOffers.forEach(abortedProfessional => params.append('abortedJobOffers', encodeURIComponent(abortedProfessional)));
+    consolidatedJobOffers.forEach(consolidatedProfessional => params.append('consolidatedJobOffers', encodeURIComponent(consolidatedProfessional)));
+    completedJobOffers.forEach(completedProfessional => params.append('completedJobOffers', encodeURIComponent(completedProfessional)));
 
     const response = await fetch(`/crm/API/professionals/?${params.toString()}`, {
         method: 'GET',
@@ -491,14 +491,14 @@ async function getProfessionalSkillsJobOffers(skills, candidateJobOffers, aborte
 
 async function getProfessionalsDistance(skills, candidateJobOffers, abortedJobOffers, consolidatedJobOffers, completedJobOffers, latitude, longitude, km, xsrfToken) {
     let params = new URLSearchParams();
-    skills.forEach(skill => params.append('skills', skill));
-    candidateJobOffers.forEach(candidateProfessional => params.append('candidateProfessionals', candidateProfessional));
-    abortedJobOffers.forEach(abortedProfessional => params.append('abortedProfessionals', abortedProfessional));
-    consolidatedJobOffers.forEach(consolidatedProfessional => params.append('consolidatedProfessionals', consolidatedProfessional));
-    completedJobOffers.forEach(completedProfessional => params.append('completedProfessionals', completedProfessional));
-    params.append('latitude', latitude);
-    params.append('longitude', longitude);
-    params.append('km', km);
+    skills.forEach(skill => params.append('skills', encodeURIComponent(skill)));
+    candidateJobOffers.forEach(candidateProfessional => params.append('candidateJobOffers', encodeURIComponent(candidateProfessional)));
+    abortedJobOffers.forEach(abortedProfessional => params.append('abortedJobOffers', encodeURIComponent(abortedProfessional)));
+    consolidatedJobOffers.forEach(consolidatedProfessional => params.append('consolidatedJobOffers', encodeURIComponent(consolidatedProfessional)));
+    completedJobOffers.forEach(completedProfessional => params.append('completedJobOffers', encodeURIComponent(completedProfessional)));
+    params.append('latitude', encodeURIComponent(latitude));
+    params.append('longitude', encodeURIComponent(longitude));
+    params.append('km', encodeURIComponent(km));
 
     const response = await fetch(`/crm/API/professionals/distance/?${params.toString()}`, {
         method: 'GET',
@@ -529,10 +529,10 @@ async function getAllJobOffers(xsrfToken) {
 
 async function getProfessionalsInfo(candidateIds, abortedIds, consolidatedIds, completedIds, xsrfToken) {
     let params = new URLSearchParams();
-    candidateIds.forEach(candidateId => params.append('candidateIds', candidateId));
-    abortedIds.forEach(abortedId => params.append('abortedIds', abortedId));
-    consolidatedIds.forEach(consolidatedId => params.append('consolidatedIds', consolidatedId));
-    completedIds.forEach(completedId => params.append('completedIds', completedId));
+    candidateIds.forEach(candidateId => params.append('candidateIds', encodeURIComponent(candidateId)));
+    abortedIds.forEach(abortedId => params.append('abortedIds', encodeURIComponent(abortedId)));
+    consolidatedIds.forEach(consolidatedId => params.append('consolidatedIds', encodeURIComponent(consolidatedId)));
+    completedIds.forEach(completedId => params.append('completedIds', encodeURIComponent(completedId)));
 
     const response = await fetch(`/crm/API/professionals/info/?${params.toString()}`, {
         method: 'GET',
@@ -549,11 +549,11 @@ async function getProfessionalsInfo(candidateIds, abortedIds, consolidatedIds, c
 
 async function getJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken) {
     let params = new URLSearchParams();
-    skills.forEach(skill => params.append('skills', skill));
-    candidateProfessionals.forEach(candidateProfessional => params.append('candidateProfessionals', candidateProfessional));
-    abortedProfessionals.forEach(abortedProfessional => params.append('abortedProfessionals', abortedProfessional));
-    consolidatedProfessionals.forEach(consolidatedProfessional => params.append('consolidatedProfessionals', consolidatedProfessional));
-    completedProfessionals.forEach(completedProfessional => params.append('completedProfessionals', completedProfessional));
+    skills.forEach(skill => params.append('skills', encodeURIComponent(skill)));
+    candidateProfessionals.forEach(candidateProfessional => params.append('candidateProfessionals', encodeURIComponent(candidateProfessional)));
+    abortedProfessionals.forEach(abortedProfessional => params.append('abortedProfessionals', encodeURIComponent(abortedProfessional)));
+    consolidatedProfessionals.forEach(consolidatedProfessional => params.append('consolidatedProfessionals', encodeURIComponent(consolidatedProfessional)));
+    completedProfessionals.forEach(completedProfessional => params.append('completedProfessionals', encodeURIComponent(completedProfessional)));
 
     const response = await fetch(`/crm/API/joboffers/?${params.toString()}`, {
         method: 'GET',
@@ -584,11 +584,11 @@ async function getOpenJobOffers(xsrfToken) {
 
 async function getOpenJobOfferSkillsProfessionals(skills, candidateProfessionals, abortedProfessionals, consolidatedProfessionals, completedProfessionals, xsrfToken) {
     let params = new URLSearchParams();
-    skills.forEach(skill => params.append('skills', skill));
-    candidateProfessionals.forEach(candidateProfessional => params.append('candidateProfessionals', candidateProfessional));
-    abortedProfessionals.forEach(abortedProfessional => params.append('abortedProfessionals', abortedProfessional));
-    consolidatedProfessionals.forEach(consolidatedProfessional => params.append('consolidatedProfessionals', consolidatedProfessional));
-    completedProfessionals.forEach(completedProfessional => params.append('completedProfessionals', completedProfessional));
+    skills.forEach(skill => params.append('skills', encodeURIComponent(skill)));
+    candidateProfessionals.forEach(candidateProfessional => params.append('candidateProfessionals', encodeURIComponent(candidateProfessional)));
+    abortedProfessionals.forEach(abortedProfessional => params.append('abortedProfessionals', encodeURIComponent(abortedProfessional)));
+    consolidatedProfessionals.forEach(consolidatedProfessional => params.append('consolidatedProfessionals', encodeURIComponent(consolidatedProfessional)));
+    completedProfessionals.forEach(completedProfessional => params.append('completedProfessionals', encodeURIComponent(completedProfessional)));
 
     const response = await fetch(`/crm/API/joboffers/open/?${params.toString()}`, {
         method: 'GET',

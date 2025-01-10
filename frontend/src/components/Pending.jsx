@@ -14,7 +14,7 @@ import {Container} from "react-bootstrap/";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
+function Pending({loggedIn, role, unreadMessages, pending, setPending, setUnreadMessages}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -86,10 +86,10 @@ function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
 
             if (filterModel.contact) {
                 if (filterModel.contact.type === 'contains') {
-                    if ( !((item.contact.toLowerCase()).includes(filterModel.contact.filter)) )
+                    if ( !((item.contact.toLowerCase()).includes(filterModel.contact.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.contact.type === 'notContains') {
-                    if ( (item.contact.toLowerCase()).includes(filterModel.contact.filter) )
+                    if ( (item.contact.toLowerCase()).includes(filterModel.contact.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -218,6 +218,25 @@ function Pending({loggedIn, role, unreadMessages, setUnreadMessages, pending}) {
         };
 
         fetchContacts(params);
+    }, []);
+
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager" || role === "operator") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
     }, []);
 
 

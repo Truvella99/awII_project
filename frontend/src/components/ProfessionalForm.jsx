@@ -11,7 +11,7 @@ import InputMask from "react-input-mask";
 import {MessageContext} from "../messageCtx.js";
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 
-const AddProfessional = ({xsrfToken}) => {
+const AddProfessional = ({xsrfToken, pending, setPending}) => {
     const location = useLocation();
     // Pending Id and contact
     const pendingId = location.state?.id;
@@ -312,6 +312,7 @@ const AddProfessional = ({xsrfToken}) => {
             }
             if(pendingId){
                 const  res = await API.deleteContact(pendingId, xsrfToken);
+                setPending(pending - 1);
             }
 
             setLoading(false);

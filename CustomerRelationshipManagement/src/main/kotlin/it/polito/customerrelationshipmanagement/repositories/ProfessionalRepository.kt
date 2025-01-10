@@ -32,13 +32,17 @@ interface ProfessionalRepository: JpaRepository<Professional,String> {
             "LEFT JOIN p.abortedJobOffers ajs " +
             "LEFT JOIN p.currentJobOffer cnj " +
             "LEFT JOIN p.jobOffers cmj " +
-            "WHERE (:skills IS NULL OR s.skill IN :skills)" +
-            "AND (:employmentState IS NULL OR p.employmentState = :employmentState) " +
-            "AND (:geographicalLocation IS NULL OR (p.geographicalLocation = :geographicalLocation))" +
-            "AND (:candidateJobOffers IS NULL OR cjs.id IN :candidateJobOffers)" +
-            "AND (:abortedJobOffers IS NULL OR ajs.id IN :abortedJobOffers)" +
-            "AND (:consolidatedJobOffers IS NULL OR cnj.id IN :consolidatedJobOffers)" +
-            "AND (:completedJobOffers IS NULL OR cmj.id IN :completedJobOffers)"
+            "WHERE (:skills IS NULL AND :employmentState IS NULL AND :geographicalLocation IS NULL " +
+            "AND :candidateJobOffers IS NULL AND :abortedJobOffers IS NULL AND :consolidatedJobOffers IS NULL " +
+            "AND :completedJobOffers IS NULL) " +
+            "OR (" +
+            "(:skills IS NOT NULL AND s.skill IN :skills) " +
+            "OR (:employmentState IS NOT NULL AND p.employmentState = :employmentState) " +
+            "OR (:geographicalLocation IS NOT NULL AND p.geographicalLocation = :geographicalLocation) " +
+            "OR (:candidateJobOffers IS NOT NULL AND cjs.id IN :candidateJobOffers) " +
+            "OR (:abortedJobOffers IS NOT NULL AND ajs.id IN :abortedJobOffers) " +
+            "OR (:consolidatedJobOffers IS NOT NULL AND cnj.id IN :consolidatedJobOffers) " +
+            "OR (:completedJobOffers IS NOT NULL AND cmj.id IN :completedJobOffers))"
     )
     fun filterHome(
         @Param("skills") skills: List<String>?,

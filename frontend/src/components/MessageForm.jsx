@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
     Form,
     Button,
@@ -282,6 +282,26 @@ function MessageForm({role, unreadMessages, setUnreadMessages, pending, setPendi
         handleError(error);
         setError(null);
     }
+
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager" || role === "operator") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
+    }, []);
+
 
     return (
         <Container fluid>

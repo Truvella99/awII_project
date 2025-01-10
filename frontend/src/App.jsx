@@ -132,22 +132,22 @@ function App() {
           <Container fluid /*className="mt-5"*/>
             <Routes>
               <Route path="/ui" element={<Home me={me} role={role}/>} />
-              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
               <Route path="/ui/professionals/:professionalId" element={loggedIn  && (role !== "customer" )?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
-              <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
-              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken} pending={pending} setPending={setPending}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/customers" element={<Customers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
               <Route path="/ui/customers/:customerId" element={loggedIn && role !== "professional"?(<CustomerProfile role={role} xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/customers/edit/:customerId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
-              <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
-              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/customers/addCustomer" element={loggedIn && (role === "operator" || role === "manager" )?(<CreateCustomer  xsrfToken={me?.xsrfToken} pending={pending} setPending={setPending}/> ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/jobOffers" element={<JobOffers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
               <Route path="/ui/jobOffers/addJobOffer" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />
               <Route path="/ui/jobOffers/:jobOfferId" element={<JobOfferContainer loggedIn={loggedIn} role={role}/>} />
-              <Route path="/ui/messages" element={<Messages loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending}/>} />
-              <Route path="/ui/messages/:messageId" element={<ViewMessage loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
+              <Route path="/ui/messages" element={<Messages loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
+              <Route path="/ui/messages/:messageId" element={<ViewMessage loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
               <Route path="/ui/messages/addMessage" element={loggedIn && (role === "operator" || role === "manager" )?(<MessageForm role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>) : (<Navigate to="/ui" /> )} />
-              <Route path="/ui/pending" element={<Pending loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>} />
-              <Route path="/ui/analytics" element={<Analytics loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} pending={pending}/>}/>
+              <Route path="/ui/pending" element={<Pending loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
+              <Route path="/ui/analytics" element={<Analytics loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>}/>
             </Routes>
           </Container>
         </MessageContext.Provider>

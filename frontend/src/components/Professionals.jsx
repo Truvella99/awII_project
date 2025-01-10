@@ -16,7 +16,7 @@ import {InfiniteRowModelModule} from "@ag-grid-community/infinite-row-model";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function Professionals({loggedIn, role, unreadMessages, pending}) {
+function Professionals({loggedIn, role, unreadMessages, pending, setPending, setUnreadMessages}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -83,55 +83,55 @@ function Professionals({loggedIn, role, unreadMessages, pending}) {
 
             if (filterModel.name) {
                 if (filterModel.name.type === 'contains') {
-                    if ( !((item.name.toLowerCase()).includes(filterModel.name.filter)) )
+                    if ( !((item.name.toLowerCase()).includes(filterModel.name.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.name.type === 'notContains') {
-                    if ( (item.name.toLowerCase()).includes(filterModel.name.filter) )
+                    if ( (item.name.toLowerCase()).includes(filterModel.name.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.surname) {
                 if (filterModel.surname.type === 'contains') {
-                    if ( !((item.surname.toLowerCase()).includes(filterModel.surname.filter)) )
+                    if ( !((item.surname.toLowerCase()).includes(filterModel.surname.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.surname.type === 'notContains') {
-                    if ( (item.surname.toLowerCase()).includes(filterModel.surname.filter) )
+                    if ( (item.surname.toLowerCase()).includes(filterModel.surname.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.ssncode) {
                 if (filterModel.ssncode.type === 'contains') {
-                    if ( !((item.ssncode.toLowerCase()).includes(filterModel.ssncode.filter)) )
+                    if ( !((item.ssncode.toLowerCase()).includes(filterModel.ssncode.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.ssncode.type === 'notContains') {
-                    if ( (item.ssncode.toLowerCase()).includes(filterModel.ssncode.filter) )
+                    if ( (item.ssncode.toLowerCase()).includes(filterModel.ssncode.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.email) {
                 if (filterModel.email.type === 'contains') {
-                    if ( !((item.email.toLowerCase()).includes(filterModel.email.filter)) )
+                    if ( !item.email || !((item.email.toLowerCase()).includes(filterModel.email.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.email.type === 'notContains') {
-                    if ( (item.email.toLowerCase()).includes(filterModel.email.filter) )
+                    if ( item.email && (item.email.toLowerCase()).includes(filterModel.email.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.telephone) {
                 if (filterModel.telephone.type === 'contains') {
-                    if ( !((item.telephone.toLowerCase()).includes(filterModel.telephone.filter)) )
+                    if ( !item.telephone || !((item.telephone.toLowerCase()).includes(filterModel.telephone.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.telephone.type === 'notContains') {
-                    if ( (item.telephone.toLowerCase()).includes(filterModel.telephone.filter) )
+                    if ( item.telephone && (item.telephone.toLowerCase()).includes(filterModel.telephone.filter.toLowerCase()) )
                         continue;
                 }
             }
             if (filterModel.address) {
                 if (filterModel.address.type === 'contains') {
-                    if ( !((item.address.toLowerCase()).includes(filterModel.address.filter)) )
+                    if ( !item.address || !((item.address.toLowerCase()).includes(filterModel.address.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.address.type === 'notContains') {
-                    if ( (item.address.toLowerCase()).includes(filterModel.address.filter) )
+                    if ( item.address && (item.address.toLowerCase()).includes(filterModel.address.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -158,10 +158,10 @@ function Professionals({loggedIn, role, unreadMessages, pending}) {
             }
             if (filterModel.employmentState) {
                 if (filterModel.employmentState.type === 'contains') {
-                    if ( !((item.employmentState.toLowerCase()).includes(filterModel.employmentState.filter)) )
+                    if ( !((item.employmentState.toLowerCase()).includes(filterModel.employmentState.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.employmentState.type === 'notContains') {
-                    if ( (item.employmentState.toLowerCase()).includes(filterModel.employmentState.filter) )
+                    if ( (item.employmentState.toLowerCase()).includes(filterModel.employmentState.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -174,6 +174,12 @@ function Professionals({loggedIn, role, unreadMessages, pending}) {
     // Table settings
     const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
     const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
+    const dailyRateFormatter = (params) => {
+        if (params.value)
+            return "€ " + params.value;
+        else
+            return ""
+    };
     const stateFormatter = (params) => {
         if (params.value === "available")
             return "Available";
@@ -204,7 +210,7 @@ function Professionals({loggedIn, role, unreadMessages, pending}) {
         { field: "email", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true },
         { field: "telephone", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true },
         { field: "address", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, suppressHeaderMenuButton: true },
-        { field: "dailyRate", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "Daily Rate", suppressHeaderMenuButton: true },
+        { field: "dailyRate", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "Daily Rate", suppressHeaderMenuButton: true, valueFormatter: dailyRateFormatter },
         { field: "employmentState", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, headerName: "Employment State", suppressHeaderMenuButton: true, valueFormatter: stateFormatter }
     ]);
     const defaultColDef = useMemo(() => {
@@ -698,6 +704,25 @@ function Professionals({loggedIn, role, unreadMessages, pending}) {
 
         // Fetch professionals
         fetchProfessionals(params);
+    }, []);
+
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager" || role === "operator") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
     }, []);
 
 

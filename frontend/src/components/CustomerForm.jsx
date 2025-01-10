@@ -9,7 +9,7 @@ import InputMask from 'react-input-mask';
 import {MessageContext} from "../messageCtx.js";
 import { Eye, EyeSlash } from 'react-bootstrap-icons'; // Impor
 
-const CreateCustomer = ({xsrfToken}) => {
+const CreateCustomer = ({xsrfToken, pending, setPending}) => {
     const location = useLocation();
 
     const pendingId = location.state?.id;
@@ -264,6 +264,7 @@ const CreateCustomer = ({xsrfToken}) => {
             }
             if(pendingId){
                 const  res = await API.deleteContact(pendingId, xsrfToken);
+                setPending(pending - 1);
             }
 
             setLoading(false);

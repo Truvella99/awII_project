@@ -13,7 +13,7 @@ import {InfiniteRowModelModule} from "@ag-grid-community/infinite-row-model";
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
 
-function JobOffers({loggedIn, role, unreadMessages, pending}) {
+function JobOffers({loggedIn, role, unreadMessages, pending, setPending, setUnreadMessages}) {
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
     const xsrfToken = useContext(TokenContext);
@@ -77,10 +77,10 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
 
             if (filterModel.name) {
                 if (filterModel.name.type === 'contains') {
-                    if ( !((item.name.toLowerCase()).includes(filterModel.name.filter)) )
+                    if ( !((item.name.toLowerCase()).includes(filterModel.name.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.name.type === 'notContains') {
-                    if ( (item.name.toLowerCase()).includes(filterModel.name.filter) )
+                    if ( (item.name.toLowerCase()).includes(filterModel.name.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -170,10 +170,10 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
             }
             if (filterModel.currentState) {
                 if (filterModel.currentState.type === 'contains') {
-                    if ( !((item.currentState.toLowerCase()).includes(filterModel.currentState.filter)) )
+                    if ( !((item.currentState.toLowerCase()).includes(filterModel.currentState.filter.toLowerCase())) )
                         continue;
                 } else if (filterModel.currentState.type === 'notContains') {
-                    if ( (item.currentState.toLowerCase()).includes(filterModel.currentState.filter) )
+                    if ( (item.currentState.toLowerCase()).includes(filterModel.currentState.filter.toLowerCase()) )
                         continue;
                 }
             }
@@ -186,6 +186,18 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
     // Table settings
     const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
     const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
+    const profitFormatter = (params) => {
+        if (params.value)
+            return params.value + "%";
+        else
+            return ""
+    };
+    const dailyRateFormatter = (params) => {
+        if (params.value)
+            return "€ " + params.value;
+        else
+            return ""
+    };
     const stateFormatter = (params) => {
         if (params.value === "created")
             return "Created";
@@ -226,9 +238,9 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
             },
         },
         { field: "duration", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true, valueFormatter: durationFormatter },
-        { field: "profitMargin", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "Profit Margin", suppressHeaderMenuButton: true },
+        { field: "profitMargin", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "Profit Margin", suppressHeaderMenuButton: true, valueFormatter: profitFormatter },
         { field: "nCandidates", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, headerName: "N. Candidates", suppressHeaderMenuButton: true },
-        { field: "value", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true },
+        { field: "value", filter: "agNumberColumnFilter", filterParams: {filterOptions: ["equals", "lessThan", "greaterThan", "inRange"]}, suppressHeaderMenuButton: true, valueFormatter: dailyRateFormatter },
         { field: "currentState", filter: "agTextColumnFilter", filterParams: {filterOptions: ["contains", "notContains"]}, headerName: "Current State", suppressHeaderMenuButton: true, valueFormatter: stateFormatter }
     ]);
     const defaultColDef = useMemo(() => {
@@ -663,6 +675,25 @@ function JobOffers({loggedIn, role, unreadMessages, pending}) {
         };
 
         fetchJobOffers(params);
+    }, []);
+
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager" || role === "operator") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
     }, []);
 
 

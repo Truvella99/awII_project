@@ -9,7 +9,7 @@ import Select from "react-select";
 import PostalMime from "postal-mime";
 
 
-function ViewMessage({loggedIn, role, unreadMessages, pending}) {
+function ViewMessage({loggedIn, role, unreadMessages, pending, setPending, setUnreadMessages}) {
     const { messageId } = useParams();
     const navigate = useNavigate();
     const handleError = useContext(MessageContext);
@@ -111,6 +111,25 @@ function ViewMessage({loggedIn, role, unreadMessages, pending}) {
 
         fetchUpdateHistory();
     }, [state, xsrfToken]);
+
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager" || role === "operator") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
+    }, []);
 
 
     return(

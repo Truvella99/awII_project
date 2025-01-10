@@ -1,14 +1,16 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {MessageContext, TokenContext} from "../messageCtx.js";
 import {Button, Col, Container, Row} from "react-bootstrap";
 import {SideBar} from "./Utils.jsx";
 import Select from "react-select";
 import {AnalyticsContainer} from "./AnalyticsContainer.jsx";
 import {useNavigate} from "react-router-dom";
+import API from "../API.jsx";
 
 
-function Analytics({loggedIn, role, unreadMessages, pending}) {
+function Analytics({loggedIn, role, unreadMessages, pending, setPending, setUnreadMessages}) {
     const navigate = useNavigate();
+    const xsrfToken = useContext(TokenContext);
     const [isEmpty, setIsEmpty] = useState(false);
     const optionCharts = [
         {value: "Customers", label: "Customers job offers"},
@@ -18,7 +20,24 @@ function Analytics({loggedIn, role, unreadMessages, pending}) {
     ];
     const [selectedChart, setSelectedChart] = useState(optionCharts[0]);
 
-
+    // Refresh unread messages and pending
+    useEffect(() => {
+        const fetchMessagesData = async () => {
+            try {
+                if (role === "manager") {
+                    // Refresh unread messages
+                    const messages = await API.getMessagesReceived(xsrfToken);
+                    setUnreadMessages(messages.length);
+                    // Refresh pending contacts
+                    const pendings = await API.getPendingContacts(xsrfToken);
+                    setPending(pendings.length);
+                }
+            } catch (error) {
+                console.error("Error refreshing unread messages and pendings data:", error);
+            }
+        };
+        fetchMessagesData();
+    }, []);
 
     if (!loggedIn || role !== "manager") {
         navigate("/ui");
