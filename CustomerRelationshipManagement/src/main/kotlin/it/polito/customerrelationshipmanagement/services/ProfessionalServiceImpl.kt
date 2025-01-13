@@ -184,9 +184,9 @@ class ProfessionalServiceImpl(
         if (!KeycloakConfig.checkExistingUserById(professionalId)) {
             throw IllegalIdException("Invalid professionalId Parameter.")
         }
-        if (keycloakRole == "professional" && keycloakId != professionalId) {
+        /*if (keycloakRole == "professional" && keycloakId != professionalId) {
             throw CustomerException("Professional With Id:$keycloakId cannot see other professional.")
-        }
+        }*/
         val professional = professionalRepository.findById(professionalId).orElseThrow{
             throw ProfessionalNotFoundException("Professional with ProfessionalId:$professionalId not found")
         }

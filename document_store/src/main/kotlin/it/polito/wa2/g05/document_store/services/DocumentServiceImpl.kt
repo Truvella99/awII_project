@@ -46,7 +46,8 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         // check if valid keycloak id
         KeycloakConfig.checkExistingUserById(userId)
         val (keycloakId,keycloakRole) = getUserKeycloakIdRole(authentication)
-        if (keycloakRole == "customer" || keycloakRole == "professional" && userId != keycloakId) {
+        // customer can see also document of professionals
+        if (keycloakRole == "professional" && userId != keycloakId) {
             throw IllegalIdException("No permission to read details of Document of the User with Id $userId")
         }
         try {
@@ -66,8 +67,9 @@ class DocumentServiceImpl(private val documentRepository: DocumentRepository,
         val document = documentRepository.findById(documentId).orElseThrow {
             DocumentNotFoundException("Document Binary Data of Document with DocumentId:$documentId not found.")
         }
-        // can download only your document if customer or professional
-        if (keycloakRole == "customer" || keycloakRole == "professional" && document.metaData.key.id != keycloakId) {
+        // can download only your document if professional
+        // if customer can see also document of professionals
+        if (keycloakRole == "professional" && document.metaData.key.id != keycloakId) {
             throw IllegalIdException("No permission to read details of Document of the User with Id ${document.metaData.key.id}")
         }
         // return the corresponding metadata document dto pair

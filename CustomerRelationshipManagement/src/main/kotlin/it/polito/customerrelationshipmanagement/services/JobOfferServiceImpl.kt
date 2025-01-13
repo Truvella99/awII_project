@@ -117,12 +117,7 @@ class JobOfferServiceImpl(
             throw JobOfferNotFoundException("Job Offer with jobOfferId:${jobOfferId} not found.")
         }
 
-        // if joboffer not yours and not open block
-        val isYours = jobOffer.abortedProfessionals.map { it.id }.contains(keycloakId) ||
-                jobOffer.candidateProfessionals.map { it.id }.contains(keycloakId) ||
-                jobOffer.consolidatedProfessional?.id == keycloakId || jobOffer.completedProfessional?.id == keycloakId
-
-        if (keycloakRole == "professional" && !isYours) {
+        if (keycloakRole == "professional") {
             if ((jobOffer.currentState == jobOfferStatus.aborted ||
                         jobOffer.currentState == jobOfferStatus.consolidated ||
                         jobOffer.currentState == jobOfferStatus.done)
@@ -199,12 +194,7 @@ class JobOfferServiceImpl(
             throw JobOfferNotFoundException("Job Offer with JobOfferId:${jobOfferId} not found.")
         }
 
-        // if joboffer not yours and not open block
-        val isYours = jobOffer.abortedProfessionals.map { it.id }.contains(keycloakId) ||
-                jobOffer.candidateProfessionals.map { it.id }.contains(keycloakId) ||
-                jobOffer.consolidatedProfessional?.id == keycloakId || jobOffer.completedProfessional?.id == keycloakId
-
-        if (keycloakRole == "professional" && !isYours) {
+        if (keycloakRole == "professional") {
             if ((jobOffer.currentState == jobOfferStatus.aborted ||
                         jobOffer.currentState == jobOfferStatus.consolidated ||
                         jobOffer.currentState == jobOfferStatus.done)
@@ -560,12 +550,8 @@ class JobOfferServiceImpl(
         if (jobOffer.completedProfessional == null && jobOffer.consolidatedProfessional == null) {
             throw JobOfferStatusException("JobOffer with JobOfferId:$jobOfferId is not bound to a professional.")
         }
-        // if joboffer not yours and not open block
-        val isYours = jobOffer.abortedProfessionals.map { it.id }.contains(keycloakId) ||
-                jobOffer.candidateProfessionals.map { it.id }.contains(keycloakId) ||
-                jobOffer.consolidatedProfessional?.id == keycloakId || jobOffer.completedProfessional?.id == keycloakId
 
-        if (keycloakRole == "professional" && !isYours) {
+        if (keycloakRole == "professional") {
             if ((jobOffer.currentState == jobOfferStatus.aborted ||
                         jobOffer.currentState == jobOfferStatus.consolidated ||
                         jobOffer.currentState == jobOfferStatus.done)

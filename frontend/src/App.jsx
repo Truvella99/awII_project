@@ -133,7 +133,7 @@ function App() {
             <Routes>
               <Route path="/ui" element={<Home me={me} role={role}/>} />
               <Route path="/ui/professionals" element={<Professionals loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
-              <Route path="/ui/professionals/:professionalId" element={loggedIn  && (role !== "customer" )?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} />
+              <Route path="/ui/professionals/:professionalId" element={loggedIn ?( <ProfessionalProfile  role={role} xsrfToken={me?.xsrfToken}/>  ) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/professionals/edit/:professionalId" element={loggedIn && (role === "operator" || role === "manager" )?(<EditProfessional xsrfToken={me?.xsrfToken}/> ) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/professionals/addProfessional" element={loggedIn && (role === "operator" || role === "manager" ) ?( <ProfessionalForm xsrfToken={me?.xsrfToken} pending={pending} setPending={setPending}/> ) : (<Navigate to="/ui" /> )} />
               <Route path="/ui/customers" element={<Customers loggedIn={loggedIn} role={role} unreadMessages={unreadMessages} setUnreadMessages={setUnreadMessages} pending={pending} setPending={setPending}/>} />
