@@ -354,7 +354,7 @@ function Customers({loggedIn, role, unreadMessages, pending, setPending, setUnre
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
                         <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
-                    <Row style={{marginBottom: '100px'}}>
+                    <Row style={{marginBottom: '30px'}}>
                         {(role === "operator" || role === "manager") ?
                             <Col className="d-flex justify-content-center">
                                 <Button variant="info" onClick={() => navigate('/ui/customers/addCustomer')}> <i

@@ -733,7 +733,7 @@ function Professionals({loggedIn, role, unreadMessages, pending, setPending, set
                     <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px', maxWidth: '250px'}}>
                         <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
-                    <Row style={{marginBottom: '50px'}}>
+                    <Row style={role !== "customer" ? {marginBottom: '30px'} : {}}>
                         { (role === "operator" || role === "manager") ?
                             <Col className="d-flex justify-content-center">
                                 <Button style={{marginRight: '15px'}} variant="info" onClick={() => navigate('/ui/professionals/addProfessional')}> <i className="bi bi-plus-lg"></i> Add professional </Button>
@@ -745,7 +745,7 @@ function Professionals({loggedIn, role, unreadMessages, pending, setPending, set
                         <h5> Filter by </h5>
                     </Row>
                     <Row>
-                        <Col ref={containerRef} style={role === "customer" ? {maxHeight: '68vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '29.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
+                        <Col ref={containerRef} style={role === "customer" ? {maxHeight: '73vh', overflowY: "auto", borderBottom: '1px solid #ccc'} : {maxHeight: '29.3vh', overflowY: "auto", borderBottom: '1px solid #ccc'}}>
                             <h6 key={0} ref={(f) => filtersRef.current[0] = f}>
                                 Skills:
                             </h6>

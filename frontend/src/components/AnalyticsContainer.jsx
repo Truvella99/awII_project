@@ -52,11 +52,11 @@ function AnalyticsContainer({ chartName, setIsEmpty }) {
     );
 }
 
-function redirect(chartName, id) {
+function redirect(navigate, chartName, id) {
     if (chartName.includes("Customers")) {
-        window.open(`/ui/customers/${id}`, '_blank');
+        navigate(`/ui/customers/${id}`);
     } else {
-        window.open(`/ui/professionals/${id}`, '_blank');
+        navigate(`/ui/professionals/${id}`);
     }
 }
 
@@ -66,6 +66,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 const JobOffersChart = ({ analyticsData, chartName }) => {
     const containerRef = useRef(null); // Reference to the container
     console.log(analyticsData);
+    const navigate = useNavigate();
     // get data dependeing on chartName
     let labels = analyticsData.map((item) => item.name + " " + item.surname);
     let ids = analyticsData.map((item) => item.id);
@@ -145,7 +146,7 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
                 if (labelIndex >= 0 && labelIndex < chart.data.labels.length) {
                     //const clickedLabel = chart.data.labels[labelIndex];
                     //alert(`You clicked on label: ${clickedLabel}`);
-                    redirect(chartName, ids[labelIndex]);
+                    redirect(navigate,chartName, ids[labelIndex]);
                 }
             }
         }
@@ -275,7 +276,7 @@ const JobOffersChart = ({ analyticsData, chartName }) => {
 
 const KpiChart = ({ analyticsData, chartName }) => {
     const containerRef = useRef(null); // Ref for the container
-
+    const navigate = useNavigate();
     // get data
     let labels = analyticsData.map((item) => item.name + " " + item.surname);
     let ids = analyticsData.map((item) => item.id);
@@ -325,7 +326,7 @@ const KpiChart = ({ analyticsData, chartName }) => {
                 if (Math.abs(offsetY - tickPosition) < 10) { // Check proximity to the tick
                     //const label = tick.label; // Get the label text
                     //alert(`You clicked on label: ${label}`);
-                    redirect(chartName, ids[labelIndex]);
+                    redirect(navigate,chartName, ids[labelIndex]);
                 }
             });
         }

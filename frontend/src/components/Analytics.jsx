@@ -46,7 +46,7 @@ function Analytics({loggedIn, role, unreadMessages, pending, setPending, setUnre
         <Container fluid>
             <Row>
                 <Col xs={'auto'} style={{height: '90vh', borderRight: '1px solid #ccc', display: "flex", flexDirection: "column"}}>
-                    <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '100px'}}>
+                    <div style={{borderBottom: '1px solid #ccc', borderTop: '1px solid #ccc', marginBottom: '30px'}}>
                         <SideBar role={role} unreadMessages={unreadMessages} pending={pending}/>
                     </div>
                     <h6> Select chart: </h6>

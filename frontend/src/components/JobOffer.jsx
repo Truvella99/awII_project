@@ -395,8 +395,9 @@ function JobOfferForm({ mode, setMode, jobOffer, role }) {
                     <Form.Label>Customer Selected</Form.Label>
                     <InputGroup>
                         <Form.Control
-                            style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
-                            onClick={() => { if (customer.id) window.open(`/ui/customers/${customer.id}`, '_blank'); }}
+                            //style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
+                            //onClick={() => { if (customer.id) window.open(`/ui/customers/${customer.id}`, '_blank'); }}
+                            disabled={true}
                             type="text"
                             value={customer.name}
                             isInvalid={customer.id === undefined && validated}
@@ -424,9 +425,9 @@ function JobOfferForm({ mode, setMode, jobOffer, role }) {
                                 value={professional.name}
                                 type="text"
                                 onKeyDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                                onClick={() => { if (professional.id) window.open(`/ui/professionals/${professional.id}`, '_blank'); }}
-                                //disabled={readOnlyBoolean}
-                                style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
+                                //onClick={() => { if (professional.id) window.open(`/ui/professionals/${professional.id}`, '_blank'); }}
+                                disabled={true}
+                                //style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}
                             />
                             {(mode !== 'view') ?
                             <InputGroup.Text>
