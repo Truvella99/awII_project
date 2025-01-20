@@ -261,9 +261,6 @@ function SearchList({ searchedContent, handleItemSelection, setShowResults, setS
                         handleItemSelection(item);
                     }}>{item.name + ' ' + item.surname + ' '}
                     </span>
-                    <span onClick={() => window.open(`/ui/customers/${item.id}`, '_blank')} style={{ color: '#0d6efd', textDecoration: 'underline', cursor: 'pointer' }}>
-                        More Info<FaInfoCircle />
-                    </span>
                     <hr style={{ margin: 2 }} />
                 </div>
             ))}
